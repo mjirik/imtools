@@ -2,3 +2,8 @@
 
 # imtools
 tools for 2D and 3D images 
+
+
+# Contributors
+
+fill requirements packages into `setup.py` file
