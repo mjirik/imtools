@@ -1,5 +1,6 @@
 python
 pip
+nose
 numpy
 scipy
 pyyaml
