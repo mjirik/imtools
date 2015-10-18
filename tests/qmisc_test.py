@@ -7,8 +7,6 @@ import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 # sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
-sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
-sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
 
 
@@ -16,8 +14,8 @@ import numpy as np
 import os
 
 
-from lisa import qmisc
-from lisa import misc
+from imtools import qmisc
+from imtools import misc
 
 
 #

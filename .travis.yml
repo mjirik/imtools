@@ -13,8 +13,8 @@ before_install:
 # command to install dependencies
 install:
     - "easy_install SimpleITK"
-    - "pip install ."
     - "pip install -r requirements.txt"
+    - "pip install ."
 # command to run tests
 script: nosetests --with-coverage --cover-package=io3d
 after_success:
