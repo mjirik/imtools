@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/mjirik/imtools.svg?branch=master)](https://travis-ci.org/mjirik/imtools)
+[![Coverage Status](https://coveralls.io/repos/mjirik/imtools/badge.svg?branch=master&service=github)](https://coveralls.io/github/mjirik/imtools?branch=master)
 
 # imtools
 tools for 2D and 3D images 
