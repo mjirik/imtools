@@ -3,12 +3,13 @@
 
 # import sys
 import os
+import sys
+import os.path
+import numpy as np
 
 import logging
 logger = logging.getLogger(__name__)
 
-import sys
-import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "./extern/sPickle"))
