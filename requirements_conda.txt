@@ -1,7 +1,6 @@
 python
 pip
 nose
-coverage
 numpy
 scipy
 pyyaml
