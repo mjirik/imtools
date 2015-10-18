@@ -8,7 +8,7 @@ python:
 virtualenv:
   system_site_packages: true
 before_install:
-    - sudo apt-get install -qq $(< apt_requirements.txt)
+    - sudo apt-get install -qq $(< requirements_apt.txt)
     - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
     - chmod +x miniconda.sh
     - ./miniconda.sh -b
@@ -21,6 +21,7 @@ before_install:
 #    - wget http://147.228.240.61/queetech/sample-extra-data/io3d_sample_data.zip && unzip io3d_sample_data.zip
 # command to install dependencies
 install:
+    - conda install --file requirements_conda.txt
 #    - "easy_install SimpleITK"
 #    - "pip install -r requirements.txt"
     - "pip install ."
