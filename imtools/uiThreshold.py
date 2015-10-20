@@ -65,7 +65,7 @@ class uiThresholdQt(QtGui.QDialog):
 
     def run(self):
         # pass
-        return self.uit.run
+        return self.uit.run()
 
     def callback_close(self, uit):
         # self.output = uit
