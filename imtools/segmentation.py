@@ -218,7 +218,7 @@ ok)')
             useSeedsOfCompactObjects=useSeedsOfCompactObjects,
             binaryClosingIterations=closing, binaryOpeningIterations=opening,
             seeds=seeds)
-        output = uiT.run
+        output = uiT.run()
 
     # Vypocet binarni matice.
     if output == None:  # noqa
