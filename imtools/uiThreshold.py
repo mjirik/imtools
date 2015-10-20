@@ -65,7 +65,7 @@ class uiThresholdQt(QtGui.QDialog):
 
     def run(self):
         # pass
-        return self.uit.run()
+        return self.uit.run
 
     def callback_close(self, uit):
         # self.output = uit
@@ -265,10 +265,10 @@ class uiThreshold:
                     thres = (self.max0 + self.min0) / 2
 
             self.smin = Slider(
-                self.axmin, 'Minimal threshold   ' + str(self.min0),
+                self.axmin, 'Min. threshold   ' + str(self.min0),
                 self.min0, self.max0, valinit=thres, dragging=True)
             self.smax = Slider(
-                self.axmax, 'Maximal threshold   ' + str(self.min0),
+                self.axmax, 'Max. threshold   ' + str(self.min0),
                 self.min0, self.max0, valinit=self.max0, dragging=True)
 
             if(self.ICBinaryClosingIterations >= 1):
@@ -302,25 +302,25 @@ class uiThreshold:
 
             # Zalozeni mist pro tlacitka
             self.axbuttnext1 = self.fig.add_axes(
-                [0.86, 0.24, 0.04, 0.03], axisbg=self.axcolor)
+                [0.88, 0.24, 0.05, 0.035], axisbg=self.axcolor)
             self.axbuttprev1 = self.fig.add_axes(
-                [0.81, 0.24, 0.04, 0.03], axisbg=self.axcolor)
+                [0.82, 0.24, 0.05, 0.035], axisbg=self.axcolor)
             self.axbuttnext2 = self.fig.add_axes(
-                [0.86, 0.20, 0.04, 0.03], axisbg=self.axcolor)
+                [0.88, 0.20, 0.05, 0.035], axisbg=self.axcolor)
             self.axbuttprev2 = self.fig.add_axes(
-                [0.81, 0.20, 0.04, 0.03], axisbg=self.axcolor)
+                [0.82, 0.20, 0.05, 0.035], axisbg=self.axcolor)
             self.axbuttnextclosing = self.fig.add_axes(
-                [0.86, 0.16, 0.04, 0.03], axisbg=self.axcolor)
+                [0.88, 0.16, 0.05, 0.035], axisbg=self.axcolor)
             self.axbuttprevclosing = self.fig.add_axes(
-                [0.81, 0.16, 0.04, 0.03], axisbg=self.axcolor)
+                [0.82, 0.16, 0.05, 0.035], axisbg=self.axcolor)
             self.axbuttnextopening = self.fig.add_axes(
-                [0.86, 0.12, 0.04, 0.03], axisbg=self.axcolor)
+                [0.88, 0.12, 0.05, 0.035], axisbg=self.axcolor)
             self.axbuttprevopening = self.fig.add_axes(
-                [0.81, 0.12, 0.04, 0.03], axisbg=self.axcolor)
+                [0.82, 0.12, 0.05, 0.035], axisbg=self.axcolor)
             self.axbuttreset = self.fig.add_axes(
-                [0.79, 0.08, 0.06, 0.03], axisbg=self.axcolor)
+                [0.82, 0.07, 0.08, 0.045], axisbg=self.axcolor)
             self.axbuttcontinue = self.fig.add_axes(
-                [0.86, 0.08, 0.06, 0.03], axisbg=self.axcolor)
+                [0.91, 0.07, 0.08, 0.045], axisbg=self.axcolor)
 
             # Zalozeni tlacitek
             self.bnext1 = Button(self.axbuttnext1, '+1.0')
@@ -400,6 +400,8 @@ class uiThreshold:
         else:
 
             self.imgFiltering = self.data.copy()
+        # import ipdb
+        # ipdb.set_trace()
 
         # Filtrovani
 
@@ -517,6 +519,9 @@ class uiThreshold:
     def __drawSegmentedSlice(self, ax, contour, i):
         ax.cla()
         ax.imshow(self.data[i, :, :], cmap=self.cmap)
+
+        ax.set_xticklabels([])
+        ax.set_yticklabels([])
         if contour is not None:
             ax.contour(contour[i, :, :])
             # import sed3
@@ -560,6 +565,14 @@ class uiThreshold:
             # del(img1)
             # del(img2)
 
+        self.ax1.set_xticklabels([])
+        self.ax1.set_yticklabels([])
+        self.ax2.set_xticklabels([])
+        self.ax2.set_yticklabels([])
+        self.ax3.set_xticklabels([])
+        self.ax3.set_yticklabels([])
+        self.ax4.set_xticklabels([])
+        self.ax4.set_yticklabels([])
         self.__drawSegmentedSlice(self.ax4, self.imgFiltering, self.imgFiltering.shape[0]/2)
         # Prekresleni
         self.fig.canvas.draw()
@@ -678,3 +691,15 @@ class uiThreshold:
             self.sclose.valtext.set_text('{}'.format(self.sclose.val))
             self.fig.canvas.draw()
             self.updateImage(0)
+
+def main():
+    import numpy as np
+    data = np.random.randint(0, 30, [15, 16, 18])
+    print data.shape
+    data[5:11, 7:13, 2:10] += 20
+    uit = uiThreshold(data=data, voxel=[1, 2, 1.5])
+    uit.run()
+
+
+if __name__ == "__main__":
+    main()

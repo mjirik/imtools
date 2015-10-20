@@ -158,7 +158,7 @@ def calculateSigma(voxel, input):
         sigmaY = (5.0 / voxel[1]) * input
         sigmaZ = (5.0 / voxel[2]) * input
 
-        return (sigmaX, sigmaY, sigmaZ) / voxelV
+        return numpy.asarray([sigmaX, sigmaY, sigmaZ]) / voxelV
 
 
 def calculateAutomaticThreshold(data, arrSeed=None):
