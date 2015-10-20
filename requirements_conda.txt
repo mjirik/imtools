@@ -4,3 +4,4 @@ nose
 numpy
 scipy
 pyyaml
+matplotlib
