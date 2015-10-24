@@ -315,25 +315,20 @@ def main():
     # input parser
     parser = argparse.ArgumentParser(
         description=
-        'Segment vessels from liver \n \npython organ_segmentation.py\n \n\
-        python organ_segmentation.py -mroi -vs 0.6')
+        "Download sample data")
     parser.add_argument(
-        '-d', '--get_sample_data', action='store_true',
-        default=False,
+        "labels", metavar="N", nargs="+",
+        default=None,
         help='Get sample data')
     parser.add_argument(
-        '-i','--install', action='store_true',
+        '-l', '--print_labels', action="store_true",
         default=False,
-        help='Install')
-    parser.add_argument('-icn','--make_icon', action='store_true',
-            default=False,
-            help='Creates desktop icon, works only in ubuntu')
-    parser.add_argument('-g','--get_git', action='store_true',
-            default=False,
-            help='Get git in windows')
+        help='print all available labels')
+    parser.add_argument(
+        '-o', '--destination_dir',
+        default=".",
+        help='set output directory')
 
-    parser.add_argument('--build_gco', action='store_true',
-            default = False, help='Build gco_python in windows. Problematic step.')
     args = parser.parse_args()
 
 #    if args.get_sample_data == False and args.install == False and args.build_gco == False:
@@ -342,11 +337,7 @@ def main():
 #        args.install = True
 #        args.build_gco = False
 
-    if args.get_sample_data:
-        get_sample_data()
-
-    if args.make_icon:
-        make_icon()
+    get_sample_data(args.labels, destination_dir=args.destination_dir)
 
                 #submodule_update()
 
