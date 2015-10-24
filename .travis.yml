@@ -25,7 +25,7 @@ install:
     - pip install -r requirements.txt
     - pip install .
 
-    - python imtools.sample_data biodur_sample gensei_slices -o sample_data
+    - python -m imtools.sample_data biodur_sample gensei_slices -o sample_data
     - ls
     - ls sample_data
 # command to run tests
