@@ -2,15 +2,15 @@
 # -*- coding: utf-8 -*-
 
 # import funkcí z jiného adresáře
-import sys
+import os
 import os.path
 
+from nose.plugins.attrib import attr
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 import unittest
 
 
 import numpy as np
-import os
 
 
 # from imtools import qmisc
@@ -26,8 +26,8 @@ class TubeTreeTest(unittest.TestCase):
 
     @attr("LAR")
     def test_vessel_tree_lar(self):
-        import lisa.gt_lar
-        tvg = TreeGenerator(lisa.gt_lar.GTLar)
+        import imtools.gt_lar
+        tvg = TreeGenerator(imtools.gt_lar.GTLar)
         yaml_path = os.path.join(path_to_script, "./hist_stats_test.yaml")
         tvg.importFromYaml(yaml_path)
         tvg.voxelsize_mm = [1, 1, 1]

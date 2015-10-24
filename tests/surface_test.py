@@ -45,7 +45,7 @@ class SurfaceTest(unittest.TestCase):
         self.assertLess(Sv, 0.4)
 
     def test_surface_measurement(self):
-        import lisa.surface_measurement as sm
+        import imtools.surface_measurement as sm
 
         # box
         data1 = np.zeros([30, 30, 30])
@@ -75,7 +75,7 @@ class SurfaceTest(unittest.TestCase):
         # ed.show()
 
     def test_surface_measurement_voxelsize_mm(self):
-        import lisa.surface_measurement as sm
+        import imtools.surface_measurement as sm
         import scipy
 
         # data 1
@@ -106,7 +106,7 @@ class SurfaceTest(unittest.TestCase):
         Test of AOI. In Sv2 is AOI half in compare with Sv1.
         Sv1 should be half of Sv2
         """
-        import lisa.surface_measurement as sm
+        import imtools.surface_measurement as sm
         data1 = np.zeros([30, 60, 60])
         aoi = np.zeros([30, 60, 60])
         aoi[:30, :60, :30] = 1
