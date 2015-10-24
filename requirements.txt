@@ -1,2 +1,13 @@
 io3d
 sed3
+
+
+# copy of requirements_conda.txt
+python
+pip
+nose
+numpy
+scipy
+pyyaml
+matplotlib
+vtk
