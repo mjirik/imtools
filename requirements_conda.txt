@@ -6,3 +6,4 @@ scipy
 pyyaml
 matplotlib
 vtk
+SimpleITK

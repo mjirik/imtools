@@ -29,6 +29,6 @@ install:
     - ls
     - ls sample_data
 # command to run tests
-script: nosetests --with-coverage --cover-package=imtools
+script: nosetests -c setup.cfg --with-coverage --cover-package=imtools
 after_success:
     - coveralls
