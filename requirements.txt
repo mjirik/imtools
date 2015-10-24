@@ -10,4 +10,4 @@ numpy
 scipy
 pyyaml
 matplotlib
-vtk
+# vtk
