@@ -22,8 +22,12 @@ before_install:
 install:
     - conda install --yes --file requirements_conda.txt
     - pip install coveralls
-#    - "pip install -r requirements.txt"
-    - "pip install ."
+    - pip install -r requirements.txt
+    - pip install .
+
+    - python imtools.sample_data biodur_sample gensei_slices -o sample_data
+    - ls
+    - ls sample_data
 # command to run tests
 script: nosetests --with-coverage --cover-package=imtools
 after_success:
