@@ -84,6 +84,12 @@ data_urls= {
 }
 
 def get_sample_data(data_label=None, destination_dir="."):
+    """
+    Download sample data by data label. Labels can be listed by sample_data.data_urls.keys()
+    :param data_label: label of data. If it is set to None, all data are downloaded
+    :param destination_dir: output dir for data
+    :return:
+    """
     try:
         os.mkdir(destination_dir)
     except:
