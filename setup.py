@@ -1,4 +1,5 @@
 # Fallowing command is used to upload to pipy
+#    bumpversion patch
 #    python setup.py register sdist upload
 from setuptools import setup, find_packages
 # Always prefer setuptools over distutils
