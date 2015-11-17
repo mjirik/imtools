@@ -179,7 +179,7 @@ def resize_to_shape(data, shape, zoom=None, mode='nearest', order=0):
         import scipy.ndimage
         dtype = data.dtype
         if zoom is None:
-            zoom = shape / np.asarray(data.shape).astype(np.double)
+            zoom = np.asarray(data.shape).astype(np.double) / shape
 
         segm_orig_scale = scipy.ndimage.zoom(
             data,
