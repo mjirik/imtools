@@ -159,6 +159,8 @@ def resize_to_shape(data, shape, zoom=None, mode='nearest', order=0):
     """
     # @TODO remove old code in except part
 
+    if data.shape == shape:
+        return data
     try:
         # rint 'pred vyjimkou'
         # aise Exception ('test without skimage')
