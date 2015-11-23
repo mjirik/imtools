@@ -7,3 +7,4 @@ pyyaml
 matplotlib
 vtk
 SimpleITK
+scikit-learn
