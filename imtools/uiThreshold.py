@@ -269,6 +269,8 @@ class uiThreshold:
                 except:
                     logger.info(traceback.format_exc())
                     thres = (self.max0 + self.min0) / 2
+            # snad jsem pridanim nasledujiciho radku nic nerozbyl
+            self.threshold = thres
 
             self.smin = Slider(
                 self.axmin, 'Min. threshold   ' + str(self.min0),
@@ -354,6 +356,7 @@ class uiThreshold:
 
             self.smin.valtext.set_text('{}'.format(self.smin.val))
             self.smax.valtext.set_text('{}'.format(self.smax.val))
+            logger.debug("self.threshold at the end of init(): " + str(self.threshold))
 
     def run(self):
         """
@@ -441,6 +444,7 @@ class uiThreshold:
             self.threshold = min_threshold
 
         if (self.threshold == -1) and self.firstRun:
+            logger.debug("This line should be never runned")
 
             min_threshold = thresholding_functions.calculateAutomaticThreshold(
                 self.imgFiltering, self.arrSeed)
