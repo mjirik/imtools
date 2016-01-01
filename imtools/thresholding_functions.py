@@ -21,6 +21,7 @@ from scipy import stats
 import matplotlib.pyplot as matpyplot
 
 
+
 def prepareVisualization(data):
 
     img0 = numpy.sum(data, axis=0)
@@ -160,6 +161,10 @@ def calculateSigma(voxel, input):
 
         return numpy.asarray([sigmaX, sigmaY, sigmaZ]) / voxelV
 
+
+def calculateAutomaticThresholdOtsu(data, arrSeed=None):
+    from skimage.filters import threshold_otsu
+    return threshold_otsu(data.reshape(-1))
 
 def calculateAutomaticThreshold(data, arrSeed=None):
     """

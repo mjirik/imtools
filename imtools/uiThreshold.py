@@ -88,7 +88,7 @@ class uiThreshold:
                  useSeedsOfCompactObjects=True,
                  binaryClosingIterations=2, binaryOpeningIterations=0,
                  seeds=None, cmap=matplotlib.cm.Greys_r, fillHoles=True, 
-                 figure=None):
+                 figure=None, auto_method=''):
         """
 
         Inicialitacni metoda.
@@ -106,6 +106,7 @@ class uiThreshold:
             seeds - matice s kliknutim uzivatele- pokud se maji vracet
                 specifikce objekty
             cmap - grey
+            :param auto_method: 'otsu' use otsu threshold, other string use our liver automatic
 
         """
 
@@ -258,8 +259,13 @@ class uiThreshold:
             thres = self.threshold
             if thres == -1:
                 try:
-                    thres = thresholding_functions.calculateAutomaticThreshold(
-                        self.data, self.arrSeed)
+                    if auto_method is 'otsu':
+                        logger.debug('using otsu threshold')
+                        thres = thresholding_functions.calculateAutomaticThresholdOtsu(
+                            self.data, self.arrSeed)
+                    else:
+                        thres = thresholding_functions.calculateAutomaticThreshold(
+                            self.data, self.arrSeed)
                 except:
                     logger.info(traceback.format_exc())
                     thres = (self.max0 + self.min0) / 2
