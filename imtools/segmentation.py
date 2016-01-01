@@ -33,7 +33,9 @@ def vesselSegmentation(data, segmentation=-1, threshold=-1,
                        binaryOpeningIterations=0,
                        smartInitBinaryOperations=True, returnThreshold=False,
                        binaryOutput=True, returnUsedData=False,
-                       qapp=None):
+                       qapp=None,
+                       auto_method=''
+                       ):
     """
 
     Vessel segmentation z jater.
@@ -207,7 +209,9 @@ ok)')
             nObj=nObj, biggestObjects=biggestObjects,
             useSeedsOfCompactObjects=useSeedsOfCompactObjects,
             binaryClosingIterations=closing, binaryOpeningIterations=opening,
-            seeds=seeds)
+            seeds=seeds,
+            auto_method=auto_method,
+        )
 
         output = uiT.run()
     else:
@@ -217,7 +221,9 @@ ok)')
             nObj=nObj, biggestObjects=biggestObjects,
             useSeedsOfCompactObjects=useSeedsOfCompactObjects,
             binaryClosingIterations=closing, binaryOpeningIterations=opening,
-            seeds=seeds)
+            seeds=seeds,
+            auto_method=auto_method,
+        )
         output = uiT.run()
 
     # Vypocet binarni matice.
