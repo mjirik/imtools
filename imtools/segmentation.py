@@ -31,7 +31,7 @@ def vesselSegmentation(data, segmentation=-1, threshold=-1,
                        useSeedsOfCompactObjects=False, seeds=None,
                        interactivity=True, binaryClosingIterations=2,
                        binaryOpeningIterations=0,
-                       smartInitBinaryOperations=True, returnThreshold=False,
+                       smartInitBinaryOperations=False, returnThreshold=False,
                        binaryOutput=True, returnUsedData=False,
                        qapp=None,
                        auto_method=''
