@@ -37,8 +37,9 @@ def prepareVisualization(data):
 
 
 def fillHoles(data):
-    return scipy.ndimage.binary_fill_holes(
+    data_new = scipy.ndimage.binary_fill_holes(
         data).astype(int)
+    return data_new
 
 
 def gaussFilter(data, sigma):
@@ -62,16 +63,24 @@ def thresholding(data, min_threshold, max_threshold, use_min_threshold=True,
     Prahovani podle minimalniho a maximalniho prahu.
 
     """
+    # TODO remove this half-thresholding
+    # ted to spoleha na to, ze segmentovane je vsechno, co neni nula :-(
+    # return data
+    # out = numpy.zeros(data.shape)
 
     if use_min_threshold:
 
         data = data * (data >= min_threshold)
+        # out += data >= min_threshold
 
     if use_max_Threshold:
 
         data = data * (data <= max_threshold)
+        # out += data <= max_threshold
+
 
     return data
+    # return out.astype(numpy.int)
 
 
 def binaryClosingOpening(data, closeNum, openNum, firstClosing=True,
@@ -84,6 +93,7 @@ def binaryClosingOpening(data, closeNum, openNum, firstClosing=True,
 
     # This creates empty border around data, so closing operations wont cut
     # off parts of segmented data on the sides
+    data = (data != 0)
     if fixBorder and closeNum >= 1:
         shape = data.shape
         new_shape = (shape[0] + closeNum * 2,
@@ -108,14 +118,17 @@ def binaryClosingOpening(data, closeNum, openNum, firstClosing=True,
         # Vlastni binarni uzavreni.
         if (closeNum >= 1):
 
-            data = data * \
-                scipy.ndimage.binary_closing(data, iterations=closeNum)
+            # data = data * \
+            #     scipy.ndimage.binary_closing(data, iterations=closeNum)
+            data = scipy.ndimage.binary_closing(data, iterations=closeNum)
+            logger.debug('closing')
 
         # Vlastni binarni otevreni.
+
         if (openNum >= 1):
 
-            data = data * \
-                scipy.ndimage.binary_opening(data, iterations=openNum)
+            data = scipy.ndimage.binary_opening(data, iterations=openNum)
+            logger.debug('opening')
 
     else:
 
@@ -124,12 +137,14 @@ def binaryClosingOpening(data, closeNum, openNum, firstClosing=True,
 
             data = data * \
                 scipy.ndimage.binary_opening(data, iterations=openNum)
+            logger.debug('opening')
 
         # Vlastni binarni uzavreni.
         if (closeNum >= 1):
 
             data = data * \
                 scipy.ndimage.binary_closing(data, iterations=closeNum)
+            logger.debug('closing')
 
     # Removes added empty border. Returns data matrix to original size.
     if fixBorder and closeNum >= 1:
@@ -511,7 +526,7 @@ def getPriorityObjects(data, nObj=1, seeds=None, debug=False):
 
         else:
 
-            logger.info(
+            logger.warning(
                 'Zadna validni data k vraceni - zadne prioritni objekty ' +
                 'nenalezeny (DEBUG: function getPriorityObjects:' +
                 str(len(arrSeed) == 0))

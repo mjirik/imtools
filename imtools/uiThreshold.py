@@ -545,7 +545,7 @@ class uiThreshold:
         """
 
         # Predani dat k vykresleni
-        if (self.imgFiltering == None):
+        if (self.imgFiltering is None):
 
             # print '(DEBUG) Typ dat: ' + str(type(self.data[0][0][0]))
 
