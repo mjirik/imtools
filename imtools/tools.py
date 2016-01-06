@@ -28,11 +28,19 @@ import cPickle as pickle
 import gzip
 
 from PyQt4 import QtGui
-import Viewer_3D
 
-sys.path.append('../seg_viewer/')
-from seg_viewer import SegViewer
-# import py3DSeedEditor
+try:
+    import data_viewers
+except ImportError:
+    pass
+#     if os.path.exists('../data_viewers/')
+#     sys.path.append('../data_viewers/')
+# from dataviewers.seg_viewer import SegViewer
+#     import Viewer_3D
+
+
+# sys.path.append('../seg_viewer/')
+# from seg_viewer import SegViewer
 
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
@@ -849,35 +857,6 @@ def get_subdir_fname(data_fname, subdir, ext='npy', create=False):
     return subdir_fname
 
 
-def show_3d(data, range=True):
-    if isinstance(data, tuple):
-        # n_data = len(data)
-        n_slices = data[0].shape[0]
-        n_rows = data[0].shape[1]
-        n_cols = sum([x.shape[2] for x in data])
-        data_vis = np.zeros((n_slices, n_rows, n_cols))
-
-        # data_vis = []
-        # for i in data:
-        #     data_vis.append(skiexp.rescale_intensity(i, out_range=np.uint8))
-        data = [skiexp.rescale_intensity(x, out_range=np.uint8) for x in data]
-        for i in xrange(n_slices):
-            slice = []
-            for j in data:
-                # slice.append(skiexp.rescale_intensity((j[i, :, :]).astype(np.uint8), out_range=np.uint8))
-                slice.append(j[i, :, :])
-            # data_vis[i, :, :] = np.hstack(slice)
-            data_vis[i, :, :] = np.hstack(slice)
-        # data_vis = np.hstack(data_vis)
-    else:
-        data_vis = data
-
-    app = QtGui.QApplication(sys.argv)
-    viewer = Viewer_3D.Viewer_3D(data_vis, range=True)
-    viewer.show()
-    sys.exit(app.exec_())
-
-
 def put_bbox_back(im_o, im_b, bbox=None, mask=None):
     im_o = im_o.copy()
     if bbox is None and mask is None:
@@ -957,7 +936,47 @@ def save_figs(data_fname, subdir, data, mask, imgs, ranges=None, cmaps=None):
 
 
 def view_segmentation(datap_1, datap_2=None):
-    app = QtGui.QApplication(sys.argv)
-    le = SegViewer(datap1=datap_1, datap2=datap_2)
-    le.show()
-    sys.exit(app.exec_())
+    if not os.path.exists('../data_viewers/'):
+        print 'Package data_viewers not found.'
+    else:
+        sys.path.append('../data_viewers/')
+        from dataviewers.seg_viewer import SegViewer
+
+        app = QtGui.QApplication(sys.argv)
+        le = SegViewer(datap1=datap_1, datap2=datap_2)
+        le.show()
+        sys.exit(app.exec_())
+
+
+def show_3d(data, range=True):
+    if not os.path.exists('../data_viewers/'):
+        print 'Package data_viewers not found.'
+    else:
+        sys.path.append('../data_viewers/')
+        from dataviewers.viewer_3d import Viewer_3D
+        if isinstance(data, tuple):
+            # n_data = len(data)
+            n_slices = data[0].shape[0]
+            n_rows = data[0].shape[1]
+            n_cols = sum([x.shape[2] for x in data])
+            data_vis = np.zeros((n_slices, n_rows, n_cols))
+
+            # data_vis = []
+            # for i in data:
+            #     data_vis.append(skiexp.rescale_intensity(i, out_range=np.uint8))
+            data = [skiexp.rescale_intensity(x, out_range=np.uint8) for x in data]
+            for i in xrange(n_slices):
+                slice = []
+                for j in data:
+                    # slice.append(skiexp.rescale_intensity((j[i, :, :]).astype(np.uint8), out_range=np.uint8))
+                    slice.append(j[i, :, :])
+                # data_vis[i, :, :] = np.hstack(slice)
+                data_vis[i, :, :] = np.hstack(slice)
+            # data_vis = np.hstack(data_vis)
+        else:
+            data_vis = data
+
+        app = QtGui.QApplication(sys.argv)
+        viewer = Viewer_3D(data_vis, range=True)
+        viewer.show()
+        sys.exit(app.exec_())
