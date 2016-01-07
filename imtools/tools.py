@@ -953,7 +953,7 @@ def show_3d(data, range=True):
         print 'Package data_viewers not found.'
     else:
         sys.path.append('../data_viewers/')
-        from dataviewers.viewer_3d import Viewer_3D
+        from dataviewers.viewer_3D import Viewer_3D
         if isinstance(data, tuple):
             # n_data = len(data)
             n_slices = data[0].shape[0]
