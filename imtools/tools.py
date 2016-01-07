@@ -356,7 +356,7 @@ def analyse_histogram(data, roi=None, show=False, show_now=True, dens_min=20, de
 
 
 def intensity_probability(data, std=20, mask=None, dens_min=10, dens_max=255):
-    if roi == None:
+    if mask == None:
         # roi = np.logical_and(data >= dens_min, data <= dens_max)
         roi = np.ones(data.shape, dtype=np.bool)
     voxels = data[np.nonzero(mask)]
