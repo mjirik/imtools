@@ -27,8 +27,6 @@ import scipy.ndimage.interpolation as scindiint
 import cPickle as pickle
 import gzip
 
-from PyQt4 import QtGui
-
 try:
     import data_viewers
 except ImportError:
@@ -947,7 +945,8 @@ def view_segmentation(datap_1, datap_2=None):
     else:
         sys.path.append('../data_viewers/')
         from dataviewers.seg_viewer import SegViewer
-
+        
+        from PyQt4 import QtGui
         app = QtGui.QApplication(sys.argv)
         le = SegViewer(datap1=datap_1, datap2=datap_2)
         le.show()
@@ -982,6 +981,7 @@ def show_3d(data, range=True):
         else:
             data_vis = data
 
+        from PyQt4 import QtGui
         app = QtGui.QApplication(sys.argv)
         viewer = Viewer_3D(data_vis, range=True)
         viewer.show()
