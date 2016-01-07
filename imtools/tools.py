@@ -945,7 +945,7 @@ def view_segmentation(datap_1, datap_2=None):
     else:
         sys.path.append('../data_viewers/')
         from dataviewers.seg_viewer import SegViewer
-        
+
         from PyQt4 import QtGui
         app = QtGui.QApplication(sys.argv)
         le = SegViewer(datap1=datap_1, datap2=datap_2)
