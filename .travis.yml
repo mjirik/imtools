@@ -20,7 +20,7 @@ before_install:
 #    - wget http://147.228.240.61/queetech/sample-extra-data/io3d_sample_data.zip && unzip io3d_sample_data.zip
 # command to install dependencies
 install:
-    - conda install --yes -c SimpleITK -c luispedro -c mjirik --file requirements_conda.txt
+    - conda install --yes -c SimpleITK -c luispedro -c mjirik -c menpo --file requirements_conda.txt
     - pip install coveralls
     - pip install -r requirements.txt
     - pip install .

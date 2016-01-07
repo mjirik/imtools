@@ -8,15 +8,15 @@ import glob
 import dicom
 import cv2
 
-# from skimage import measure
 import skimage.exposure as skiexp
 import skimage.measure as skimea
 import skimage.morphology as skimor
 import skimage.transform as skitra
-# import skimage.restoration as skires
 import skimage.filters as skifil
 import skimage.restoration as skires
 import skimage.segmentation as skiseg
+import skimage.feature as skifea
+import skimage.io as skiio
 from skimage.segmentation import mark_boundaries
 
 import scipy.stats as scista
@@ -210,7 +210,8 @@ def read_data(dcmdir, indices=None, wildcard='*.dcm', type=np.int16):
             except:
                 print('problem with RescaleSlope and RescaleIntercept')
         else:
-            data2d = cv2.imread(onefile, 0)
+            # data2d = cv2.imread(onefile, 0)
+            data2d = skiio.imread(onefile, as_grey=True)
 
         if len(data3d) == 0:
             shp2 = data2d.shape
@@ -317,7 +318,7 @@ def smoothing_gauss(data, sigma=1, pseudo_3D='True', sliceId=2):
 
 
 
-def analyse_histogram(data, roi=None, debug=False, dens_min=20, dens_max=255, minT=0.95, maxT=1.05):
+def analyse_histogram(data, roi=None, show=False, show_now=True, dens_min=20, dens_max=255, minT=0.95, maxT=1.05):
     if roi == None:
         #roi = np.ones(data.shape, dtype=np.bool)
         roi = np.logical_and(data >= dens_min, data <= dens_max)
@@ -338,7 +339,7 @@ def analyse_histogram(data, roi=None, debug=False, dens_min=20, dens_max=255, mi
     liver = data * (roi > 0)
     class1 = np.where( (liver >= class1TMin) * (liver <= class1TMax), 1, 0)
 
-    if debug:
+    if show:
         plt.figure()
         plt.plot(bins, hist)
         plt.hold(True)
@@ -348,16 +349,17 @@ def analyse_histogram(data, roi=None, debug=False, dens_min=20, dens_max=255, mi
         plt.plot(bins[histTIdxs[0]], hist[histTIdxs[0]], 'rx')
         plt.plot(bins[histTIdxs[-1]], hist[histTIdxs[-1]], 'rx')
         plt.title('Histogram of liver density and its class1 = maximal peak (red dot) +-5% of its density (red line).')
-        plt.show()
+        if show_now:
+            plt.show()
 
     return class1
 
 
-def intensity_probability(data, std=20, roi=None, dens_min=10, dens_max=255):
+def intensity_probability(data, std=20, mask=None, dens_min=10, dens_max=255):
     if roi == None:
         # roi = np.logical_and(data >= dens_min, data <= dens_max)
         roi = np.ones(data.shape, dtype=np.bool)
-    voxels = data[np.nonzero(roi)]
+    voxels = data[np.nonzero(mask)]
     hist, bins = skiexp.histogram(voxels)
 
     #zeroing histogram outside interval <dens_min, dens_max>
@@ -725,7 +727,7 @@ def auto_canny(image, sigma=0.33):
     # apply automatic Canny edge detection using the computed median
     lower = int(max(0, (1.0 - sigma) * v))
     upper = int(min(255, (1.0 + sigma) * v))
-    edged = cv2.Canny(image, lower, upper)
+    edged = skifea.canny(image, low_threshold=lower, high_threshold=upper)
 
     # return the edged image
     return edged
@@ -736,16 +738,17 @@ def morph_hat(img, strels, type='tophat', show=False, show_now=True):
         strels = [strels]
     n_strels = len(strels)
 
-    if type in ['tophat', 'whitehat']:
-        op = cv2.MORPH_TOPHAT
-    elif type == 'blackhat':
-        op = cv2.MORPH_BLACKHAT
-    else:
-        raise ValueError('Wrong operation type. Only \'tophat\' and \'blackhat\' are allowed.')
-
     resps = []
-    for i in strels:
-        resp = cv2.morphologyEx(img, op, i)
+    for strel in strels:
+        # resp = cv2.morphologyEx(img, op, strel)
+        if type in ['tophat', 'whitehat']:
+            # op = cv2.MORPH_TOPHAT
+            resp = skimor.white_tophat(img, strel)
+        elif type == 'blackhat':
+            # op = cv2.MORPH_BLACKHAT
+            resp = skimor.black_tophat(img, strel)
+        else:
+            raise ValueError('Wrong operation type. Only \'tophat\' and \'blackhat\' are allowed.')
         resps.append(resp)
 
     if show:
@@ -778,7 +781,7 @@ def get_status_text(text, iter, max_iter):
     return line
 
 
-def load_pickle_data(fname, slice_idx=-1):
+def load_pickle_data(fname, slice_idx=-1, return_datap=False):
     ext_list = ('pklz', 'pickle')
     if fname.split('.')[-1] in ext_list:
 
@@ -792,6 +795,9 @@ def load_pickle_data(fname, slice_idx=-1):
             fcontent = f.read()
             f.close()
         data_dict = pickle.loads(fcontent)
+
+        if return_datap:
+            return data_dict
 
         # data = tools.windowing(data_dict['data3d'], level=params['win_level'], width=params['win_width'])
         data = data_dict['data3d']

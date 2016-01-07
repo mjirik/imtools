@@ -8,3 +8,4 @@ matplotlib
 vtk
 SimpleITK
 scikit-learn
+opencv
