@@ -986,3 +986,37 @@ def show_3d(data, range=True):
         viewer = Viewer_3D(data_vis, range=True)
         viewer.show()
         sys.exit(app.exec_())
+
+
+def arange_figs(imgs, tits=None, max_r=3, max_c=5):
+    n_imgs = len(imgs)
+    max_imgs = max_r * max_c
+    if isinstance(imgs[0], tuple):
+        tits = [x[0] for x in imgs]
+        imgs = [x[1] for x in imgs]
+    else:
+        if tits is None:
+            tits = [str(x + 1) for x in range(n_imgs)]
+
+    n_rows = int(np.ceil(n_imgs / float(max_c)))
+    n_cols = min(n_imgs, max_c)
+
+    if n_imgs > max_imgs:
+        imgs_rem = imgs[max_imgs:]
+        tits_rem = tits[max_imgs:]
+        imgs = imgs[:min(max_imgs, n_imgs)]
+        tits = tits[:min(max_imgs, n_imgs)]
+        n_rem = n_imgs - max_imgs
+    else:
+        n_rem = 0
+
+    plt.figure()
+    for i, (im, tit) in enumerate(zip(imgs, tits)):
+        plt.subplot(n_rows, n_cols, i + 1)
+        plt.imshow(im, 'gray', interpolation='nearest')
+        plt.title(tit)
+
+    if n_rem > 0:
+        arange_figs(imgs_rem, tits=tits_rem)
+    else:
+        plt.show()
