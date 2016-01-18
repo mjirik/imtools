@@ -461,31 +461,37 @@ def eroding3D(data, selem=None, selem_size=3, slicewise=False, sliceId=0):
 
 
 def resize3D(data, scale, sliceId=2, method='cv2'):
-    if sliceId == 2:
-        n_slices = data.shape[2]
-        # new_shape = cv2.resize(data[:,:,0], None, fx=scale, fy=scale).shape
-        new_shape = scindiint.zoom(data[:,:,0], scale).shape
-        new_data = np.zeros(np.hstack((new_shape,n_slices)), dtype=np.int)
-        for i in range(n_slices):
-            # new_data[:,:,i] = cv2.resize(data[:,:,i], None, fx=scale, fy=scale)
-            # new_data[:,:,i] = (255 * skitra.rescale(data[:,:,0], scale)).astype(np.int)
-            if method == 'cv2':
-                new_data[:,:,i] = cv2.resize(data[:,:,i], (0,0),  fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
-            else:
-                new_data[:,:,i] = scindiint.zoom(data[:,:,i], scale)
-    elif sliceId == 0:
-        n_slices = data.shape[0]
-        # new_shape = cv2.resize(data[0,:,:], None, fx=scale, fy=scale).shape
-        # new_shape = skitra.rescale(data[0,:,:], scale).shape
-        new_shape =  scindiint.zoom(data[0,:,:], scale).shape
-        new_data = np.zeros(np.hstack((n_slices, new_shape)), dtype=np.int)
-        for i in range(n_slices):
-            # new_data[i,:,:] = cv2.resize(data[i,:,:], None, fx=scale, fy=scale)
-            # new_data[i,:,:] = (255 * skitra.rescale(data[i,:,:], scale)).astype(np.int)
-            if method == 'cv2':
-                new_data[i,:,:] = cv2.resize(data[i,:,:], (0,0),  fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
-            else:
-                new_data[i,:,:] = scindiint.zoom(data[i,:,:], scale)
+    if data.ndim == 2:
+        if method == 'cv2':
+            new_data = cv2.resize(data, (0,0), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
+        else:
+            new_data = scindiint.zoom(data, scale)
+    else:
+        if sliceId == 2:
+            n_slices = data.shape[2]
+            # new_shape = cv2.resize(data[:,:,0], None, fx=scale, fy=scale).shape
+            new_shape = scindiint.zoom(data[:,:,0], scale).shape
+            new_data = np.zeros(np.hstack((new_shape,n_slices)), dtype=np.int)
+            for i in range(n_slices):
+                # new_data[:,:,i] = cv2.resize(data[:,:,i], None, fx=scale, fy=scale)
+                # new_data[:,:,i] = (255 * skitra.rescale(data[:,:,0], scale)).astype(np.int)
+                if method == 'cv2':
+                    new_data[:,:,i] = cv2.resize(data[:,:,i], (0,0), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
+                else:
+                    new_data[:,:,i] = scindiint.zoom(data[:,:,i], scale)
+        elif sliceId == 0:
+            n_slices = data.shape[0]
+            # new_shape = cv2.resize(data[0,:,:], None, fx=scale, fy=scale).shape
+            # new_shape = skitra.rescale(data[0,:,:], scale).shape
+            new_shape =  scindiint.zoom(data[0,:,:], scale).shape
+            new_data = np.zeros(np.hstack((n_slices, new_shape)), dtype=np.int)
+            for i in range(n_slices):
+                # new_data[i,:,:] = cv2.resize(data[i,:,:], None, fx=scale, fy=scale)
+                # new_data[i,:,:] = (255 * skitra.rescale(data[i,:,:], scale)).astype(np.int)
+                if method == 'cv2':
+                    new_data[i,:,:] = cv2.resize(data[i,:,:], (0,0), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
+                else:
+                    new_data[i,:,:] = scindiint.zoom(data[i,:,:], scale)
     return new_data
 
 
@@ -988,7 +994,7 @@ def show_3d(data, range=True):
         sys.exit(app.exec_())
 
 
-def arange_figs(imgs, tits=None, max_r=3, max_c=5):
+def arange_figs(imgs, tits=None, max_r=3, max_c=5, colorbar=False, same_range=False, show_now=True):
     n_imgs = len(imgs)
     max_imgs = max_r * max_c
     if isinstance(imgs[0], tuple):
@@ -996,10 +1002,14 @@ def arange_figs(imgs, tits=None, max_r=3, max_c=5):
         imgs = [x[1] for x in imgs]
     else:
         if tits is None:
-            tits = [str(x + 1) for x in range(n_imgs)]
+            tits = [str(x) for x in range(n_imgs)]
 
     n_rows = int(np.ceil(n_imgs / float(max_c)))
     n_cols = min(n_imgs, max_c)
+
+    if same_range:
+        vmin = min([x.min() for x in imgs])
+        vmax = max([x.max() for x in imgs])
 
     if n_imgs > max_imgs:
         imgs_rem = imgs[max_imgs:]
@@ -1013,10 +1023,15 @@ def arange_figs(imgs, tits=None, max_r=3, max_c=5):
     plt.figure()
     for i, (im, tit) in enumerate(zip(imgs, tits)):
         plt.subplot(n_rows, n_cols, i + 1)
-        plt.imshow(im, 'gray', interpolation='nearest')
+        if same_range:
+            plt.imshow(im, 'gray', interpolation='nearest', vmin=vmin, vmax=vmax)
+        else:
+            plt.imshow(im, 'gray', interpolation='nearest')
         plt.title(tit)
+        if colorbar:
+            plt.colorbar()
 
     if n_rem > 0:
         arange_figs(imgs_rem, tits=tits_rem)
-    else:
+    elif show_now:
         plt.show()
