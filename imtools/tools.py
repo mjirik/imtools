@@ -31,6 +31,12 @@ try:
     import data_viewers
 except ImportError:
     pass
+
+# if not os.path.exists('../data_viewers/'):
+#     print 'Package data_viewers not found.'
+# else:
+#     sys.path.append('../data_viewers/')
+#     from dataviewers.viewer_3D import Viewer_3D, Seg_Viewer
 #     if os.path.exists('../data_viewers/')
 #     sys.path.append('../data_viewers/')
 # from dataviewers.seg_viewer import SegViewer
@@ -946,52 +952,67 @@ def save_figs(data_fname, subdir, data, mask, imgs, ranges=None, cmaps=None):
 
 
 def view_segmentation(datap_1, datap_2=None):
-    if not os.path.exists('../data_viewers/'):
-        print 'Package data_viewers not found.'
+    path1 = '../data_viewers/'
+    path2 = '../../data_viewers/'
+    if os.path.exists(path1):
+        path = path1
+    elif os.path.exists(path2):
+        path = path2
     else:
-        sys.path.append('../data_viewers/')
-        from dataviewers.seg_viewer import SegViewer
+        print 'Package data_viewers not found.'
+        return None
+    print 'Package data_viewers found at', path
+    sys.path.append(path)
+    from dataviewers.seg_viewer import SegViewer
 
-        from PyQt4 import QtGui
-        app = QtGui.QApplication(sys.argv)
-        le = SegViewer(datap1=datap_1, datap2=datap_2)
-        le.show()
-        sys.exit(app.exec_())
+    from PyQt4 import QtGui
+    app = QtGui.QApplication(sys.argv)
+    le = SegViewer(datap1=datap_1, datap2=datap_2)
+    le.show()
+    sys.exit(app.exec_())
 
 
 def show_3d(data, range=True):
-    if not os.path.exists('../data_viewers/'):
-        print 'Package data_viewers not found.'
+    path1 = '../data_viewers/'
+    path2 = '../../data_viewers/'
+    if os.path.exists(path1):
+        path = path1
+    elif os.path.exists(path2):
+        path = path2
     else:
-        sys.path.append('../data_viewers/')
-        from dataviewers.viewer_3D import Viewer_3D
-        if isinstance(data, tuple):
-            # n_data = len(data)
-            n_slices = data[0].shape[0]
-            n_rows = data[0].shape[1]
-            n_cols = sum([x.shape[2] for x in data])
-            data_vis = np.zeros((n_slices, n_rows, n_cols))
+        print 'Package data_viewers not found.'
+        return None
+    print 'Package data_viewers found at', path
+    sys.path.append(path)
+    from dataviewers.viewer_3D import Viewer_3D
 
-            # data_vis = []
-            # for i in data:
-            #     data_vis.append(skiexp.rescale_intensity(i, out_range=np.uint8))
-            data = [skiexp.rescale_intensity(x, out_range=np.uint8) for x in data]
-            for i in xrange(n_slices):
-                slice = []
-                for j in data:
-                    # slice.append(skiexp.rescale_intensity((j[i, :, :]).astype(np.uint8), out_range=np.uint8))
-                    slice.append(j[i, :, :])
-                # data_vis[i, :, :] = np.hstack(slice)
-                data_vis[i, :, :] = np.hstack(slice)
-            # data_vis = np.hstack(data_vis)
-        else:
-            data_vis = data
+    if isinstance(data, tuple):
+        # n_data = len(data)
+        n_slices = data[0].shape[0]
+        n_rows = data[0].shape[1]
+        n_cols = sum([x.shape[2] for x in data])
+        data_vis = np.zeros((n_slices, n_rows, n_cols))
 
-        from PyQt4 import QtGui
-        app = QtGui.QApplication(sys.argv)
-        viewer = Viewer_3D(data_vis, range=True)
-        viewer.show()
-        sys.exit(app.exec_())
+        # data_vis = []
+        # for i in data:
+        #     data_vis.append(skiexp.rescale_intensity(i, out_range=np.uint8))
+        data = [skiexp.rescale_intensity(x, out_range=np.uint8) for x in data]
+        for i in xrange(n_slices):
+            slice = []
+            for j in data:
+                # slice.append(skiexp.rescale_intensity((j[i, :, :]).astype(np.uint8), out_range=np.uint8))
+                slice.append(j[i, :, :])
+            # data_vis[i, :, :] = np.hstack(slice)
+            data_vis[i, :, :] = np.hstack(slice)
+        # data_vis = np.hstack(data_vis)
+    else:
+        data_vis = data
+
+    from PyQt4 import QtGui
+    app = QtGui.QApplication(sys.argv)
+    viewer = Viewer_3D(data_vis, range=True)
+    viewer.show()
+    sys.exit(app.exec_())
 
 
 def arange_figs(imgs, tits=None, max_r=3, max_c=5, colorbar=False, same_range=False, show_now=True):
