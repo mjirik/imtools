@@ -988,7 +988,7 @@ def show_3d(data, range=True):
         sys.exit(app.exec_())
 
 
-def arange_figs(imgs, tits=None, max_r=3, max_c=5):
+def arange_figs(imgs, tits=None, max_r=3, max_c=5, same_range=False, colorbar=False, show_now=True):
     n_imgs = len(imgs)
     max_imgs = max_r * max_c
     if isinstance(imgs[0], tuple):
@@ -1010,13 +1010,20 @@ def arange_figs(imgs, tits=None, max_r=3, max_c=5):
     else:
         n_rem = 0
 
+    if same_range:
+        vmin = imgs.min()
+        vmax = imgs.max()
     plt.figure()
     for i, (im, tit) in enumerate(zip(imgs, tits)):
         plt.subplot(n_rows, n_cols, i + 1)
         plt.imshow(im, 'gray', interpolation='nearest')
+        if same_range:
+            plt.imshow(im, 'gray', vmin=vmin, vmax=vmax, interpolation='nearest')
+        if colorbar:
+            plt.colorbar()
         plt.title(tit)
 
     if n_rem > 0:
         arange_figs(imgs_rem, tits=tits_rem)
-    else:
+    elif show_now:
         plt.show()
