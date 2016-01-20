@@ -13,34 +13,34 @@ Subpackages
 Submodules
 ----------
 
-lisa.audiosupport module
+imtools.uiThreshold module
 ------------------------
 
-.. automodule:: lisa.audiosupport
+.. automodule:: imtools.uiThreshold
     :members:
     :undoc-members:
     :show-inheritance:
 
-lisa.classification module
+imtools.misc module
 --------------------------
 
-.. automodule:: lisa.classification
+.. automodule:: imtools.misc
     :members:
     :undoc-members:
     :show-inheritance:
 
-lisa.config module
+imtools.qmisc module
 ------------------
 
-.. automodule:: lisa.config
+.. automodule:: imtools.qmisc
     :members:
     :undoc-members:
     :show-inheritance:
 
-lisa.convert_pkl module
+imtools.sample_data module
 -----------------------
 
-.. automodule:: lisa.convert_pkl
+.. automodule:: imtools.sample_data
     :members:
     :undoc-members:
     :show-inheritance:
