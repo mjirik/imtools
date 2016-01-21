@@ -67,9 +67,9 @@ imtools.uiThreshold module
 ------------------------
 
 .. automodule:: imtools.uiThreshold
-:members:
-        :undoc-members:
-        :show-inheritance:
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 Module contents
 ---------------

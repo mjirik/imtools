@@ -18,8 +18,9 @@ sys.path.append(os.path.join(path_to_script, "./extern/sPickle"))
 
 def suggest_filename(file_path, exists=None):
     """
-    Try if exist path and append number to its end.
-    For debug you can set as input if file exists or not.
+    Append a string with number to its filename if the path exist.
+    :param file_path: input file path
+    :param exists: You can force path exists check. It is usefull for debug issues.
     """
     import os.path
     import re
@@ -213,3 +214,31 @@ def resize_to_shape(data, shape, zoom=None, mode='nearest', order=0):
 
         del segm_orig_scale
     return segmentation
+
+def resize_to_mm(data3d, voxelsize_mm, new_voxelsize_mm, mode='nearest'):
+    """
+    Function can resize data3d or segmentation to specifed voxelsize_mm
+    :new_voxelsize_mm: requested voxelsize. List of 3 numbers, also
+        can be a string 'orig', 'orgi*2' and 'orgi*4'.
+
+    :voxelsize_mm: size of voxel
+    :mode: default is 'nearest'
+    """
+
+    if new_voxelsize_mm == 'orig':
+        new_voxelsize_mm = np.array(voxelsize_mm)
+
+    elif new_voxelsize_mm == 'orig*2':
+        new_voxelsize_mm = np.array(voxelsize_mm) * 2
+    elif new_voxelsize_mm == 'orig*4':
+        new_voxelsize_mm = np.array(voxelsize_mm) * 4
+        # vx_size = np.array(metadata['voxelsize_mm']) * 4
+
+    zoom = voxelsize_mm / (1.0 * np.array(new_voxelsize_mm))
+    data3d_res = scipy.ndimage.zoom(
+            data3d,
+            zoom,
+            mode=mode,
+            order=1
+    ).astype(data3d.dtype)
+    return data3d_res
