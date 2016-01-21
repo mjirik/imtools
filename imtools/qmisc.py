@@ -69,7 +69,7 @@ def crop(data, crinfo):
 
     crop(data, crinfo)
 
-    :param crinfo: min and max for each axis
+    :param crinfo: min and max for each axis - [[minX, maxX], [minY, maxY], [minZ, maxZ]]
 
     """
     crinfo = fix_crinfo(crinfo)
@@ -103,6 +103,13 @@ def combinecrinfo(crinfo1, crinfo2):
 
 
 def crinfo_from_specific_data(data, margin):
+    """
+    Create crinfo of minimum orthogonal nonzero block in input data.
+
+    :param data: input data
+    :param margin: add margin to minimum block
+    :return:
+    """
     # hledáme automatický ořez, nonzero dá indexy
     logger.debug('crinfo')
     logger.debug(str(margin))
@@ -137,6 +144,15 @@ def crinfo_from_specific_data(data, margin):
 
 
 def uncrop(data, crinfo, orig_shape, resize=False):
+    """
+
+    :param data: input data
+    :param crinfo: array with minimum and maximum index along each axis
+        [[minX. maxX],[minY, maxY],[minZ, maxZ]]
+    :param orig_shape: shape of uncropped image
+    :param resize:
+    :return:
+    """
 
     crinfo = fix_crinfo(crinfo)
     data_out = np.zeros(orig_shape, dtype=data.dtype)
