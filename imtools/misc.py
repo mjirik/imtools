@@ -6,6 +6,8 @@ import os
 import sys
 import os.path
 import numpy as np
+import scipy
+import scipy.ndimage
 
 import logging
 logger = logging.getLogger(__name__)
