@@ -221,7 +221,7 @@ def resize_to_mm(data3d, voxelsize_mm, new_voxelsize_mm, mode='nearest'):
     """
     Function can resize data3d or segmentation to specifed voxelsize_mm
     :new_voxelsize_mm: requested voxelsize. List of 3 numbers, also
-        can be a string 'orig', 'orgi*2' and 'orgi*4'.
+        can be a string 'orig', 'orig*2' and 'orig*4'.
 
     :voxelsize_mm: size of voxel
     :mode: default is 'nearest'
