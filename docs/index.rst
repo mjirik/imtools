@@ -1,9 +1,9 @@
-.. lisa documentation master file, created by
+.. imtools documentation master file, created by
    sphinx-quickstart on Fri Oct 31 14:03:40 2014.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to lisa's documentation!
+Welcome to imtools's documentation!
 ================================
 
 Contents:

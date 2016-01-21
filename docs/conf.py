@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# lisa documentation build configuration file, created by
+# imtools documentation build configuration file, created by
 # sphinx-quickstart on Fri Oct 31 14:03:40 2014.
 #
 # This file is execfile()d with the current directory set to its
@@ -322,7 +322,7 @@ epub_publisher = u'Author'
 epub_copyright = u'2014, Author'
 
 # The basename for the epub file. It defaults to the project name.
-#epub_basename = u'lisa'
+#epub_basename = u'imtools'
 
 # The HTML theme for the epub output. Since the default themes are not optimized
 # for small screen space, using the same theme for HTML and epub output is

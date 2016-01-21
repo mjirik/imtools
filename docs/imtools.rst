@@ -1,4 +1,4 @@
-lisa package
+imtools package
 ============
 
 Test text
@@ -8,18 +8,11 @@ Subpackages
 
 .. toctree::
 
-    lisa.extern
+    imtools.extern
 
 Submodules
 ----------
 
-imtools.uiThreshold module
-------------------------
-
-.. automodule:: imtools.uiThreshold
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 imtools.misc module
 --------------------------
@@ -70,6 +63,13 @@ imtools.tools module
     :show-inheritance:
     
 
+imtools.uiThreshold module
+------------------------
+
+.. automodule:: imtools.uiThreshold
+:members:
+        :undoc-members:
+        :show-inheritance:
 
 Module contents
 ---------------
