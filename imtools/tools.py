@@ -988,7 +988,7 @@ def show_3d(data, range=True):
         sys.exit(app.exec_())
 
 
-def arange_figs(imgs, tits=None, max_r=3, max_c=5, same_range=False, colorbar=False, show_now=True, ret_fig=False):
+def arange_figs(imgs, tits=None, max_r=3, max_c=5, same_range=False, colorbar=False, show_now=True):
     n_imgs = len(imgs)
     max_imgs = max_r * max_c
     if isinstance(imgs[0], tuple):
@@ -1027,5 +1027,3 @@ def arange_figs(imgs, tits=None, max_r=3, max_c=5, same_range=False, colorbar=Fa
         arange_figs(imgs_rem, tits=tits_rem)
     elif show_now:
         plt.show()
-    if ret_fig:
-        return fig

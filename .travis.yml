@@ -15,8 +15,8 @@ before_install:
     - export PATH=/home/travis/miniconda2/bin:$PATH
     - conda update --yes conda
     # GUI
-#    - "export DISPLAY=:99.0"
-#    - sh -e /etc/init.d/xvfb start
+    - "export DISPLAY=:99.0"
+    - sh -e /etc/init.d/xvfb start
 #    - wget http://147.228.240.61/queetech/sample-extra-data/io3d_sample_data.zip && unzip io3d_sample_data.zip
 # command to install dependencies
 install:
@@ -29,6 +29,6 @@ install:
     - ls
     - ls sample_data
 # command to run tests
-script: nosetests -c setup.cfg --with-coverage --cover-package=imtools
+script: nosetests -c setup.cfg --with-coverage --cover-package=imtools -v
 after_success:
     - coveralls

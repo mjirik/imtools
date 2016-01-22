@@ -211,11 +211,32 @@ def download_and_run(url, local_file_name):
 
 
 def get_conda_path():
-    import os.path as op
-    conda_pth = op.expanduser('~/anaconda/bin')
-    if not op.exists(conda_pth):
-        conda_pth = op.expanduser('~/miniconda/bin')
-    return conda_pth
+    """
+    Return anaconda or miniconda directory
+    :return: anaconda directory
+    """
+
+    dstdir = ''
+    # try:
+    import subprocess
+    import re
+    # cond info --root work only for root environment
+    # p = subprocess.Popen(['conda', 'info', '--root'], stdout=subprocess.PIPE,  stderr=subprocess.PIPE)
+    p = subprocess.Popen(['conda', 'info', '-e'], stdout=subprocess.PIPE,  stderr=subprocess.PIPE)
+    out, err = p.communicate()
+
+    dstdir = out.strip()
+    dstdir = re.search("\*(.*)\n", dstdir).group(1).strip()
+    # except:
+    #     import traceback
+    #     traceback.print_exc()
+
+    # import os.path as op
+    # conda_pth = op.expanduser('~/anaconda/bin')
+    # if not op.exists(conda_pth):
+    #     conda_pth = op.expanduser('~/miniconda/bin')
+    # return conda_pth
+    return dstdir
 
 
 def file_copy_and_replace_lines(in_path, out_path):
