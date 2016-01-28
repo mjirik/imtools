@@ -31,12 +31,6 @@ try:
     import data_viewers
 except ImportError:
     pass
-
-# if not os.path.exists('../data_viewers/'):
-#     print 'Package data_viewers not found.'
-# else:
-#     sys.path.append('../data_viewers/')
-#     from dataviewers.viewer_3D import Viewer_3D, Seg_Viewer
 #     if os.path.exists('../data_viewers/')
 #     sys.path.append('../data_viewers/')
 # from dataviewers.seg_viewer import SegViewer
@@ -467,37 +461,31 @@ def eroding3D(data, selem=None, selem_size=3, slicewise=False, sliceId=0):
 
 
 def resize3D(data, scale, sliceId=2, method='cv2'):
-    if data.ndim == 2:
-        if method == 'cv2':
-            new_data = cv2.resize(data, (0,0), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
-        else:
-            new_data = scindiint.zoom(data, scale)
-    else:
-        if sliceId == 2:
-            n_slices = data.shape[2]
-            # new_shape = cv2.resize(data[:,:,0], None, fx=scale, fy=scale).shape
-            new_shape = scindiint.zoom(data[:,:,0], scale).shape
-            new_data = np.zeros(np.hstack((new_shape,n_slices)), dtype=np.int)
-            for i in range(n_slices):
-                # new_data[:,:,i] = cv2.resize(data[:,:,i], None, fx=scale, fy=scale)
-                # new_data[:,:,i] = (255 * skitra.rescale(data[:,:,0], scale)).astype(np.int)
-                if method == 'cv2':
-                    new_data[:,:,i] = cv2.resize(data[:,:,i], (0,0), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
-                else:
-                    new_data[:,:,i] = scindiint.zoom(data[:,:,i], scale)
-        elif sliceId == 0:
-            n_slices = data.shape[0]
-            # new_shape = cv2.resize(data[0,:,:], None, fx=scale, fy=scale).shape
-            # new_shape = skitra.rescale(data[0,:,:], scale).shape
-            new_shape =  scindiint.zoom(data[0,:,:], scale).shape
-            new_data = np.zeros(np.hstack((n_slices, new_shape)), dtype=np.int)
-            for i in range(n_slices):
-                # new_data[i,:,:] = cv2.resize(data[i,:,:], None, fx=scale, fy=scale)
-                # new_data[i,:,:] = (255 * skitra.rescale(data[i,:,:], scale)).astype(np.int)
-                if method == 'cv2':
-                    new_data[i,:,:] = cv2.resize(data[i,:,:], (0,0), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
-                else:
-                    new_data[i,:,:] = scindiint.zoom(data[i,:,:], scale)
+    if sliceId == 2:
+        n_slices = data.shape[2]
+        # new_shape = cv2.resize(data[:,:,0], None, fx=scale, fy=scale).shape
+        new_shape = scindiint.zoom(data[:,:,0], scale).shape
+        new_data = np.zeros(np.hstack((new_shape,n_slices)), dtype=np.int)
+        for i in range(n_slices):
+            # new_data[:,:,i] = cv2.resize(data[:,:,i], None, fx=scale, fy=scale)
+            # new_data[:,:,i] = (255 * skitra.rescale(data[:,:,0], scale)).astype(np.int)
+            if method == 'cv2':
+                new_data[:,:,i] = cv2.resize(data[:,:,i], (0,0),  fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
+            else:
+                new_data[:,:,i] = scindiint.zoom(data[:,:,i], scale)
+    elif sliceId == 0:
+        n_slices = data.shape[0]
+        # new_shape = cv2.resize(data[0,:,:], None, fx=scale, fy=scale).shape
+        # new_shape = skitra.rescale(data[0,:,:], scale).shape
+        new_shape =  scindiint.zoom(data[0,:,:], scale).shape
+        new_data = np.zeros(np.hstack((n_slices, new_shape)), dtype=np.int)
+        for i in range(n_slices):
+            # new_data[i,:,:] = cv2.resize(data[i,:,:], None, fx=scale, fy=scale)
+            # new_data[i,:,:] = (255 * skitra.rescale(data[i,:,:], scale)).astype(np.int)
+            if method == 'cv2':
+                new_data[i,:,:] = cv2.resize(data[i,:,:], (0,0),  fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
+            else:
+                new_data[i,:,:] = scindiint.zoom(data[i,:,:], scale)
     return new_data
 
 
@@ -952,70 +940,55 @@ def save_figs(data_fname, subdir, data, mask, imgs, ranges=None, cmaps=None):
 
 
 def view_segmentation(datap_1, datap_2=None):
-    path1 = '../data_viewers/'
-    path2 = '../../data_viewers/'
-    if os.path.exists(path1):
-        path = path1
-    elif os.path.exists(path2):
-        path = path2
-    else:
+    if not os.path.exists('../data_viewers/'):
         print 'Package data_viewers not found.'
-        return None
-    print 'Package data_viewers found at', path
-    sys.path.append(path)
-    from dataviewers.seg_viewer import SegViewer
+    else:
+        sys.path.append('../data_viewers/')
+        from dataviewers.seg_viewer import SegViewer
 
-    from PyQt4 import QtGui
-    app = QtGui.QApplication(sys.argv)
-    le = SegViewer(datap1=datap_1, datap2=datap_2)
-    le.show()
-    sys.exit(app.exec_())
+        from PyQt4 import QtGui
+        app = QtGui.QApplication(sys.argv)
+        le = SegViewer(datap1=datap_1, datap2=datap_2)
+        le.show()
+        sys.exit(app.exec_())
 
 
 def show_3d(data, range=True):
-    path1 = '../data_viewers/'
-    path2 = '../../data_viewers/'
-    if os.path.exists(path1):
-        path = path1
-    elif os.path.exists(path2):
-        path = path2
-    else:
+    if not os.path.exists('../data_viewers/'):
         print 'Package data_viewers not found.'
-        return None
-    print 'Package data_viewers found at', path
-    sys.path.append(path)
-    from dataviewers.viewer_3D import Viewer_3D
-
-    if isinstance(data, tuple):
-        # n_data = len(data)
-        n_slices = data[0].shape[0]
-        n_rows = data[0].shape[1]
-        n_cols = sum([x.shape[2] for x in data])
-        data_vis = np.zeros((n_slices, n_rows, n_cols))
-
-        # data_vis = []
-        # for i in data:
-        #     data_vis.append(skiexp.rescale_intensity(i, out_range=np.uint8))
-        data = [skiexp.rescale_intensity(x, out_range=np.uint8) for x in data]
-        for i in xrange(n_slices):
-            slice = []
-            for j in data:
-                # slice.append(skiexp.rescale_intensity((j[i, :, :]).astype(np.uint8), out_range=np.uint8))
-                slice.append(j[i, :, :])
-            # data_vis[i, :, :] = np.hstack(slice)
-            data_vis[i, :, :] = np.hstack(slice)
-        # data_vis = np.hstack(data_vis)
     else:
-        data_vis = data
+        sys.path.append('../data_viewers/')
+        from dataviewers.viewer_3D import Viewer_3D
+        if isinstance(data, tuple):
+            # n_data = len(data)
+            n_slices = data[0].shape[0]
+            n_rows = data[0].shape[1]
+            n_cols = sum([x.shape[2] for x in data])
+            data_vis = np.zeros((n_slices, n_rows, n_cols))
 
-    from PyQt4 import QtGui
-    app = QtGui.QApplication(sys.argv)
-    viewer = Viewer_3D(data_vis, range=True)
-    viewer.show()
-    sys.exit(app.exec_())
+            # data_vis = []
+            # for i in data:
+            #     data_vis.append(skiexp.rescale_intensity(i, out_range=np.uint8))
+            data = [skiexp.rescale_intensity(x, out_range=np.uint8) for x in data]
+            for i in xrange(n_slices):
+                slice = []
+                for j in data:
+                    # slice.append(skiexp.rescale_intensity((j[i, :, :]).astype(np.uint8), out_range=np.uint8))
+                    slice.append(j[i, :, :])
+                # data_vis[i, :, :] = np.hstack(slice)
+                data_vis[i, :, :] = np.hstack(slice)
+            # data_vis = np.hstack(data_vis)
+        else:
+            data_vis = data
+
+        from PyQt4 import QtGui
+        app = QtGui.QApplication(sys.argv)
+        viewer = Viewer_3D(data_vis, range=True)
+        viewer.show()
+        sys.exit(app.exec_())
 
 
-def arange_figs(imgs, tits=None, max_r=3, max_c=5, colorbar=False, same_range=False, show_now=True):
+def arange_figs(imgs, tits=None, max_r=3, max_c=5, same_range=False, colorbar=False, show_now=True):
     n_imgs = len(imgs)
     max_imgs = max_r * max_c
     if isinstance(imgs[0], tuple):
@@ -1023,14 +996,10 @@ def arange_figs(imgs, tits=None, max_r=3, max_c=5, colorbar=False, same_range=Fa
         imgs = [x[1] for x in imgs]
     else:
         if tits is None:
-            tits = [str(x) for x in range(n_imgs)]
+            tits = [str(x + 1) for x in range(n_imgs)]
 
     n_rows = int(np.ceil(n_imgs / float(max_c)))
     n_cols = min(n_imgs, max_c)
-
-    if same_range:
-        vmin = min([x.min() for x in imgs])
-        vmax = max([x.max() for x in imgs])
 
     if n_imgs > max_imgs:
         imgs_rem = imgs[max_imgs:]
@@ -1041,16 +1010,18 @@ def arange_figs(imgs, tits=None, max_r=3, max_c=5, colorbar=False, same_range=Fa
     else:
         n_rem = 0
 
-    plt.figure()
+    if same_range:
+        vmin = imgs.min()
+        vmax = imgs.max()
+    fig = plt.figure()
     for i, (im, tit) in enumerate(zip(imgs, tits)):
         plt.subplot(n_rows, n_cols, i + 1)
+        plt.imshow(im, 'gray', interpolation='nearest')
         if same_range:
-            plt.imshow(im, 'gray', interpolation='nearest', vmin=vmin, vmax=vmax)
-        else:
-            plt.imshow(im, 'gray', interpolation='nearest')
-        plt.title(tit)
+            plt.imshow(im, 'gray', vmin=vmin, vmax=vmax, interpolation='nearest')
         if colorbar:
             plt.colorbar()
+        plt.title(tit)
 
     if n_rem > 0:
         arange_figs(imgs_rem, tits=tits_rem)

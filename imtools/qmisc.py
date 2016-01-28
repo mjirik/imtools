@@ -69,7 +69,7 @@ def crop(data, crinfo):
 
     crop(data, crinfo)
 
-    :param crinfo: min and max for each axis
+    :param crinfo: min and max for each axis - [[minX, maxX], [minY, maxY], [minZ, maxZ]]
 
     """
     crinfo = fix_crinfo(crinfo)
@@ -103,6 +103,13 @@ def combinecrinfo(crinfo1, crinfo2):
 
 
 def crinfo_from_specific_data(data, margin):
+    """
+    Create crinfo of minimum orthogonal nonzero block in input data.
+
+    :param data: input data
+    :param margin: add margin to minimum block
+    :return:
+    """
     # hledáme automatický ořez, nonzero dá indexy
     logger.debug('crinfo')
     logger.debug(str(margin))
@@ -137,6 +144,15 @@ def crinfo_from_specific_data(data, margin):
 
 
 def uncrop(data, crinfo, orig_shape, resize=False):
+    """
+
+    :param data: input data
+    :param crinfo: array with minimum and maximum index along each axis
+        [[minX. maxX],[minY, maxY],[minZ, maxZ]]
+    :param orig_shape: shape of uncropped image
+    :param resize:
+    :return:
+    """
 
     crinfo = fix_crinfo(crinfo)
     data_out = np.zeros(orig_shape, dtype=data.dtype)
@@ -236,33 +252,17 @@ def max_area_index(labels, num):
     return mxi
 
 
-def resize_to_mm(data3d, voxelsize_mm, new_voxelsize_mm, mode='nearest'):
+def resize_to_mm(*pars, **params):
     """
     Function can resize data3d or segmentation to specifed voxelsize_mm
-    :new_voxelsize_mm: requested voxelsize. List of 3 numbers, also 
+    :new_voxelsize_mm: requested voxelsize. List of 3 numbers, also
         can be a string 'orig', 'orgi*2' and 'orgi*4'.
-        
+
     :voxelsize_mm: size of voxel
     :mode: default is 'nearest'
     """
-
-    if new_voxelsize_mm == 'orig':
-        new_voxelsize_mm = np.array(voxelsize_mm)
-
-    elif new_voxelsize_mm == 'orig*2':
-        new_voxelsize_mm = np.array(voxelsize_mm) * 2
-    elif new_voxelsize_mm == 'orig*4':
-        new_voxelsize_mm = np.array(voxelsize_mm) * 4
-        # vx_size = np.array(metadata['voxelsize_mm']) * 4
-
-    zoom = voxelsize_mm / (1.0 * np.array(new_voxelsize_mm))
-    data3d_res = scipy.ndimage.zoom(
-        data3d,
-        zoom,
-        mode=mode,
-        order=1
-    ).astype(data3d.dtype)
-    return data3d_res
+    import misc
+    return misc.resize_to_mm(*pars, **params)
 
 
 def resize_to_shape(*pars, **params):

@@ -45,6 +45,7 @@ class SegmentationTest(unittest.TestCase):
         data3d = (data3d + noise).astype(np.int16)
         return data3d, segm, voxelsize_mm, slab
 
+    @attr('interactive')
     def test_synthetic_data_segmentation(self):
         """
         Function uses organ_segmentation  for synthetic box object
