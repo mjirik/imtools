@@ -1061,14 +1061,14 @@ def resize(image, width=None, height=None, inter=cv2.INTER_AREA):
     return resized
 
 
-def pyramid(image, scale=2, minSize=(30, 30)):
-    '''
+def pyramid(image, scale=2, min_size=(30, 30), inter=cv2.INTER_AREA):
+    """
     Creates generator of image pyramid.
     :param image: input image
     :param scale: factor that controls by how much the image is resized at each layer
-    :param minSize: minimum required width and height of the layer
+    :param min_size: minimum required width and height of the layer
     :return: generator of the image pyramid
-    '''
+    """
     # yield the original image
     yield image
 
@@ -1076,12 +1076,37 @@ def pyramid(image, scale=2, minSize=(30, 30)):
     while True:
         # compute the new dimensions of the image and resize it
         w = int(image.shape[1] / scale)
-        image = resize(image, width=w)
+        image = resize(image, width=w, inter=inter)
 
         # if the resized image does not meet the supplied minimum
         # size, then stop constructing the pyramid
-        if image.shape[0] < minSize[1] or image.shape[1] < minSize[0]:
+        if image.shape[0] < min_size[1] or image.shape[1] < min_size[0]:
             break
 
         # yield the next image in the pyramid
         yield image
+
+
+def sliding_window(image, step_size, window_size, only_whole=True):
+    """
+    Creates generator of sliding windows.
+    :param image: input image
+    :param step_size: number of pixels we are going to skip in both the (x, y) direction
+    :param window_size: the width and height of the window we are going to extract
+    :param only_whole: if True - produces only windows of the given window_size
+    :return: generator that produce upper left corner of the window, center of the window and the sliding window itself
+    """
+    # slide a window across the image
+    for y in xrange(0, image.shape[0], step_size):
+        for x in xrange(0, image.shape[1], step_size):
+            # c_x = x + window_size[0] / 2.
+            # c_y = y + window_size[1] / 2.
+            # yield the current window
+            end_x = x + window_size[0]
+            end_y = y + window_size[1]
+            if only_whole and (end_x > image.shape[1] or end_y > image.shape[0]):
+                continue
+            else:
+                mask = np.zeros(image.shape, dtype=np.bool)
+                mask[y:end_y, x:end_x] = True
+                yield (x, y, mask, image[y:end_y, x:end_x])
