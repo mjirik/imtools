@@ -1087,26 +1087,30 @@ def pyramid(image, scale=2, min_size=(30, 30), inter=cv2.INTER_AREA):
         yield image
 
 
-def sliding_window(image, step_size, window_size, only_whole=True):
+def sliding_window(image, step_size, window_size, mask=None, only_whole=True):
     """
     Creates generator of sliding windows.
     :param image: input image
     :param step_size: number of pixels we are going to skip in both the (x, y) direction
     :param window_size: the width and height of the window we are going to extract
+    :param mask: region of interest, if None it will slide through the whole image
     :param only_whole: if True - produces only windows of the given window_size
     :return: generator that produce upper left corner of the window, center of the window and the sliding window itself
     """
+    if mask is None:
+        mask = np.ones(image.shape, dtype=np.bool)
     # slide a window across the image
     for y in xrange(0, image.shape[0], step_size):
         for x in xrange(0, image.shape[1], step_size):
-            # c_x = x + window_size[0] / 2.
-            # c_y = y + window_size[1] / 2.
-            # yield the current window
-            end_x = x + window_size[0]
-            end_y = y + window_size[1]
-            if only_whole and (end_x > image.shape[1] or end_y > image.shape[0]):
-                continue
-            else:
-                mask = np.zeros(image.shape, dtype=np.bool)
-                mask[y:end_y, x:end_x] = True
-                yield (x, y, mask, image[y:end_y, x:end_x])
+            c_x = x + window_size[0] / 2.
+            c_y = y + window_size[1] / 2.
+            if c_x < mask.shape[1] and c_y < mask.shape[0] and mask[c_y, c_x]:
+                # yield the current window
+                end_x = x + window_size[0]
+                end_y = y + window_size[1]
+                if only_whole and (end_x > image.shape[1] or end_y > image.shape[0]):
+                    continue
+                else:
+                    mask_out = np.zeros(image.shape, dtype=np.bool)
+                    mask_out[y:end_y, x:end_x] = True
+                    yield (x, y, mask_out, image[y:end_y, x:end_x])
