@@ -1114,3 +1114,22 @@ def sliding_window(image, step_size, window_size, mask=None, only_whole=True):
                     mask_out = np.zeros(image.shape, dtype=np.bool)
                     mask_out[y:end_y, x:end_x] = True
                     yield (x, y, mask_out, image[y:end_y, x:end_x])
+
+
+def fill_holes(data, slicewise=True, slice_id=0):
+    data_o = np.zeros_like(data)
+    if data.ndim == 3:
+        if slicewise:
+            for i in range(data.shape[slice_id]):
+                if slice_id == 0:
+                    data_o[i, :, :] = scindimor.binary_fill_holes(data[i, :, :])
+                    # plt.figure()
+                    # plt.subplot(121), plt.imshow(data[i, :, :], 'gray')
+                    # plt.subplot(122), plt.imshow(data_o[i, :, :], 'gray')
+                    # plt.show()
+                elif slice_id == 2:
+                    data_o[:, :, i] = scindimor.binary_fill_holes(data[:, :, 1])
+    else:
+        data_o = scindimor.binary_fill_holes(data)
+
+    return data_o
