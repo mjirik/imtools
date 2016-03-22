@@ -1116,6 +1116,55 @@ def sliding_window(image, step_size, window_size, mask=None, only_whole=True):
                     yield (x, y, mask_out, image[y:end_y, x:end_x])
 
 
+def sliding_window_3d(image, step_size, window_size, mask=None, only_whole=True, include_last=False):
+    """
+    Creates generator of sliding windows.
+    :param image: input image
+    :param step_size: number of pixels we are going to skip in both the (x, y) direction
+    :param window_size: the width and height of the window we are going to extract
+    :param mask: region of interest, if None it will slide through the whole image
+    :param only_whole: if True - produces only windows of the given window_size
+    :return: generator that produce upper left corner of the window, center of the window and the sliding window itself
+    """
+    if image.ndim == 2:
+        image = np.expand_dims(image, 0)
+        window_size = (1, window_size[0], window_size[1])
+        if mask is not None:
+            mask = np.expand_dims(mask, 0)
+    if mask is None:
+        mask = np.ones(image.shape, dtype=np.bool)
+    # slide a window across the image
+    for z in xrange(0, image.shape[0], step_size):
+        for y in xrange(0, image.shape[1], step_size):
+            for x in xrange(0, image.shape[2], step_size):
+                c_z = z + window_size[0] / 2.
+                c_x = x + window_size[1] / 2.
+                c_y = y + window_size[2] / 2.
+                if c_z < mask.shape[0] and c_x < mask.shape[2] and c_y < mask.shape[1] and mask[c_z, c_y, c_x]:
+                    # yield the current window
+                    end_x = x + window_size[1]
+                    end_y = y + window_size[2]
+                    end_z = z + window_size[0]
+                    if end_z > image.shape[0] or end_x > image.shape[2] or end_y > image.shape[1]:
+                        if only_whole:
+                            continue
+                        elif include_last:
+                            mask_out = np.zeros(image.shape, dtype=np.bool)
+                            x = image.shape[2] - window_size[1]
+                            y = image.shape[1] - window_size[2]
+                            z = image.shape[0] - window_size[0]
+                            end_x = image.shape[2]
+                            end_y = image.shape[1]
+                            end_z = image.shape[0]
+
+                            mask_out[z:end_z, y:end_y, x:end_x] = True
+                            yield (x, y, z, mask_out, image[z:end_z, y:end_y, x:end_x])
+                    else:
+                        mask_out = np.zeros(image.shape, dtype=np.bool)
+                        mask_out[z:end_z, y:end_y, x:end_x] = True
+                        yield (x, y, z, mask_out, image[z:end_z, y:end_y, x:end_x])
+
+
 def fill_holes(data, slicewise=True, slice_id=0):
     data_o = np.zeros_like(data)
     if data.ndim == 3:
