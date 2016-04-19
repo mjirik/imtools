@@ -257,7 +257,7 @@ def smoothing(data, d=10, sigmaColor=10, sigmaSpace=10, sliceId=2):
             for idx in range(data.shape[0]):
                 data[idx, :, :] = cv2.bilateralFilter( data[idx, :, :], d=d, sigmaColor=sigmaColor, sigmaSpace=sigmaSpace )
     else:
-        data = cv2.bilateralFilter( data, d=d, sigmaColor=sigmaColor, sigmaSpace=sigmaSpace )
+        data = cv2.bilateralFilter(data, d=d, sigmaColor=sigmaColor, sigmaSpace=sigmaSpace)
     return data
 
 
@@ -1087,6 +1087,19 @@ def pyramid(image, scale=2, min_size=(30, 30), inter=cv2.INTER_AREA):
         yield image
 
 
+def pyramid_down(image, scale=2, min_size=(30, 30), inter=cv2.INTER_AREA, smooth=False):
+    w = int(image.shape[1] / scale)
+    img = resize(image, width=w, inter=inter)
+    if smooth:
+        # img = smoothing(image.astype(np.uint8), d=20, sigmaColor=20, sigmaSpace=20).astype(image.dtype)
+        img = smoothing(image.astype(np.uint8)).astype(image.dtype)
+
+    if img.shape[0] < min_size[1] or img.shape[1] < min_size[0]:
+        return None
+    else:
+        return img
+
+
 def sliding_window(image, step_size, window_size, mask=None, only_whole=True):
     """
     Creates generator of sliding windows.
@@ -1101,19 +1114,19 @@ def sliding_window(image, step_size, window_size, mask=None, only_whole=True):
         mask = np.ones(image.shape, dtype=np.bool)
     # slide a window across the image
     for y in xrange(0, image.shape[0], step_size):
+        # c_y = y + window_size[1] / 2.
         for x in xrange(0, image.shape[1], step_size):
-            c_x = x + window_size[0] / 2.
-            c_y = y + window_size[1] / 2.
-            if c_x < mask.shape[1] and c_y < mask.shape[0] and mask[c_y, c_x]:
-                # yield the current window
-                end_x = x + window_size[0]
-                end_y = y + window_size[1]
-                if only_whole and (end_x > image.shape[1] or end_y > image.shape[0]):
-                    continue
-                else:
-                    mask_out = np.zeros(image.shape, dtype=np.bool)
-                    mask_out[y:end_y, x:end_x] = True
-                    yield (x, y, mask_out, image[y:end_y, x:end_x])
+            # c_x = x + window_size[0] / 2.
+            # if c_x < mask.shape[1] and c_y < mask.shape[0] and mask[c_y, c_x]:
+            # yield the current window
+            end_x = x + window_size[0]
+            end_y = y + window_size[1]
+            if only_whole and (end_x > image.shape[1] or end_y > image.shape[0]):
+                continue
+            else:
+                mask_out = np.zeros(image.shape, dtype=np.bool)
+                mask_out[y:end_y, x:end_x] = True
+                yield (x, y, mask_out, image[y:end_y, x:end_x])
 
 
 def sliding_window_3d(image, step_size, window_size, mask=None, only_whole=True, include_last=False):
@@ -1135,34 +1148,34 @@ def sliding_window_3d(image, step_size, window_size, mask=None, only_whole=True,
         mask = np.ones(image.shape, dtype=np.bool)
     # slide a window across the image
     for z in xrange(0, image.shape[0], step_size):
+        # c_z = z + window_size[0] / 2.
         for y in xrange(0, image.shape[1], step_size):
+            # c_y = y + window_size[2] / 2.
             for x in xrange(0, image.shape[2], step_size):
-                c_z = z + window_size[0] / 2.
-                c_x = x + window_size[1] / 2.
-                c_y = y + window_size[2] / 2.
-                if c_z < mask.shape[0] and c_x < mask.shape[2] and c_y < mask.shape[1] and mask[c_z, c_y, c_x]:
-                    # yield the current window
-                    end_x = x + window_size[1]
-                    end_y = y + window_size[2]
-                    end_z = z + window_size[0]
-                    if end_z > image.shape[0] or end_x > image.shape[2] or end_y > image.shape[1]:
-                        if only_whole:
-                            continue
-                        elif include_last:
-                            mask_out = np.zeros(image.shape, dtype=np.bool)
-                            x = image.shape[2] - window_size[1]
-                            y = image.shape[1] - window_size[2]
-                            z = image.shape[0] - window_size[0]
-                            end_x = image.shape[2]
-                            end_y = image.shape[1]
-                            end_z = image.shape[0]
-
-                            mask_out[z:end_z, y:end_y, x:end_x] = True
-                            yield (x, y, z, mask_out, image[z:end_z, y:end_y, x:end_x])
-                    else:
-                        mask_out = np.zeros(image.shape, dtype=np.bool)
-                        mask_out[z:end_z, y:end_y, x:end_x] = True
-                        yield (x, y, z, mask_out, image[z:end_z, y:end_y, x:end_x])
+                # c_x = x + window_size[1] / 2.
+                # if c_z < mask.shape[0] and c_x < mask.shape[2] and c_y < mask.shape[1] and mask[c_z, c_y, c_x]:
+                # yield the current window
+                end_x = x + window_size[1]
+                end_y = y + window_size[2]
+                end_z = z + window_size[0]
+                if only_whole and (end_z > image.shape[0] or end_x > image.shape[2] or end_y > image.shape[1]):
+                    # if only_whole:
+                    continue
+                    # elif include_last:
+                    #     mask_out = np.zeros(image.shape, dtype=np.bool)
+                    #     x = image.shape[2] - window_size[1]
+                    #     y = image.shape[1] - window_size[2]
+                    #     z = image.shape[0] - window_size[0]
+                    #     end_x = image.shape[2]
+                    #     end_y = image.shape[1]
+                    #     end_z = image.shape[0]
+                    #
+                    #     mask_out[z:end_z, y:end_y, x:end_x] = True
+                    #     yield (x, y, z, mask_out, image[z:end_z, y:end_y, x:end_x])
+                else:
+                    mask_out = np.zeros(image.shape, dtype=np.bool)
+                    mask_out[z:end_z, y:end_y, x:end_x] = True
+                    yield (x, y, z, mask_out, image[z:end_z, y:end_y, x:end_x])
 
 
 def fill_holes(data, slicewise=True, slice_id=0):
