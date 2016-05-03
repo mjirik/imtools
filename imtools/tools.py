@@ -1195,3 +1195,13 @@ def fill_holes(data, slicewise=True, slice_id=0):
         data_o = scindimor.binary_fill_holes(data)
 
     return data_o
+
+
+def sigmoid(image, mask=None, a=0.1, c=20, sigm_t = 0.2):
+    if mask is None:
+        mask = np.ones_like(image)
+
+    im_sigm = (1. / (1 + (np.exp(-a * (image - c))))) * mask
+    im_sigm *= (im_sigm > sigm_t)
+
+    return im_sigm
