@@ -326,11 +326,11 @@ class uiThreshold:
             self.axbuttnext2_5 = self.fig.add_axes(
                 [0.91, 0.20, 0.03, 0.035], axisbg=self.axcolor)
             self.axbuttnextclosing = self.fig.add_axes(
-                [0.88, 0.16, 0.05, 0.035], axisbg=self.axcolor)
+                [0.89, 0.16, 0.05, 0.035], axisbg=self.axcolor)
             self.axbuttprevclosing = self.fig.add_axes(
                 [0.82, 0.16, 0.05, 0.035], axisbg=self.axcolor)
             self.axbuttnextopening = self.fig.add_axes(
-                [0.88, 0.12, 0.05, 0.035], axisbg=self.axcolor)
+                [0.89, 0.12, 0.05, 0.035], axisbg=self.axcolor)
             self.axbuttprevopening = self.fig.add_axes(
                 [0.82, 0.12, 0.05, 0.035], axisbg=self.axcolor)
             self.axbuttreset = self.fig.add_axes(
@@ -636,21 +636,6 @@ class uiThreshold:
     def buttonMinPrev5(self, event):
         self.buttonMinUpdate(event, -5.0)
 
-    def buttonMinUpdate(self, event, value):
-
-        if self.min0 > (self.smin.val + value):
-            self.smin.val = self.min0
-        else:
-            self.smin.val += value
-        if self.max0 < (self.smin.val + value):
-            self.smin.val = self.max0
-        else:
-            self.smin.val += value
-
-        self.smin.val = (numpy.round(self.smin.val, 2))
-        self.smin.valtext.set_text('{}'.format(self.smin.val))
-        self.fig.canvas.draw()
-        self.updateImage(0)
 
     def buttonMaxNext(self, event):
         self.buttonMaxUpdate(event, -1.0)
@@ -675,13 +660,25 @@ class uiThreshold:
     def buttonMaxPrev(self, event):
         self.buttonMaxUpdate(event, -1.0)
 
+    def buttonMinUpdate(self, event, value):
+
+        if self.min0 > (self.smin.val + value):
+            self.smin.val = self.min0
+        elif self.max0 < (self.smin.val + value):
+            self.smin.val = self.max0
+        else:
+            self.smin.val += value
+
+        self.smin.val = (numpy.round(self.smin.val, 2))
+        self.smin.valtext.set_text('{}'.format(self.smin.val))
+        self.fig.canvas.draw()
+        self.updateImage(0)
+
     def buttonMaxUpdate(self, event, value):
 
         if self.min0 > (self.smax.val + value):
             self.smax.val = self.min0
-        else:
-            self.smax.val += value
-        if self.max0 < (self.smax.val + value):
+        elif self.max0 < (self.smax.val + value):
             self.smax.val = self.max0
         else:
             self.smax.val += value
