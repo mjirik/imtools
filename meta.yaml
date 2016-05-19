@@ -34,7 +34,7 @@ requirements:
     - setuptools
     - numpy
     - scipy
-    - skimage
+    - scikit-image
     - pyyaml
     - matplotlib
     - mock
