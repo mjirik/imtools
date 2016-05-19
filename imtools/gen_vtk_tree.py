@@ -152,7 +152,7 @@ def vt_file_2_vtk_file(infile, outfile, text_label=None):
     """
     yaml_file = open(infile, 'r')
     tree_raw_data = yaml.load(yaml_file)
-    vt2vtk_file(tree_raw_data)
+    vt2vtk_file(tree_raw_data, outfile, text_label)
 
 
 
@@ -202,7 +202,6 @@ def main():
     parser.add_argument(
         'inputfile',
         default=None,
-        required=True,
         help='input file'
     )
     parser.add_argument(
