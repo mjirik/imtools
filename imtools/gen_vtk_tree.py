@@ -208,7 +208,7 @@ def main():
     parser.add_argument(
         'outputfile',
         default='output.vtk',
-        required=False,
+        nargs='?',
         help='output file'
     )
     parser.add_argument(
