@@ -1066,7 +1066,7 @@ def resize(image, width=None, height=None, inter=None):
     return resized
 
 
-def pyramid(image, scale=2, min_size=(30, 30), inter=cv2.INTER_AREA):
+def pyramid(image, scale=2, min_size=(30, 30), inter=None):
     """
     Creates generator of image pyramid.
     :param image: input image
@@ -1074,8 +1074,11 @@ def pyramid(image, scale=2, min_size=(30, 30), inter=cv2.INTER_AREA):
     :param min_size: minimum required width and height of the layer
     :return: generator of the image pyramid
     """
-    # yield the original image
     yield image
+    import cv2
+    if inter is None:
+        inter=cv2.INTER_AREA
+    # yield the original image
 
     # keep looping over the pyramid
     while True:
