@@ -5,8 +5,6 @@ import matplotlib.patches as matpat
 import os
 import sys
 import glob
-import dicom
-import cv2
 
 import skimage.exposure as skiexp
 import skimage.measure as skimea
@@ -188,6 +186,7 @@ def change_slice_index(data):
 
 
 def read_data(dcmdir, indices=None, wildcard='*.dcm', type=np.int16):
+    import dicom
 
     dcmlist = []
     for infile in glob.glob(os.path.join(dcmdir, wildcard)):
@@ -249,6 +248,7 @@ def windowing(data, level=50, width=350, sub1024=False, sliceId=2):
 
 
 def smoothing(data, d=10, sigmaColor=10, sigmaSpace=10, sliceId=2):
+    import cv2
     if data.ndim == 3:
         if sliceId == 2:
             for idx in range(data.shape[2]):
@@ -461,6 +461,7 @@ def eroding3D(data, selem=None, selem_size=3, slicewise=False, sliceId=0):
 
 
 def resize3D(data, scale, sliceId=2, method='cv2'):
+    import cv2
     if sliceId == 2:
         n_slices = data.shape[2]
         # new_shape = cv2.resize(data[:,:,0], None, fx=scale, fy=scale).shape
@@ -562,6 +563,7 @@ def crop_to_bbox(im, mask):
 
 
 def slics_3D(im, pseudo_3D=True, n_segments=100, get_slicewise=False):
+    import cv2
     if im.ndim != 3:
         raise Exception('3D image is needed.')
 
@@ -1087,7 +1089,11 @@ def pyramid(image, scale=2, min_size=(30, 30), inter=cv2.INTER_AREA):
         yield image
 
 
-def pyramid_down(image, scale=2, min_size=(30, 30), inter=cv2.INTER_AREA, smooth=False):
+def pyramid_down(image, scale=2, min_size=(30, 30), inter=None, smooth=False):
+    import cv2
+    if inter is None:
+        inter=cv2.INTER_AREA
+
     w = int(image.shape[1] / scale)
     img = resize(image, width=w, inter=inter)
     if smooth:
