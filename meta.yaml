@@ -35,7 +35,7 @@ requirements:
     - numpy
     - scipy
     - scikit-image
-    - cv2
+    - opencv
     - pyyaml
     - matplotlib
     - mock
@@ -48,7 +48,7 @@ requirements:
     - scikit-image
     - pyyaml
     - matplotlib
-    - cv2
+    - opencv
 
 test:
   # Python imports
