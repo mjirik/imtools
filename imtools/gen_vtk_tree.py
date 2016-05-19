@@ -138,7 +138,7 @@ def fix_tree_structure(tree_raw_data):
     else:
         trees = tree_raw_data['Graph']
 
-def vt_file_2_vtk_file(infile, outfile)
+def vt_file_2_vtk_file(infile, outfile):
     yaml_file = open(infile, 'r')
     tree_raw_data = yaml.load(yaml_file)
 
