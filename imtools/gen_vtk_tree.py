@@ -132,27 +132,17 @@ def process_tree(indata):
 
     return outdata
 
-
-def main():
-    logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
-    ch = logging.StreamHandler()
-    logger.addHandler(ch)
-
-    infile = sys.argv[1]
-    if len(sys.argv) >= 3:
-        outfile = sys.argv[2]
-
-    else:
-        outfile = 'output.vtk'
-
-    yaml_file = open(infile, 'r')
-    tree_raw_data = yaml.load(yaml_file)
-
+def fix_tree_structure(tree_raw_data):
     if 'graph' in tree_raw_data:
         trees = tree_raw_data['graph']
     else:
         trees = tree_raw_data['Graph']
+
+def vt_file_2_vtk_file(infile, outfile)
+    yaml_file = open(infile, 'r')
+    tree_raw_data = yaml.load(yaml_file)
+
+    trees = fix_tree_structure(tree_raw_data)
 
     tkeys = trees.keys()
 
@@ -167,6 +157,22 @@ def main():
     writer.SetFileName(outfile)
     writer.SetInput(polyData)
     writer.Write()
+
+def main():
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    ch = logging.StreamHandler()
+    logger.addHandler(ch)
+
+    infile = sys.argv[1]
+    if len(sys.argv) >= 3:
+        outfile = sys.argv[2]
+
+    else:
+        outfile = 'output.vtk'
+
+    vt_file_2_vtk_file(infile, outfile)
+
 
 if __name__ == "__main__":
     main()
