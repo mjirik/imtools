@@ -1031,7 +1031,10 @@ def arange_figs(imgs, tits=None, max_r=3, max_c=5, same_range=False, colorbar=Fa
         plt.show()
 
 
-def resize(image, width=None, height=None, inter=cv2.INTER_AREA):
+def resize(image, width=None, height=None, inter=None):
+    import cv2
+    if inter is None:
+        inter=cv2.INTER_AREA
     # initialize the dimensions of the image to be resized and
     # grab the image size
     dim = None
