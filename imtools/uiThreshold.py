@@ -309,14 +309,22 @@ class uiThreshold:
             self.ssigma.on_changed(self.updateImage)
 
             # Zalozeni mist pro tlacitka
-            self.axbuttnext1 = self.fig.add_axes(
-                [0.88, 0.24, 0.05, 0.035], axisbg=self.axcolor)
+            self.axbuttprev1_5 = self.fig.add_axes(
+                [0.82, 0.24, 0.03, 0.035], axisbg=self.axcolor)
             self.axbuttprev1 = self.fig.add_axes(
-                [0.82, 0.24, 0.05, 0.035], axisbg=self.axcolor)
-            self.axbuttnext2 = self.fig.add_axes(
-                [0.88, 0.20, 0.05, 0.035], axisbg=self.axcolor)
+                [0.85, 0.24, 0.03, 0.035], axisbg=self.axcolor)
+            self.axbuttnext1 = self.fig.add_axes(
+                [0.88, 0.24, 0.03, 0.035], axisbg=self.axcolor)
+            self.axbuttnext1_5 = self.fig.add_axes(
+                [0.91, 0.24, 0.03, 0.035], axisbg=self.axcolor)
+            self.axbuttprev2_5 = self.fig.add_axes(
+                [0.82, 0.20, 0.03, 0.035], axisbg=self.axcolor)
             self.axbuttprev2 = self.fig.add_axes(
-                [0.82, 0.20, 0.05, 0.035], axisbg=self.axcolor)
+                [0.85, 0.20, 0.03, 0.035], axisbg=self.axcolor)
+            self.axbuttnext2 = self.fig.add_axes(
+                [0.88, 0.20, 0.03, 0.035], axisbg=self.axcolor)
+            self.axbuttnext2_5 = self.fig.add_axes(
+                [0.91, 0.20, 0.03, 0.035], axisbg=self.axcolor)
             self.axbuttnextclosing = self.fig.add_axes(
                 [0.88, 0.16, 0.05, 0.035], axisbg=self.axcolor)
             self.axbuttprevclosing = self.fig.add_axes(
@@ -331,10 +339,14 @@ class uiThreshold:
                 [0.91, 0.07, 0.08, 0.045], axisbg=self.axcolor)
 
             # Zalozeni tlacitek
-            self.bnext1 = Button(self.axbuttnext1, '+1.0')
-            self.bprev1 = Button(self.axbuttprev1, '-1.0')
-            self.bnext2 = Button(self.axbuttnext2, '+1.0')
-            self.bprev2 = Button(self.axbuttprev2, '-1.0')
+            self.bnext1 = Button(self.axbuttnext1, '+1')
+            self.bnext1_5 = Button(self.axbuttnext1_5, '+5')
+            self.bprev1 = Button(self.axbuttprev1, '-1')
+            self.bprev1_5 = Button(self.axbuttprev1_5, '-5')
+            self.bnext2 = Button(self.axbuttnext2, '+1')
+            self.bnext2_5 = Button(self.axbuttnext2_5, '+5')
+            self.bprev2 = Button(self.axbuttprev2, '-1')
+            self.bnext2_5 = Button(self.axbuttnext2_5, '+5')
             self.bnextclosing = Button(self.axbuttnextclosing, '+1.0')
             self.bprevclosing = Button(self.axbuttprevclosing, '-1.0')
             self.bnextopening = Button(self.axbuttnextopening, '+1.0')
@@ -347,6 +359,10 @@ class uiThreshold:
             self.bprev1.on_clicked(self.buttonMinPrev)
             self.bnext2.on_clicked(self.buttonMaxNext)
             self.bprev2.on_clicked(self.buttonMaxPrev)
+            self.bnext1.on_clicked(self.buttonMinNext5)
+            self.bprev1.on_clicked(self.buttonMinPrev5)
+            self.bnext2.on_clicked(self.buttonMaxNext5)
+            self.bprev2.on_clicked(self.buttonMaxPrev5)
             self.bnextclosing.on_clicked(self.buttonNextClosing)
             self.bprevclosing.on_clicked(self.buttonPrevClosing)
             self.bnextopening.on_clicked(self.buttonNextOpening)
@@ -609,29 +625,27 @@ class uiThreshold:
         matpyplot.close()
 
     def buttonMinNext(self, event):
-
-        if self.max0 < (self.smin.val + 1.0):
-
-            self.smin.val = self.max0
-
-        else:
-
-            self.smin.val += 1.0
-
-        self.smin.val = (numpy.round(self.smin.val, 2))
-        self.smin.valtext.set_text('{}'.format(self.smin.val))
-        self.fig.canvas.draw()
-        self.updateImage(0)
+        self.buttonMinUpdate(event, +1.0)
 
     def buttonMinPrev(self, event):
+        self.buttonMinUpdate(event, -1.0)
 
-        if self.min0 > (self.smin.val - 1.0):
+    def buttonMinNext5(self, event):
+        self.buttonMinUpdate(event, +5.0)
 
+    def buttonMinPrev5(self, event):
+        self.buttonMinUpdate(event, -5.0)
+
+    def buttonMinUpdate(self, event, value):
+
+        if self.min0 > (self.smin.val + value):
             self.smin.val = self.min0
-
         else:
-
-            self.smin.val -= 1.0
+            self.smin.val += value
+        if self.max0 < (self.smin.val + value):
+            self.smin.val = self.max0
+        else:
+            self.smin.val += value
 
         self.smin.val = (numpy.round(self.smin.val, 2))
         self.smin.valtext.set_text('{}'.format(self.smin.val))
@@ -639,29 +653,38 @@ class uiThreshold:
         self.updateImage(0)
 
     def buttonMaxNext(self, event):
+        self.buttonMaxUpdate(event, -1.0)
 
-        if self.max0 < (self.smax.val + 1.0):
+        # if self.max0 < (self.smax.val + 1.0):
+        #
+        #     self.smax.val = self.max0
+        #
+        # else:
+        #
+        #     self.smax.val += 1.0
+        #
+        # self.smax.val = (numpy.round(self.smax.val, 2))
+        # self.smax.valtext.set_text('{}'.format(self.smax.val))
+        # self.fig.canvas.draw()
+        # self.updateImage(0)
 
-            self.smax.val = self.max0
-
-        else:
-
-            self.smax.val += 1.0
-
-        self.smax.val = (numpy.round(self.smax.val, 2))
-        self.smax.valtext.set_text('{}'.format(self.smax.val))
-        self.fig.canvas.draw()
-        self.updateImage(0)
-
+    def buttonMaxNext5 (self, event):
+        self.buttonMaxUpdate(event, 5.0)
+    def buttonMaxPrev5 (self, event):
+        self.buttonMaxUpdate(event, -5.0)
     def buttonMaxPrev(self, event):
+        self.buttonMaxUpdate(event, -1.0)
 
-        if self.min0 > (self.smax.val - 1.0):
+    def buttonMaxUpdate(self, event, value):
 
+        if self.min0 > (self.smax.val + value):
             self.smax.val = self.min0
-
         else:
-
-            self.smax.val -= 1.0
+            self.smax.val += value
+        if self.max0 < (self.smax.val + value):
+            self.smax.val = self.max0
+        else:
+            self.smax.val += value
 
         self.smax.val = (numpy.round(self.smax.val, 2))
         self.smax.valtext.set_text('{}'.format(self.smax.val))
