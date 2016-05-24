@@ -48,7 +48,7 @@ requirements:
     - scikit-image
     - pyyaml
     - matplotlib
-    - opencv
+#    - opencv
 
 test:
   # Python imports
