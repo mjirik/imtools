@@ -15,8 +15,8 @@ import numpy as np
 
 # from imtools import qmisc
 # from imtools import misc
-from imtools.gt_volume import TreeGenerator
-
+from imtools.tree_processing import TreeGenerator
+import io3d
 
 #
 
@@ -28,6 +28,17 @@ class TubeTreeTest(unittest.TestCase):
     def test_vessel_tree_lar(self):
         import imtools.gt_lar
         tvg = TreeGenerator(imtools.gt_lar.GTLar)
+        yaml_path = os.path.join(path_to_script, "./hist_stats_test.yaml")
+        tvg.importFromYaml(yaml_path)
+        tvg.voxelsize_mm = [1, 1, 1]
+        tvg.shape = [100, 100, 100]
+        output = tvg.generateTree() # noqa
+        if self.interactiveTests:
+            tvg.show()
+
+    @attr("LAR")
+    def test_vessel_tree_vtk(self):
+        tvg = TreeGenerator('vtk')
         yaml_path = os.path.join(path_to_script, "./hist_stats_test.yaml")
         tvg.importFromYaml(yaml_path)
         tvg.voxelsize_mm = [1, 1, 1]

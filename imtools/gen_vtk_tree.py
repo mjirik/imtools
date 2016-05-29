@@ -9,6 +9,42 @@ import numpy as nm
 import yaml
 import argparse
 import sys
+import numpy as np
+
+
+# new interface
+
+class VTKTreeGenerator:
+    """
+    This generator is called by generateTree() function as a general form.
+    Other similar generator is used for generating LAR outputs.
+    """
+    def __init__(self, gtree):
+        self.shape = gtree.shape
+        self.data3d = np.zeros(gtree.shape, dtype=np.int)
+        self.voxelsize_mm = gtree.voxelsize_mm
+        self.gtree = gtree
+
+    def add_cylinder(self, p1m, p2m, rad, id):
+        """
+        Funkce na vykresleni jednoho segmentu do 3D dat
+        """
+        pass
+
+    def get_output(self):
+        self.polyData = gen_tree(self.gtree)
+        return self.polyData
+
+    def save(self, outputfile):
+
+        writer = vtk.vtkPolyDataWriter()
+        writer.SetFileName(outputfile)
+        writer.SetInput(self.polyData)
+        writer.Write()
+
+    def show(self):
+        logger.info("there is no show implemented")
+# old interface
 
 
 def get_cylinder(upper, height, radius,
@@ -97,7 +133,7 @@ def gen_tree(tree_data):
     return polyData
 
 
-def process_tree(indata):
+def compatibility_processing(indata):
     scale = 1e-3
     scale = 1
 
@@ -170,7 +206,7 @@ def vt2vtk_file(vessel_tree, outfile, text_label=None):
     if text_label is None:
         text_label = tkeys[0]
 
-    tree_data = process_tree(trees[text_label])
+    tree_data = compatibility_processing(trees[text_label])
     polyData = gen_tree(tree_data)
 
     writer = vtk.vtkPolyDataWriter()

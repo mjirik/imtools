@@ -14,7 +14,7 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 
 # from imtools import qmisc
 # from imtools import misc
-from imtools.gt_volume import TreeGenerator
+from imtools.tree_processing import TreeGenerator
 
 
 #
@@ -27,8 +27,12 @@ class SurfaceTest(unittest.TestCase):
     def test_surface_density_gensei_data(self):
         import imtools.surface_measurement as sm
         import io3d
+        import imtools.sample_data
+        data_path = 'sample_data/gensei_slices/'
+        if not os.path.exists(data_path):
+            imtools.sample_data.get_sample_data("gensei_slices", 'sample_data/')
         dr = io3d.datareader.DataReader()
-        datap = dr.Get3DData('sample_data/gensei_slices/',
+        datap = dr.Get3DData(datapath=data_path,
                              dataplus_format=True)
         # total object volume fraction:           0.081000
         # total object volume [(mm)^3]:           81.000000

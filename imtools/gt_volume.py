@@ -17,7 +17,6 @@ sys.path.append(os.path.join(path_to_script, "../extern/dicom2fem/src"))
 import argparse
 import numpy as np
 import scipy.ndimage
-from io3d import datawriter
 import misc
 
 # import datareader
