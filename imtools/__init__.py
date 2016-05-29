@@ -1,5 +1,7 @@
 __all__ = ['qmisc', 'misc' ]
 
+__version__ = "0.1.4"
+
 import qmisc
 import misc
 from qmisc import resize_to_mm, resize_to_shape
