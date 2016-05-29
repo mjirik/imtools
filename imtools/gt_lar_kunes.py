@@ -3,7 +3,7 @@
 
 """
 Surface model generator of vessel tree.
-Used by gen_volume_tree.py
+Used by gt_volume.py
 """
 import logging
 logger = logging.getLogger(__name__)

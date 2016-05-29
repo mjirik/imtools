@@ -15,7 +15,7 @@ import numpy as np
 
 # from imtools import qmisc
 # from imtools import misc
-from imtools.gen_volume_tree import TreeGenerator
+from imtools.gt_volume import TreeGenerator
 
 
 #

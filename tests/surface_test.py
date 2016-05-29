@@ -14,7 +14,7 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 
 # from imtools import qmisc
 # from imtools import misc
-from imtools.gen_volume_tree import TreeGenerator
+from imtools.gt_volume import TreeGenerator
 
 
 #
