@@ -23,7 +23,10 @@ class VTKTreeGenerator:
         self.shape = gtree.shape
         self.data3d = np.zeros(gtree.shape, dtype=np.int)
         self.voxelsize_mm = gtree.voxelsize_mm
-        self.gtree = gtree
+        # make comapatible with old system
+        self.tree_data = gtree.tree_data
+
+        self.tree_data_old = compatibility_processing(self.tree_data)
 
     def add_cylinder(self, p1m, p2m, rad, id):
         """
@@ -31,8 +34,10 @@ class VTKTreeGenerator:
         """
         pass
 
+    def finish(self):
+        self.polyData = gen_tree(self.tree_data_old)
+
     def get_output(self):
-        self.polyData = gen_tree(self.gtree)
         return self.polyData
 
     def save(self, outputfile):
@@ -84,15 +89,26 @@ def get_cylinder(upper, height, radius,
     tl.Translate(upper)
 
     tr1a = vtk.vtkTransformFilter()
-    tr1a.SetInput(src.GetOutput())
+    if "SetInputConnection" in dir(tr1a):
+        tr1a.SetInputConnection(src.GetOutputPort())
+    else:
+        tr1a.SetInput(src.GetOutput())
     tr1a.SetTransform(rot1)
 
     tr1b = vtk.vtkTransformFilter()
-    tr1b.SetInput(tr1a.GetOutput())
+    if "SetInputConnection" in dir(tr1b):
+        tr1b.SetInputConnection(tr1a.GetOutputPort())
+    else:
+        tr1b.SetInput(tr1a.GetOutput())
+    # tr1b.SetInput(tr1a.GetOutput())
     tr1b.SetTransform(rot2)
 
     tr2 = vtk.vtkTransformFilter()
-    tr2.SetInput(tr1b.GetOutput())
+    if "SetInputConnection" in dir(tr2):
+        tr2.SetInputConnection(tr1b.GetOutputPort())
+    else:
+        tr2.SetInput(tr1b.GetOutput())
+    # tr2.SetInput(tr1b.GetOutput())
     tr2.SetTransform(tl)
 
     tr2.Update()

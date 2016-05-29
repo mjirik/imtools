@@ -111,7 +111,7 @@ class TreeGenerator:
         if self.generator_params is None:
             self.generator = self.generator_class(self)
         else:
-            self.generator = self.generator_class(self, **generator_params)
+            self.generator = self.generator_class(self, **self.generator_params)
 
         for cyl_id in self.tree_data:
             logger.debug("CylinderId: " + str(cyl_id))
@@ -146,7 +146,6 @@ class TreeGenerator:
         except:
             import traceback
             logger.debug(traceback.format_exc())
-            pass
 
         output = self.generator.get_output()
 
@@ -286,11 +285,10 @@ python src/gt_volume.py -i ./tests/hist_stats_test.yaml'
     generator_params = None
     generator_class = args.generator
 
-    # TODO make vtk in standard way
-    if args.generator == "vtk":
-        import gen_vtk_tree
-        gen_vtk_tree.vt2vtk_file(args.inputfile, args.outputfile)
-        return
+    # if args.generator == "vtk":
+    #     import gen_vtk_tree
+    #     gen_vtk_tree.vt2vtk_file(args.inputfile, args.outputfile)
+    #     return
 
     tg = TreeGenerator(generator_class, generator_params)
     tg.importFromYaml(args.inputfile)

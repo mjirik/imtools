@@ -36,7 +36,6 @@ class TubeTreeTest(unittest.TestCase):
         if self.interactiveTests:
             tvg.show()
 
-    @attr("LAR")
     def test_vessel_tree_vtk(self):
         tvg = TreeGenerator('vtk')
         yaml_path = os.path.join(path_to_script, "./hist_stats_test.yaml")
@@ -44,8 +43,8 @@ class TubeTreeTest(unittest.TestCase):
         tvg.voxelsize_mm = [1, 1, 1]
         tvg.shape = [100, 100, 100]
         output = tvg.generateTree() # noqa
-        if self.interactiveTests:
-            tvg.show()
+        # if self.interactiveTests:
+        #     tvg.show()
 
     def test_import_new_vt_format(self):
 
