@@ -29,7 +29,6 @@ def vt2esofspy(vesseltree, outputfilename="tracer.txt", axisorder=[0, 1, 2]):
     :return:
     """
 
-    import io3d.misc
     if (type(vesseltree) == str) and os.path.isfile(vesseltree):
         import io3d
         vt = io3d.misc.obj_from_file(vesseltree)
@@ -69,7 +68,6 @@ def vt2esofspy(vesseltree, outputfilename="tracer.txt", axisorder=[0, 1, 2]):
         f.writelines(lines)
 
 
-    print "urra"
 
 
 if __name__ == "__main__":
