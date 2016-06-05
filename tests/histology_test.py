@@ -17,7 +17,8 @@ import imtools.surface_measurement as sm
 
 
 def join_sdp(datadir):
-    return os.path.join('./sample_data', datadir)
+
+    return os.path.join(path_to_script, '../sample_data', datadir)
 
 class HistologyTest(unittest.TestCase):
     interactiveTests = False
@@ -54,13 +55,6 @@ class HistologyTest(unittest.TestCase):
         yaml_output = os.path.join(path_to_script, "delme_esofspy.txt")
         vt.vt2esofspy(yaml_input, yaml_output)
 
-    def test_generate_sample_data(self):
-        """
-        Test has no strong part
-        """
-
-        import lisa.histology_analyser
-        lisa.histology_analyser.generate_sample_data()
 
     @attr("actual")
     def test_surface_density_gensei_data(self):
