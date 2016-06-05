@@ -44,7 +44,11 @@ class VTKTreeGenerator:
 
         writer = vtk.vtkPolyDataWriter()
         writer.SetFileName(outputfile)
-        writer.SetInput(self.polyData)
+        try:
+            writer.SetInputData(self.polyData)
+        except:
+            logger.warning("old vtk is used")
+            writer.SetInput(self.polyData)
         writer.Write()
 
     def show(self):
@@ -227,7 +231,11 @@ def vt2vtk_file(vessel_tree, outfile, text_label=None):
 
     writer = vtk.vtkPolyDataWriter()
     writer.SetFileName(outfile)
-    writer.SetInput(polyData)
+    try:
+        writer.SetInputData(polyData)
+    except:
+        logger.warning("old vtk is used")
+        writer.SetInput(polyData)
     writer.Write()
 
 
