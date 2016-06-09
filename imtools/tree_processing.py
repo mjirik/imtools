@@ -18,8 +18,6 @@ import misc
 import datetime
 
 
-import gen_vtk_tree
-
 class TreeGenerator:
 
     def __init__(self, generator_class='volume', generator_params=None):
