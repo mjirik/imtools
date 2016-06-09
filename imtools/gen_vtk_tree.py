@@ -20,9 +20,9 @@ class VTKTreeGenerator:
     Other similar generator is used for generating LAR outputs.
     """
     def __init__(self, gtree):
-        self.shape = gtree.shape
-        self.data3d = np.zeros(gtree.shape, dtype=np.int)
-        self.voxelsize_mm = gtree.voxelsize_mm
+        # self.shape = gtree.shape
+        # self.data3d = np.zeros(gtree.shape, dtype=np.int)
+        # self.voxelsize_mm = gtree.voxelsize_mm
         # make comapatible with old system
         self.tree_data = gtree.tree_data
 
