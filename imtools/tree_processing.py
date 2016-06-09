@@ -24,6 +24,7 @@ class TreeGenerator:
 
     def __init__(self, generator_class='volume', generator_params=None):
         """
+        This function can be used as vessel_tree iterator. Just implement generator_class
 
         :param generator_class: class with function add_cylinder(p1pix, p2pix, rad_mm) and get_output()
         :param generator_params:
@@ -212,8 +213,8 @@ class TreeGenerator:
 
         self.data3d = numpy_data
 
-    def saveToFile(self, outputfile, filetype):
-        self.generator.save(outputfile, filetype)
+    def saveToFile(self, *args, **kwargs):
+        self.generator.save(*args, **kwargs)
 
     def show(self):
         self.generator.show()
