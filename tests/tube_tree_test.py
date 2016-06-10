@@ -42,36 +42,6 @@ class TubeTreeTest(unittest.TestCase):
         tvg.shape = [100, 100, 100]
         output = tvg.generateTree() # noqa
 
-    @unittest.skipIf(not ("skelet3d" in sys.modules), "skelet3d is not installed")
-    def test_vessel_tree_vtk_from_skeleton(self):
-
-        import skelet3d
-        import imtools
-        import skelet3d.skeleton_analyser
-        import shutil
-
-        fn_out = 'tree.vtk'
-        if os.path.exists(fn_out):
-            os.remove(fn_out)
-
-        volume_data = np.zeros([3, 7, 9], dtype=np.int)
-        volume_data [:, :, 1:3] = 1
-        volume_data [:, 5, 2:9] = 1
-        volume_data [:, 0:7, 5] = 1
-        skelet = skelet3d.skelet3d(volume_data)
-
-        skan = skelet3d.skeleton_analyser.SkeletonAnalyser(skelet, volume_data=volume_data, voxelsize_mm=[1,1,1])
-        stats = skan.skeleton_analysis()
-
-        tvg = TreeGenerator('vtk')
-        tvg.voxelsize_mm = [1, 1, 1]
-        tvg.shape = [100, 100, 100]
-        tvg.tree_data = stats
-        output = tvg.generateTree() # noqa
-        tvg.saveToFile(fn_out)
-        os.path.exists(fn_out)
-
-
     def test_import_new_vt_format(self):
 
         tvg = TreeGenerator()
