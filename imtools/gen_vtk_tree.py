@@ -10,49 +10,54 @@ import yaml
 import argparse
 import sys
 import numpy as np
+import skelet3d
+import skelet3d.gt_vtk
+from skelet3d.gt_vtk import VTKTreeGenerator
+logger.warning("Module is moved to package skelet3d.gt_vtk. This placeholder will be removed in future")
 
 
 # new interface
 
-class VTKTreeGenerator:
-    """
-    This generator is called by generateTree() function as a general form.
-    Other similar generator is used for generating LAR outputs.
-    """
-    def __init__(self, gtree):
-        # self.shape = gtree.shape
-        # self.data3d = np.zeros(gtree.shape, dtype=np.int)
-        # self.voxelsize_mm = gtree.voxelsize_mm
-        # make comapatible with old system
-        self.tree_data = gtree.tree_data
-
-        self.tree_data_old = compatibility_processing(self.tree_data)
-
-    def add_cylinder(self, p1m, p2m, rad, id):
-        """
-        Funkce na vykresleni jednoho segmentu do 3D dat
-        """
-        pass
-
-    def finish(self):
-        self.polyData = gen_tree(self.tree_data_old)
-
-    def get_output(self):
-        return self.polyData
-
-    def save(self, outputfile):
-
-        writer = vtk.vtkPolyDataWriter()
-        writer.SetFileName(outputfile)
-        try:
-            writer.SetInputData(self.polyData)
-        except:
-            logger.warning("old vtk is used")
-            writer.SetInput(self.polyData)
-        writer.Write()
-
-    def show(self):
-        logger.info("there is no show implemented")
+# class VTKTreeGenerator:
+#     pass
+#     """
+#     This generator is called by generateTree() function as a general form.
+#     Other similar generator is used for generating LAR outputs.
+#     """
+#     def __init__(self, gtree):
+#         # self.shape = gtree.shape
+#         # self.data3d = np.zeros(gtree.shape, dtype=np.int)
+#         # self.voxelsize_mm = gtree.voxelsize_mm
+#         # make comapatible with old system
+#         self.tree_data = gtree.tree_data
+#
+#         self.tree_data_old = compatibility_processing(self.tree_data)
+#
+#     def add_cylinder(self, p1m, p2m, rad, id):
+#         """
+#         Funkce na vykresleni jednoho segmentu do 3D dat
+#         """
+#         pass
+#
+#     def finish(self):
+#         self.polyData = gen_tree(self.tree_data_old)
+#
+#     def get_output(self):
+#         return self.polyData
+#
+#     def save(self, outputfile):
+#
+#         writer = vtk.vtkPolyDataWriter()
+#         writer.SetFileName(outputfile)
+#         try:
+#             writer.SetInputData(self.polyData)
+#         except:
+#             logger.warning("old vtk is used")
+#             writer.SetInput(self.polyData)
+#         writer.Write()
+#
+#     def show(self):
+#         logger.info("there is no show implemented")
 # old interface
 
 
