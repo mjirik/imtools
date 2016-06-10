@@ -5,6 +5,14 @@ python:
   # - "3.2"
   # - "3.3"
   # - "3.4"
+# install new cmake
+addons:
+  apt:
+    packages:
+      - cmake
+    sources:
+      - kalakris-cmake
+
 virtualenv:
   system_site_packages: true
 before_install:
