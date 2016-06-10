@@ -50,6 +50,7 @@ requirements:
     - pyyaml
     - matplotlib
     - vtk
+    - skelet3d >=1.5.3
 #    - opencv
 
 test:
