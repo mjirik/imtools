@@ -50,9 +50,9 @@ class TubeTreeTest(unittest.TestCase):
         import skelet3d.skeleton_analyser
         import shutil
 
-        fn_out = 'tree.vkt'
+        fn_out = 'tree.vtk'
         if os.path.exists(fn_out):
-            shutil.rmtree(fn_out)
+            os.remove(fn_out)
 
         volume_data = np.zeros([3, 7, 9], dtype=np.int)
         volume_data [:, :, 1:3] = 1
