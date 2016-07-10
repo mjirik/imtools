@@ -458,7 +458,7 @@ def getPriorityObjects(data, nObj=1, seeds=None, debug=False):
             if debug:
                 logger.debug(str(label - 1) + ': ' + str(returning))
 
-        if returning == None:
+        if returning is None:
             logger.info(
                 'Zadna validni olabelovana data! (DEBUG: returning == None)')
 

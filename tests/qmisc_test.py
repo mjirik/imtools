@@ -142,10 +142,21 @@ class QmiscTest(unittest.TestCase):
 
     def test_getVersionString(self):
         """
+        getVersionString is not used anymore
         """
+
+        vfn = "../__VERSION__"
+        existed = False
+        if not os.path.exists(vfn):
+            with open(vfn, 'a') as the_file:
+                the_file.write('1.1.1\n')
+            existed = False
+
         verstr = qmisc.getVersionString()
 
         self.assertTrue(type(verstr) == str)
+        if existed:
+            os.remove(vfn)
 
     def test_resize_to_shape(self):
 
