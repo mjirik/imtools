@@ -1139,6 +1139,8 @@ def sliding_window_3d(image, step_size, window_size, mask=None, only_whole=True,
     :param only_whole: if True - produces only windows of the given window_size
     :return: generator that produce upper left corner of the window, center of the window and the sliding window itself
     """
+    if not isinstance(step_size, tuple):
+        step_size = (step_size, step_size, step_size)
     if image.ndim == 2:
         image = np.expand_dims(image, 0)
         window_size = (1, window_size[0], window_size[1])
@@ -1147,11 +1149,11 @@ def sliding_window_3d(image, step_size, window_size, mask=None, only_whole=True,
     if mask is None:
         mask = np.ones(image.shape, dtype=np.bool)
     # slide a window across the image
-    for z in xrange(0, image.shape[0], step_size):
+    for z in xrange(0, image.shape[0], step_size[0]):
         # c_z = z + window_size[0] / 2.
-        for y in xrange(0, image.shape[1], step_size):
+        for y in xrange(0, image.shape[1], step_size[1]):
             # c_y = y + window_size[2] / 2.
-            for x in xrange(0, image.shape[2], step_size):
+            for x in xrange(0, image.shape[2], step_size[2]):
                 # c_x = x + window_size[1] / 2.
                 # if c_z < mask.shape[0] and c_x < mask.shape[2] and c_y < mask.shape[1] and mask[c_z, c_y, c_x]:
                 # yield the current window
