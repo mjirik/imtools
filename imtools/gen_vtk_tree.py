@@ -7,7 +7,58 @@ logger = logging.getLogger(__name__)
 import vtk
 import numpy as nm
 import yaml
+import argparse
 import sys
+import numpy as np
+import skelet3d
+import skelet3d.gt_vtk
+from skelet3d.gt_vtk import VTKTreeGenerator
+logger.warning("Module is moved to package skelet3d.gt_vtk. This placeholder will be removed in future")
+
+
+# new interface
+
+# class VTKTreeGenerator:
+#     pass
+#     """
+#     This generator is called by generateTree() function as a general form.
+#     Other similar generator is used for generating LAR outputs.
+#     """
+#     def __init__(self, gtree):
+#         # self.shape = gtree.shape
+#         # self.data3d = np.zeros(gtree.shape, dtype=np.int)
+#         # self.voxelsize_mm = gtree.voxelsize_mm
+#         # make comapatible with old system
+#         self.tree_data = gtree.tree_data
+#
+#         self.tree_data_old = compatibility_processing(self.tree_data)
+#
+#     def add_cylinder(self, p1m, p2m, rad, id):
+#         """
+#         Funkce na vykresleni jednoho segmentu do 3D dat
+#         """
+#         pass
+#
+#     def finish(self):
+#         self.polyData = gen_tree(self.tree_data_old)
+#
+#     def get_output(self):
+#         return self.polyData
+#
+#     def save(self, outputfile):
+#
+#         writer = vtk.vtkPolyDataWriter()
+#         writer.SetFileName(outputfile)
+#         try:
+#             writer.SetInputData(self.polyData)
+#         except:
+#             logger.warning("old vtk is used")
+#             writer.SetInput(self.polyData)
+#         writer.Write()
+#
+#     def show(self):
+#         logger.info("there is no show implemented")
+# old interface
 
 
 def get_cylinder(upper, height, radius,
@@ -47,15 +98,26 @@ def get_cylinder(upper, height, radius,
     tl.Translate(upper)
 
     tr1a = vtk.vtkTransformFilter()
-    tr1a.SetInput(src.GetOutput())
+    if "SetInputConnection" in dir(tr1a):
+        tr1a.SetInputConnection(src.GetOutputPort())
+    else:
+        tr1a.SetInput(src.GetOutput())
     tr1a.SetTransform(rot1)
 
     tr1b = vtk.vtkTransformFilter()
-    tr1b.SetInput(tr1a.GetOutput())
+    if "SetInputConnection" in dir(tr1b):
+        tr1b.SetInputConnection(tr1a.GetOutputPort())
+    else:
+        tr1b.SetInput(tr1a.GetOutput())
+    # tr1b.SetInput(tr1a.GetOutput())
     tr1b.SetTransform(rot2)
 
     tr2 = vtk.vtkTransformFilter()
-    tr2.SetInput(tr1b.GetOutput())
+    if "SetInputConnection" in dir(tr2):
+        tr2.SetInputConnection(tr1b.GetOutputPort())
+    else:
+        tr2.SetInput(tr1b.GetOutput())
+    # tr2.SetInput(tr1b.GetOutput())
     tr2.SetTransform(tl)
 
     tr2.Update()
@@ -96,7 +158,7 @@ def gen_tree(tree_data):
     return polyData
 
 
-def process_tree(indata):
+def compatibility_processing(indata):
     scale = 1e-3
     scale = 1
 
@@ -132,41 +194,103 @@ def process_tree(indata):
 
     return outdata
 
-
-def main():
-    logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
-    ch = logging.StreamHandler()
-    logger.addHandler(ch)
-
-    infile = sys.argv[1]
-    if len(sys.argv) >= 3:
-        outfile = sys.argv[2]
-
-    else:
-        outfile = 'output.vtk'
-
-    yaml_file = open(infile, 'r')
-    tree_raw_data = yaml.load(yaml_file)
-
+def fix_tree_structure(tree_raw_data):
     if 'graph' in tree_raw_data:
         trees = tree_raw_data['graph']
     else:
         trees = tree_raw_data['Graph']
+    return trees
+
+def vt_file_2_vtk_file(infile, outfile, text_label=None):
+    """
+    From vessel_tree.yaml to output.vtk
+
+    :param vessel_tree:  vt structure
+    :param outfile: filename with .vtk extension
+    :param text_label: text label like 'porta' or 'hepatic_veins'
+    :return:
+
+    """
+    yaml_file = open(infile, 'r')
+    tree_raw_data = yaml.load(yaml_file)
+    vt2vtk_file(tree_raw_data, outfile, text_label)
+
+
+
+def vt2vtk_file(vessel_tree, outfile, text_label=None):
+    """
+    vessel_tree structure
+    :param vessel_tree:  vt structure
+    :param outfile: filename with .vtk extension
+    :param text_label: text label like 'porta' or 'hepatic_veins'
+    :return:
+    """
+    trees = fix_tree_structure(vessel_tree)
 
     tkeys = trees.keys()
+    if text_label is None:
+        text_label = tkeys[0]
 
-    tree_data = process_tree(trees[tkeys[0]])
-    # try:
-    #     trees = process_tree(tree_raw_data['graph']['porta'])
-    # except:
-    #     = process_tree(tree_raw_data['Graph']['porta'])
+    tree_data = compatibility_processing(trees[text_label])
     polyData = gen_tree(tree_data)
 
     writer = vtk.vtkPolyDataWriter()
     writer.SetFileName(outfile)
-    writer.SetInput(polyData)
+    try:
+        writer.SetInputData(polyData)
+    except:
+        logger.warning("old vtk is used")
+        writer.SetInput(polyData)
     writer.Write()
+
+
+def main():
+    logger = logging.getLogger()
+
+    logger.setLevel(logging.DEBUG)
+    ch = logging.StreamHandler()
+    logger.addHandler(ch)
+
+    # create file handler which logs even debug messages
+    # fh = logging.FileHandler('log.txt')
+    # fh.setLevel(logging.DEBUG)
+    # formatter = logging.Formatter(
+    #     '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    # fh.setFormatter(formatter)
+    # logger.addHandler(fh)
+    # logger.debug('start')
+
+    # input parser
+    parser = argparse.ArgumentParser(
+        description=__doc__
+    )
+    parser.add_argument(
+        'inputfile',
+        default=None,
+        help='input file'
+    )
+    parser.add_argument(
+        'outputfile',
+        default='output.vtk',
+        nargs='?',
+        help='output file'
+    )
+    parser.add_argument(
+        '-l','--label',
+        default=None,
+        help='text label of vessel tree. f.e. "porta" or "hepatic_veins". \
+        First label is used if it is set to None'
+    )
+    parser.add_argument(
+        '-d', '--debug', action='store_true',
+        help='Debug mode')
+    args = parser.parse_args()
+
+    if args.debug:
+        ch.setLevel(logging.DEBUG)
+
+    vt_file_2_vtk_file(args.inputfile, args.outputfile, args.label)
+
 
 if __name__ == "__main__":
     main()

@@ -2,37 +2,65 @@
 # -*- coding: utf-8 -*-
 
 # import funkcí z jiného adresáře
-import unittest
-import numpy as np
-import os
 import os.path
-from nose.plugins.attrib import attr
+
 path_to_script = os.path.dirname(os.path.abspath(__file__))
+import unittest
+from nose.plugins.attrib import attr
+import numpy as np
 
+import logging
+logger = logging.getLogger(__name__)
 
-
-
-# from imtools import qmisc
-# from imtools import misc
 from imtools.tree_processing import TreeGenerator
+import imtools.surface_measurement as sm
 
 
-#
+def join_sdp(datadir):
 
-class SurfaceTest(unittest.TestCase):
-    interactivetTest = False
-    # interactivetTest = True
+    return os.path.join(path_to_script, '../sample_data', datadir)
+
+class HistologyTest(unittest.TestCase):
+    interactiveTests = False
+
+    @attr("LAR")
+    def test_vessel_tree_lar(self):
+        import imtools.gt_lar
+        tvg = TreeGenerator(imtools.gt_lar.GTLar)
+        yaml_path = os.path.join(path_to_script, "./hist_stats_test.yaml")
+        tvg.importFromYaml(yaml_path)
+        tvg.voxelsize_mm = [1, 1, 1]
+        tvg.shape = [100, 100, 100]
+        output = tvg.generateTree() # noqa
+        if self.interactiveTests:
+            tvg.show()
+
+
+    def test_import_new_vt_format(self):
+
+        tvg = TreeGenerator()
+        yaml_path = os.path.join(path_to_script, "vt_biodur.yaml")
+        tvg.importFromYaml(yaml_path)
+        tvg.voxelsize_mm = [1, 1, 1]
+        tvg.shape = [150, 150, 150]
+        data3d = tvg.generateTree()
+
+    def test_test_export_to_esofspy(self):
+        """
+        tests export function
+        """
+
+        import imtools.vesseltree_export as vt
+        yaml_input = os.path.join(path_to_script, "vt_biodur.yaml")
+        yaml_output = os.path.join(path_to_script, "delme_esofspy.txt")
+        vt.vt2esofspy(yaml_input, yaml_output)
+
 
     @attr("actual")
     def test_surface_density_gensei_data(self):
-        import imtools.surface_measurement as sm
         import io3d
-        import imtools.sample_data
-        data_path = 'sample_data/gensei_slices/'
-        if not os.path.exists(data_path):
-            imtools.sample_data.get_sample_data("gensei_slices", 'sample_data/')
         dr = io3d.datareader.DataReader()
-        datap = dr.Get3DData(datapath=data_path,
+        datap = dr.Get3DData(join_sdp('gensei_slices/'),
                              dataplus_format=True)
         # total object volume fraction:           0.081000
         # total object volume [(mm)^3]:           81.000000
@@ -49,16 +77,15 @@ class SurfaceTest(unittest.TestCase):
         self.assertLess(Sv, 0.4)
 
     def test_surface_measurement(self):
-        import imtools.surface_measurement as sm
 
-        # box
+# box
         data1 = np.zeros([30, 30, 30])
         voxelsize_mm = [1, 1, 1]
         data1[10:20, 10:20, 10:20] = 1
 
         Sv1 = sm.surface_density(data1, voxelsize_mm)
 
-        # box without small box on corner
+# box without small box on corner
         data2 = np.zeros([30, 30, 30])
         voxelsize_mm = [1, 1, 1]
         data2[10:20, 10:20, 10:20] = 1
@@ -67,7 +94,7 @@ class SurfaceTest(unittest.TestCase):
 
         self.assertEqual(Sv2, Sv1)
 
-        # box with hole in one edge
+# box with hole in one edge
         data3 = np.zeros([30, 30, 30])
         voxelsize_mm = [1, 1, 1]
         data3[10:20, 10:20, 10:20] = 1
@@ -79,15 +106,14 @@ class SurfaceTest(unittest.TestCase):
         # ed.show()
 
     def test_surface_measurement_voxelsize_mm(self):
-        import imtools.surface_measurement as sm
         import scipy
 
-        # data 1
+# data 1
         data1 = np.zeros([30, 40, 55])
         voxelsize_mm1 = [1, 1, 1]
         data1[10:20, 10:20, 10:20] = 1
         data1[13:18, 13:18, 10:15] = 0
-        # data 2
+# data 2
         voxelsize_mm2 = [0.1, 0.2, 0.3]
         data2 = scipy.ndimage.interpolation.zoom(
             data1,
@@ -110,7 +136,6 @@ class SurfaceTest(unittest.TestCase):
         Test of AOI. In Sv2 is AOI half in compare with Sv1.
         Sv1 should be half of Sv2
         """
-        import imtools.surface_measurement as sm
         data1 = np.zeros([30, 60, 60])
         aoi = np.zeros([30, 60, 60])
         aoi[:30, :60, :30] = 1
@@ -124,7 +149,6 @@ class SurfaceTest(unittest.TestCase):
         self.assertLess(2*Sv1, Sv2*1.1)
 
     def test_surface_measurement_find_edge(self):
-        import imtools.surface_measurement as sm
         tvg = TreeGenerator()
         yaml_path = os.path.join(path_to_script, "./hist_stats_test.yaml")
         tvg.importFromYaml(yaml_path)
@@ -147,6 +171,7 @@ class SurfaceTest(unittest.TestCase):
         # import sed3
         # ed = sed3.sed3(im_edg)
         # ed.show()
+
 
 if __name__ == "__main__":
     unittest.main()

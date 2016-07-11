@@ -8,15 +8,13 @@ import os.path
 from nose.plugins.attrib import attr
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 import unittest
-
-
 import numpy as np
-
+import sys
 
 # from imtools import qmisc
 # from imtools import misc
-from imtools.gen_volume_tree import TreeGenerator
-
+from imtools.tree_processing import TreeGenerator
+import io3d
 
 #
 
@@ -35,6 +33,14 @@ class TubeTreeTest(unittest.TestCase):
         output = tvg.generateTree() # noqa
         if self.interactiveTests:
             tvg.show()
+
+    def test_vessel_tree_vtk(self):
+        tvg = TreeGenerator('vtk')
+        yaml_path = os.path.join(path_to_script, "./hist_stats_test.yaml")
+        tvg.importFromYaml(yaml_path)
+        tvg.voxelsize_mm = [1, 1, 1]
+        tvg.shape = [100, 100, 100]
+        output = tvg.generateTree() # noqa
 
     def test_import_new_vt_format(self):
 

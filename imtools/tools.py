@@ -5,8 +5,6 @@ import matplotlib.patches as matpat
 import os
 import sys
 import glob
-import dicom
-import cv2
 
 import skimage.exposure as skiexp
 import skimage.measure as skimea
@@ -188,6 +186,7 @@ def change_slice_index(data):
 
 
 def read_data(dcmdir, indices=None, wildcard='*.dcm', type=np.int16):
+    import dicom
 
     dcmlist = []
     for infile in glob.glob(os.path.join(dcmdir, wildcard)):
@@ -224,7 +223,7 @@ def read_data(dcmdir, indices=None, wildcard='*.dcm', type=np.int16):
     return data3d
 
 
-def windowing(data, level=50, width=350, sub1024=False, sliceId=2):
+def windowing(data, level=50, width=350, sub1024=False, sliceId=2, out_range=(0, 255)):
     #srovnani na standardni skalu = odecteni 1024HU
     if sub1024:
         data -= 1024
@@ -243,12 +242,13 @@ def windowing(data, level=50, width=350, sub1024=False, sliceId=2):
                 #rescalovani intenzity tak, aby skala <minHU, maxHU> odpovidala intervalu <0,255>
                 data[idx, :, :] = skiexp.rescale_intensity(data[idx, :, :], in_range=(minHU, maxHU), out_range=(0, 255))
     else:
-        data = skiexp.rescale_intensity(data, in_range=(minHU, maxHU), out_range=(0, 255))
+        data = skiexp.rescale_intensity(data, in_range=(minHU, maxHU), out_range=out_range)
 
     return data.astype(np.uint8)
 
 
 def smoothing(data, d=10, sigmaColor=10, sigmaSpace=10, sliceId=2):
+    import cv2
     if data.ndim == 3:
         if sliceId == 2:
             for idx in range(data.shape[2]):
@@ -315,8 +315,7 @@ def smoothing_gauss(data, sigma=1, pseudo_3D='True', sliceId=2):
     return data
 
 
-
-def analyse_histogram(data, roi=None, show=False, show_now=True, dens_min=20, dens_max=255, minT=0.95, maxT=1.05):
+def analyse_histogram(data, roi=None, dens_min=20, dens_max=255, minT=0.8, maxT=1.2, show=False, show_now=True):
     if roi == None:
         #roi = np.ones(data.shape, dtype=np.bool)
         roi = np.logical_and(data >= dens_min, data <= dens_max)
@@ -334,8 +333,8 @@ def analyse_histogram(data, roi=None, show=False, show_now=True, dens_min=20, de
     class1TMin = bins[histTIdxs[0]]
     class1TMax = bins[histTIdxs[-1]]
 
-    liver = data * (roi > 0)
-    class1 = np.where( (liver >= class1TMin) * (liver <= class1TMax), 1, 0)
+    main = data * (roi > 0)
+    class1 = np.where((main >= class1TMin) * (main <= class1TMax), 1, 0)
 
     if show:
         plt.figure()
@@ -346,15 +345,69 @@ def analyse_histogram(data, roi=None, show=False, show_now=True, dens_min=20, de
         plt.plot(bins[histTIdxs], hist[histTIdxs], 'r')
         plt.plot(bins[histTIdxs[0]], hist[histTIdxs[0]], 'rx')
         plt.plot(bins[histTIdxs[-1]], hist[histTIdxs[-1]], 'rx')
-        plt.title('Histogram of liver density and its class1 = maximal peak (red dot) +-5% of its density (red line).')
+        plt.title('Histogram and class1 = max peak (red dot) +-5% of its density (red lines).')
         if show_now:
             plt.show()
 
     return class1
 
 
+def dominant_class(data, roi=None, dens_min=0, dens_max=255, peakT=0.8, show=False, show_now=True):
+    if roi == None:
+        #roi = np.ones(data.shape, dtype=np.bool)
+        if isinstance(data.dtype, float):
+            dens_min /= 255.
+            dens_max /= 255.
+        roi = np.logical_and(data >= dens_min, data <= dens_max)
+
+    voxels = data[np.nonzero(roi)]
+    hist, bins = skiexp.histogram(voxels)
+    max_peak = hist.max()
+    max_peak_idx = hist.argmax()
+
+    l_idx = max_peak_idx
+    while hist[l_idx] > (max_peak * peakT):
+        l_idx -= 1
+
+    r_idx = max_peak_idx
+    while hist[r_idx] > (max_peak * peakT):
+        r_idx += 1
+
+    dom_l = bins[l_idx]
+    dom_r = bins[r_idx]
+
+    main = data * (roi > 0)
+    class1 = np.where((main >= dom_l) * (main <= dom_r), 1, 0)
+
+    std = data[np.nonzero(class1)].std()
+    std = 10
+    rv = scista.norm(loc=max_peak_idx, scale=std)
+
+    if show:
+        plt.figure()
+        plt.plot(bins, hist)
+        plt.fill_between(bins, hist, color='b')
+        plt.hold(True)
+
+        # pdf = rv.pdf(bins)
+        # plt.figure()
+        # plt.plot(bins, pdf * max_peak / pdf.max(), 'm')
+        # plt.show()
+
+        plt.plot(bins[max_peak_idx], hist[max_peak_idx], 'ro')
+        plt.plot([bins[l_idx], bins[l_idx]], [0, hist[max_peak_idx]], 'r-')
+        plt.plot([bins[r_idx], bins[r_idx]], [0, hist[max_peak_idx]], 'r-')
+        plt.plot(bins[l_idx], hist[l_idx], 'rx')
+        plt.plot(bins[r_idx], hist[r_idx], 'rx')
+        plt.title('Histogram and dominant_class.')
+        if show_now:
+            plt.show()
+
+    return class1, rv
+
+
 def intensity_probability(data, std=20, mask=None, dens_min=10, dens_max=255):
-    if mask == None:
+    if mask is None:
         # roi = np.logical_and(data >= dens_min, data <= dens_max)
         roi = np.ones(data.shape, dtype=np.bool)
     voxels = data[np.nonzero(mask)]
@@ -369,7 +422,7 @@ def intensity_probability(data, std=20, mask=None, dens_min=10, dens_max=255):
 
     prb = scista.norm(loc=mu, scale=std)
 
-    print('liver pdf: mu = %i, std = %i'%(mu, std))
+    print('main pdf: mu = %i, std = %i' % (mu, std))
 
     # plt.figure()
     # plt.plot(bins, hist)
@@ -461,6 +514,7 @@ def eroding3D(data, selem=None, selem_size=3, slicewise=False, sliceId=0):
 
 
 def resize3D(data, scale, sliceId=2, method='cv2'):
+    import cv2
     if sliceId == 2:
         n_slices = data.shape[2]
         # new_shape = cv2.resize(data[:,:,0], None, fx=scale, fy=scale).shape
@@ -562,6 +616,7 @@ def crop_to_bbox(im, mask):
 
 
 def slics_3D(im, pseudo_3D=True, n_segments=100, get_slicewise=False):
+    import cv2
     if im.ndim != 3:
         raise Exception('3D image is needed.')
 
@@ -1029,7 +1084,10 @@ def arange_figs(imgs, tits=None, max_r=3, max_c=5, same_range=False, colorbar=Fa
         plt.show()
 
 
-def resize(image, width=None, height=None, inter=cv2.INTER_AREA):
+def resize(image, width=None, height=None, inter=None):
+    import cv2
+    if inter is None:
+        inter=cv2.INTER_AREA
     # initialize the dimensions of the image to be resized and
     # grab the image size
     dim = None
@@ -1061,7 +1119,7 @@ def resize(image, width=None, height=None, inter=cv2.INTER_AREA):
     return resized
 
 
-def pyramid(image, scale=2, min_size=(30, 30), inter=cv2.INTER_AREA):
+def pyramid(image, scale=2, min_size=(30, 30), inter=None):
     """
     Creates generator of image pyramid.
     :param image: input image
@@ -1069,8 +1127,11 @@ def pyramid(image, scale=2, min_size=(30, 30), inter=cv2.INTER_AREA):
     :param min_size: minimum required width and height of the layer
     :return: generator of the image pyramid
     """
-    # yield the original image
     yield image
+    import cv2
+    if inter is None:
+        inter=cv2.INTER_AREA
+    # yield the original image
 
     # keep looping over the pyramid
     while True:
@@ -1087,7 +1148,11 @@ def pyramid(image, scale=2, min_size=(30, 30), inter=cv2.INTER_AREA):
         yield image
 
 
-def pyramid_down(image, scale=2, min_size=(30, 30), inter=cv2.INTER_AREA, smooth=False):
+def pyramid_down(image, scale=2, min_size=(30, 30), inter=None, smooth=False):
+    import cv2
+    if inter is None:
+        inter=cv2.INTER_AREA
+
     w = int(image.shape[1] / scale)
     img = resize(image, width=w, inter=inter)
     if smooth:
@@ -1207,3 +1272,36 @@ def sigmoid(image, mask=None, a=0.1, c=20, sigm_t = 0.2):
     im_sigm *= (im_sigm > sigm_t)
 
     return im_sigm
+
+
+def split_to_tiles(img, columns, rows):
+    """
+    Split an image into a specified number of tiles.
+    Args:
+       img (ndarray):  The image to split.
+       number_tiles (int):  The number of tiles required.
+    Returns:
+        Tuple of tiles
+    """
+    # validate_image(img, number_tiles)
+
+    im_w, im_h = img.shape
+    # columns, rows = calc_columns_rows(number_tiles)
+    # extras = (columns * rows) - number_tiles
+    tile_w, tile_h = int(np.floor(im_w / columns)), int(np.floor(im_h / rows))
+
+    tiles = []
+    # number = 1
+    for pos_y in range(0, im_h - rows, tile_h): # -rows for rounding error.
+        for pos_x in range(0, im_w - columns, tile_w): # as above.
+            roi = (pos_x, pos_y, pos_x + tile_w, pos_y + tile_h)
+            # image = img.crop(area)
+            tile = img[roi[1]:roi[3], roi[0]:roi[2]]
+            # position = (int(floor(pos_x / tile_w)) + 1,
+            #             int(floor(pos_y / tile_h)) + 1)
+            # coords = (pos_x, pos_y)
+            # tile = Tile(image, number, position, coords)
+            tiles.append(tile)
+            # number += 1
+
+    return tuple(tiles)

@@ -10,3 +10,4 @@ SimpleITK
 scikit-learn
 scikit-image
 opencv
+skelet3d
