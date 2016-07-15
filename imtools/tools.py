@@ -252,10 +252,10 @@ def smoothing(data, d=10, sigmaColor=10, sigmaSpace=10, sliceId=2):
     if data.ndim == 3:
         if sliceId == 2:
             for idx in range(data.shape[2]):
-                data[:, :, idx] = cv2.bilateralFilter( data[:, :, idx], d=d, sigmaColor=sigmaColor, sigmaSpace=sigmaSpace )
+                data[:, :, idx] = cv2.bilateralFilter(data[:, :, idx], d=d, sigmaColor=sigmaColor, sigmaSpace=sigmaSpace)
         elif sliceId == 0:
             for idx in range(data.shape[0]):
-                data[idx, :, :] = cv2.bilateralFilter( data[idx, :, :], d=d, sigmaColor=sigmaColor, sigmaSpace=sigmaSpace )
+                data[idx, :, :] = cv2.bilateralFilter(data[idx, :, :], d=d, sigmaColor=sigmaColor, sigmaSpace=sigmaSpace)
     else:
         data = cv2.bilateralFilter(data, d=d, sigmaColor=sigmaColor, sigmaSpace=sigmaSpace)
     return data
@@ -366,11 +366,11 @@ def dominant_class(data, roi=None, dens_min=0, dens_max=255, peakT=0.8, show=Fal
     max_peak_idx = hist.argmax()
 
     l_idx = max_peak_idx
-    while hist[l_idx] > (max_peak * peakT):
+    while (hist[l_idx] > (max_peak * peakT)) and (l_idx > 0):
         l_idx -= 1
 
     r_idx = max_peak_idx
-    while hist[r_idx] > (max_peak * peakT):
+    while (hist[r_idx] > (max_peak * peakT)) and (r_idx < len(hist) - 1):
         r_idx += 1
 
     dom_l = bins[l_idx]
