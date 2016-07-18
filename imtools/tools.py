@@ -531,7 +531,10 @@ def resize3D(data, scale, sliceId=2, method='cv2'):
         n_slices = data.shape[0]
         # new_shape = cv2.resize(data[0,:,:], None, fx=scale, fy=scale).shape
         # new_shape = skitra.rescale(data[0,:,:], scale).shape
-        new_shape =  scindiint.zoom(data[0,:,:], scale).shape
+        if method == 'cv2':
+            new_shape = cv2.resize(data[0,:,:], (0,0),  fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST).shape
+        else:
+            new_shape =  scindiint.zoom(data[0,:,:], scale).shape
         new_data = np.zeros(np.hstack((n_slices, new_shape)), dtype=np.int)
         for i in range(n_slices):
             # new_data[i,:,:] = cv2.resize(data[i,:,:], None, fx=scale, fy=scale)
@@ -1292,8 +1295,8 @@ def split_to_tiles(img, columns, rows):
 
     tiles = []
     # number = 1
-    for pos_y in range(0, im_h - rows, tile_h): # -rows for rounding error.
-        for pos_x in range(0, im_w - columns, tile_w): # as above.
+    for pos_y in range(0, im_h - rows, tile_h):  # -rows for rounding error.
+        for pos_x in range(0, im_w - columns, tile_w):  # as above.
             roi = (pos_x, pos_y, pos_x + tile_w, pos_y + tile_h)
             # image = img.crop(area)
             tile = img[roi[1]:roi[3], roi[0]:roi[2]]
@@ -1305,3 +1308,99 @@ def split_to_tiles(img, columns, rows):
             # number += 1
 
     return tuple(tiles)
+
+
+def make_neighborhood_matrix(im, nghood=4, roi=None):
+    im = np.array(im, ndmin=3)
+    n_slices, n_rows, n_cols = im.shape
+
+    # initialize ROI
+    if roi is None:
+        roi = np.ones(im.shape, dtype=np.bool)
+
+    # if len(im.shape) == 3:
+    #     nslices = im.shape[2]
+    # else:
+    #     nslices = 1
+    npts = n_rows * n_cols * n_slices
+    # print 'start'
+    if nghood == 8:
+        nr = np.array([-1, -1, -1, 0, 0, 1, 1, 1])
+        nc = np.array([-1, 0, 1, -1, 1, -1, 0, 1])
+        ns = np.zeros(nghood)
+    elif nghood == 4:
+        nr = np.array([-1, 0, 0, 1])
+        nc = np.array([0, -1, 1, 0])
+        ns = np.zeros(nghood, dtype=np.int32)
+    elif nghood == 26:
+        nr_center = np.array([-1, -1, -1, 0, 0, 1, 1, 1])
+        nc_center = np.array([-1, 0, 1, -1, 1, -1, 0, 1])
+        nr_border = np.zeros([-1, -1, -1, 0, 0, 0, 1, 1, 1])
+        nc_border = np.array([-1, 0, 1, -1, 0, 1, -1, 0, 1])
+        nr = np.array(np.hstack((nr_border, nr_center, nr_border)))
+        nc = np.array(np.hstack((nc_border, nc_center, nc_border)))
+        ns = np.array(np.hstack((-np.ones_like(nr_border), np.zeros_like(nr_center), np.ones_like(nr_border))))
+    elif nghood == 6:
+        nr_center = np.array([-1, 0, 0, 1])
+        nc_center = np.array([0, -1, 1, 0])
+        nr_border = np.array([0])
+        nc_border = np.array([0])
+        nr = np.array(np.hstack((nr_border, nr_center, nr_border)))
+        nc = np.array(np.hstack((nc_border, nc_center, nc_border)))
+        ns = np.array(np.hstack((-np.ones_like(nr_border), np.zeros_like(nr_center), np.ones_like(nr_border))))
+    else:
+        print 'Wrong neighborhood passed. Exiting.'
+        return None
+
+    lind = np.ravel_multi_index(np.indices(im.shape), im.shape)  # linear indices in array form
+    lindv = np.reshape(lind, npts)  # linear indices in vector form
+    coordsv = np.array(np.unravel_index(lindv, im.shape))  # coords in array [dim * nvoxels]
+
+    neighbors_m = np.zeros((nghood, npts))
+    for i in range(npts):
+        s, r, c = tuple(coordsv[:, i])
+        # if point doesn't lie in the roi then continue with another one
+        if not roi[s, r, c]:
+            continue
+        for nghb in range(nghood):
+            rn = r + nr[nghb]
+            cn = c + nc[nghb]
+            sn = s + ns[nghb]
+            row_ko = rn < 0 or rn > (n_rows - 1)
+            col_ko = cn < 0 or cn > (n_cols - 1)
+            slice_ko = sn < 0 or sn > (n_slices - 1)
+            if row_ko or col_ko or slice_ko or not roi[sn, rn, cn]:
+                neighbors_m[nghb, i] = np.NaN
+            else:
+                indexN = np.ravel_multi_index((sn, rn, cn), im.shape)
+                neighbors_m[nghb, i] = indexN
+
+    return neighbors_m
+
+
+def graycomatrix_3D(data, connectivity=1):
+    ndims = data.ndim
+    if ndims == 2:
+        if connectivity == 1:
+            nghood = 4
+        else:
+            nghood = 8
+    elif ndims == 3:
+        if connectivity == 1:
+            nghood = 6
+        else:
+            nghood = 26
+    else:
+        raise AttributeError('Unsupported image dimension.')
+
+    nghbm = make_neighborhood_matrix(data, nghood=nghood).T
+
+    # n_rows, n_cols = data.shape
+    glcm = np.zeros((256, 256), dtype=np.uint32)
+    data_v = data.flatten()
+    for p, nghbs in enumerate(nghbm):
+        for n in nghbs:
+            if not np.isnan(n):
+                glcm[data_v[p], data_v[n]] += 1
+
+    return glcm
