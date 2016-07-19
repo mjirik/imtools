@@ -25,6 +25,8 @@ import scipy.ndimage.interpolation as scindiint
 import cPickle as pickle
 import gzip
 
+import cv2
+
 try:
     import data_viewers
 except ImportError:
@@ -514,35 +516,41 @@ def eroding3D(data, selem=None, selem_size=3, slicewise=False, sliceId=0):
 
 
 def resize3D(data, scale, sliceId=2, method='cv2'):
-    import cv2
-    if sliceId == 2:
-        n_slices = data.shape[2]
-        # new_shape = cv2.resize(data[:,:,0], None, fx=scale, fy=scale).shape
-        new_shape = scindiint.zoom(data[:,:,0], scale).shape
-        new_data = np.zeros(np.hstack((new_shape,n_slices)), dtype=np.int)
-        for i in range(n_slices):
-            # new_data[:,:,i] = cv2.resize(data[:,:,i], None, fx=scale, fy=scale)
-            # new_data[:,:,i] = (255 * skitra.rescale(data[:,:,0], scale)).astype(np.int)
-            if method == 'cv2':
-                new_data[:,:,i] = cv2.resize(data[:,:,i], (0,0),  fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
-            else:
-                new_data[:,:,i] = scindiint.zoom(data[:,:,i], scale)
-    elif sliceId == 0:
-        n_slices = data.shape[0]
-        # new_shape = cv2.resize(data[0,:,:], None, fx=scale, fy=scale).shape
-        # new_shape = skitra.rescale(data[0,:,:], scale).shape
+    if data.ndim == 2:
         if method == 'cv2':
-            new_shape = cv2.resize(data[0,:,:], (0,0),  fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST).shape
+            new_data = cv2.resize(data, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
         else:
-            new_shape =  scindiint.zoom(data[0,:,:], scale).shape
-        new_data = np.zeros(np.hstack((n_slices, new_shape)), dtype=np.int)
-        for i in range(n_slices):
-            # new_data[i,:,:] = cv2.resize(data[i,:,:], None, fx=scale, fy=scale)
-            # new_data[i,:,:] = (255 * skitra.rescale(data[i,:,:], scale)).astype(np.int)
+            new_data = scindiint.zoom(data, scale)
+
+    else:
+        if sliceId == 2:
+            n_slices = data.shape[2]
+            # new_shape = cv2.resize(data[:,:,0], None, fx=scale, fy=scale).shape
+            new_shape = scindiint.zoom(data[:,:,0], scale).shape
+            new_data = np.zeros(np.hstack((new_shape,n_slices)), dtype=np.int)
+            for i in range(n_slices):
+                # new_data[:,:,i] = cv2.resize(data[:,:,i], None, fx=scale, fy=scale)
+                # new_data[:,:,i] = (255 * skitra.rescale(data[:,:,0], scale)).astype(np.int)
+                if method == 'cv2':
+                    new_data[:,:,i] = cv2.resize(data[:,:,i], (0,0),  fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
+                else:
+                    new_data[:,:,i] = scindiint.zoom(data[:,:,i], scale)
+        elif sliceId == 0:
+            n_slices = data.shape[0]
+            # new_shape = cv2.resize(data[0,:,:], None, fx=scale, fy=scale).shape
+            # new_shape = skitra.rescale(data[0,:,:], scale).shape
             if method == 'cv2':
-                new_data[i,:,:] = cv2.resize(data[i,:,:], (0,0),  fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
+                new_shape = cv2.resize(data[0,:,:], (0,0),  fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST).shape
             else:
-                new_data[i,:,:] = scindiint.zoom(data[i,:,:], scale)
+                new_shape =  scindiint.zoom(data[0,:,:], scale).shape
+            new_data = np.zeros(np.hstack((n_slices, new_shape)), dtype=np.int)
+            for i in range(n_slices):
+                # new_data[i,:,:] = cv2.resize(data[i,:,:], None, fx=scale, fy=scale)
+                # new_data[i,:,:] = (255 * skitra.rescale(data[i,:,:], scale)).astype(np.int)
+                if method == 'cv2':
+                    new_data[i,:,:] = cv2.resize(data[i,:,:], (0,0),  fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
+                else:
+                    new_data[i,:,:] = scindiint.zoom(data[i,:,:], scale)
     return new_data
 
 
