@@ -1,4 +1,7 @@
 __author__ = 'Ryba'
+
+from collections import namedtuple
+
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as matpat
@@ -15,12 +18,14 @@ import skimage.restoration as skires
 import skimage.segmentation as skiseg
 import skimage.feature as skifea
 import skimage.io as skiio
+import skimage.color as skicol
 from skimage.segmentation import mark_boundaries
 
 import scipy.stats as scista
 import scipy.ndimage.morphology as scindimor
 import scipy.ndimage.measurements as scindimea
 import scipy.ndimage.interpolation as scindiint
+import scipy.ndimage.filters as scindifil
 
 import cPickle as pickle
 import gzip
@@ -532,7 +537,7 @@ def resize3D(data, scale, sliceId=2, method='cv2'):
                 # new_data[:,:,i] = cv2.resize(data[:,:,i], None, fx=scale, fy=scale)
                 # new_data[:,:,i] = (255 * skitra.rescale(data[:,:,0], scale)).astype(np.int)
                 if method == 'cv2':
-                    new_data[:,:,i] = cv2.resize(data[:,:,i], (0,0),  fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
+                    new_data[:,:,i] = cv2.resize(data[:,:,i], (0,0), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
                 else:
                     new_data[:,:,i] = scindiint.zoom(data[:,:,i], scale)
         elif sliceId == 0:
@@ -540,7 +545,7 @@ def resize3D(data, scale, sliceId=2, method='cv2'):
             # new_shape = cv2.resize(data[0,:,:], None, fx=scale, fy=scale).shape
             # new_shape = skitra.rescale(data[0,:,:], scale).shape
             if method == 'cv2':
-                new_shape = cv2.resize(data[0,:,:], (0,0),  fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST).shape
+                new_shape = cv2.resize(data[0,:,:], (0,0), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST).shape
             else:
                 new_shape =  scindiint.zoom(data[0,:,:], scale).shape
             new_data = np.zeros(np.hstack((n_slices, new_shape)), dtype=np.int)
@@ -1275,6 +1280,22 @@ def fill_holes(data, slicewise=True, slice_id=0):
     return data_o
 
 
+def fill_holes_watch_borders(mask):
+    mask_ex = np.zeros([x + 2 for x in mask.shape], dtype=np.uint8)
+    if mask.ndim == 3:
+        for i, im in enumerate(mask):
+            mask_ex[i + 1, 1:-1, 1:-1] = im
+    else:
+        mask_ex[1:-1, 1:-1] = mask
+    mask_ex = skimor.remove_small_holes(mask_ex, min_size=0.1 * mask.sum(), connectivity=2)
+    if mask.ndim == 3:
+        mask_ex = mask_ex[1:-1, 1:-1, 1:-1]
+    else:
+        mask_ex = mask_ex[1:-1, 1:-1]
+
+    return mask_ex
+
+
 def sigmoid(image, mask=None, a=0.1, c=20, sigm_t = 0.2):
     if mask is None:
         mask = np.ones_like(image)
@@ -1412,3 +1433,281 @@ def graycomatrix_3D(data, connectivity=1):
                 glcm[data_v[p], data_v[n]] += 1
 
     return glcm
+
+
+def initialize_graycom(data_in, slice=None, distances=(1, ), scale=0.5, angles=(0, np.pi / 4, np.pi / 2, 3 * np.pi / 4),
+                       symmetric=False, c_t=5, show=False, show_now=True):
+    if scale != 1:
+        data = resize3D(data_in, scale, sliceId=0)
+    else:
+        data = data_in.copy()
+
+    # computing gray co-occurence matrix
+    print 'Computing gray co-occurence matrix ...',
+    if data.ndim == 2:
+        gcm = skifea.greycomatrix(data, distances, angles, symmetric=symmetric)
+        # summing over distances and directions
+        gcm = gcm.sum(axis=3).sum(axis=2)
+    else:
+        gcm = graycomatrix_3D(data, connectivity=1)
+    print 'done'
+
+    # plt.figure()
+    # plt.subplot(121), plt.imshow(gcm, 'jet', vmax=10 * gcm.mean())
+    # plt.subplot(122), plt.imshow(gcm2, 'jet', vmax=10 * gcm.mean())
+    # plt.show()
+
+    # thresholding graycomatrix (GCM)
+    thresh = c_t * np.mean(gcm)
+    gcm_t = gcm > thresh
+    gcm_to = skimor.binary_opening(gcm_t, selem=skimor.disk(3))
+    # gcm_to = skimor.binary_closing(gcm_t, selem=skimor.disk(3))
+    # gcm_to = skimor.binary_opening(gcm_to, selem=skimor.disk(3))
+
+    # plt.figure()
+    # plt.subplot(131), plt.imshow(gcm, 'jet', vmax=10 * gcm.mean())
+    # plt.subplot(132), plt.imshow(gcm_t)
+    # plt.subplot(133), plt.imshow(gcm_to)
+    # plt.show()
+
+    try:
+        blob = blob_from_gcm(gcm_to, data, slice)
+        # print 'first'
+    except:
+        gcm_to = skimor.binary_closing(gcm_t, selem=skimor.disk(3))
+        gcm_to = skimor.binary_opening(gcm_to, selem=skimor.disk(3))
+        blob = blob_from_gcm(gcm_to, data, slice)
+        # print 'second - different gcm processing'
+
+        # plt.figure()
+        # plt.subplot(131), plt.imshow(gcm, 'jet', vmax=10 * gcm.mean())
+        # plt.subplot(132), plt.imshow(gcm_t)
+        # plt.subplot(133), plt.imshow(gcm_to)
+        # plt.show()
+
+    # find peaks in the GCM and return them as random variables
+    # rvs = analyze_gcm(gcm_to)
+    #
+    # if slice is not None:
+    #     data = data[slice, ...]
+    #
+    # deriving seed points
+    # seeds = np.zeros(data.shape, dtype=np.uint8)
+    # best_probs = np.zeros(data.shape)  # assign the most probable label if more than one are possible
+    # for i, rv in enumerate(rvs):
+    #     probs = rv.pdf(data)
+    #     s = probs > probs.mean()  # probability threshold
+    #     s = fill_holes_watch_borders(s)
+    #     # s = skimor.binary_opening(s, selem=skimor.disk(3))
+    #     # plt.figure()
+    #     # plt.subplot(131), plt.imshow(s, 'gray')
+    #     # plt.subplot(132), plt.imshow(sfh, 'gray')
+    #     # plt.subplot(133), plt.imshow(sfh2, 'gray')
+    #     # plt.show()
+    #     s = np.where((probs * s) > (best_probs * s), i + 1, s)  # assign new label only if its probability is higher
+    #     best_probs = np.where(s, probs, best_probs)  # update best probs
+    #     seeds = np.where(s, i + 1, seeds)  # update seeds
+    #
+    # labs_f = scindifil.median_filter(seeds, size=3)
+    #
+    # # finding biggest blob - this would be our initialization
+    # adepts_lbl, n_labels = skimea.label(labs_f, connectivity=2, return_num=True)
+    # areas = [(adepts_lbl == l).sum() for l in range(1, n_labels + 1)]
+    # blob = adepts_lbl == (np.argmax(areas) + 1)
+
+    # hole filling - adding (and then removing) a capsule of zeros, otherwise it'd fill holes touching image borders
+    blob = fill_holes_watch_borders(blob)
+
+    if scale != 1:
+        blob = blob.astype(np.uint8)
+        if blob.ndim == 2:
+            blob = cv2.resize(blob, (data_in.shape[::-1]))
+        else:
+            for i, im in enumerate(blob):
+                blob[i, :, :] = cv2.resize(im, (data_in.shape[2], data_in.shape[1]))
+
+    # visualization
+    if show:
+        plt.figure()
+        plt.subplot(131), plt.imshow(gcm, 'gray', vmax=gcm.mean()), plt.title('gcm')
+        plt.subplot(132), plt.imshow(gcm_t, 'gray'), plt.title('thresholded')
+        plt.subplot(133), plt.imshow(gcm_to, 'gray'), plt.title('opened')
+
+        plt.figure()
+        plt.subplot(121), plt.imshow(data, 'gray', interpolation='nearest'), plt.title('input')
+        plt.subplot(122), plt.imshow(seeds, 'jet', interpolation='nearest'), plt.title('seeds')
+        divider = make_axes_locatable(plt.gca())
+        cax = divider.append_axes('right', size='5%', pad=0.05)
+        plt.colorbar(cax=cax, ticks=np.unique(seeds))
+
+        plt.figure()
+        plt.subplot(131), plt.imshow(data, 'gray'), plt.title('input')
+        plt.subplot(132), plt.imshow(labs_f, 'gray'), plt.title('labels')
+        plt.subplot(133), plt.imshow(blob, 'gray'), plt.title('init blob')
+
+        if show_now:
+            plt.show()
+
+    return data, blob
+
+
+def analyze_gcm(gcm, area_t=200, ecc_t=0.35):
+    labs_im = skimea.label(gcm, connectivity=2)
+
+    # plt.figure()
+    # plt.subplot(121), plt.imshow(gcm, 'gray', interpolation='nearest')
+    # plt.subplot(122), plt.imshow(labs_im, 'jet', interpolation='nearest')
+    # plt.show()
+
+    blobs = describe_blob(labs_im, area_t=area_t, ecc_t=ecc_t)
+    means = [np.array(b.centroid).mean() for b in blobs]
+    stds = 5 / np.array([b.eccentricity for b in blobs])
+
+    rvs = [scista.norm(m, s) for m, s in zip(means, stds)]
+
+    return rvs
+
+
+def blob_from_gcm(gcm, data, slice=None):
+    rvs = analyze_gcm(gcm)
+
+    if slice is not None:
+        data = data[slice, ...]
+
+    seeds = np.zeros(data.shape, dtype=np.uint8)
+    best_probs = np.zeros(data.shape)  # assign the most probable label if more than one are possible
+    for i, rv in enumerate(rvs):
+        probs = rv.pdf(data)
+        s = probs > probs.mean()  # probability threshold
+        s = fill_holes_watch_borders(s)
+        # s = skimor.binary_opening(s, selem=skimor.disk(3))
+        # plt.figure()
+        # plt.subplot(131), plt.imshow(s, 'gray')
+        # plt.subplot(132), plt.imshow(sfh, 'gray')
+        # plt.subplot(133), plt.imshow(sfh2, 'gray')
+        # plt.show()
+        s = np.where((probs * s) > (best_probs * s), i + 1, s)  # assign new label only if its probability is higher
+        best_probs = np.where(s, probs, best_probs)  # update best probs
+        seeds = np.where(s, i + 1, seeds)  # update seeds
+
+    labs_f = scindifil.median_filter(seeds, size=3)
+
+    # finding biggest blob - this would be our initialization
+    adepts_lbl, n_labels = skimea.label(labs_f, connectivity=2, return_num=True)
+    areas = [(adepts_lbl == l).sum() for l in range(1, n_labels + 1)]
+    blob = adepts_lbl == (np.argmax(areas) + 1)
+    return blob
+
+
+def describe_blob(labs_im, area_t=200, ecc_t=0.25):
+    # TODO: misto ecc kontrolovat jen major_axis?
+    props = skimea.regionprops(labs_im)
+    blobs = []
+    blob = namedtuple('blob', ['label', 'area', 'centroid', 'eccentricity'])
+    for i, prop in enumerate(props):
+        label = prop.label
+        area = int(prop.area)
+        centroid = map(int, prop.centroid)
+        major_axis = prop.major_axis_length
+        minor_axis = prop.minor_axis_length
+        # my_ecc = minor_axis / major_axis
+        try:
+            eccentricity = minor_axis / major_axis
+        except ZeroDivisionError:
+            eccentricity = 0
+        print '#{}: area={}, centroid={}, eccentricity={:.2f}'.format(i, area, centroid, eccentricity),
+
+        if (area > area_t) and (eccentricity > ecc_t):
+            blobs.append(blob(label, area, centroid, eccentricity))
+            print '... OK'
+        elif area <= area_t:
+            print '... TO SMALL - DISCARDING'
+        elif eccentricity <= ecc_t:
+            print '... SPLITTING'
+            splitted = split_blob(labs_im == label, prop)
+            for spl in splitted:
+                spl_blob = describe_blob(spl)
+                blobs += spl_blob
+                pass
+
+    return blobs
+
+
+def split_blob(im, prop):
+    # blobs = []
+    # blob = namedtuple('blob', ['label', 'area', 'centroid', 'eccentricity'])
+    centroid = tuple(map(int, np.round(prop.centroid)))
+    major_axis = int(round(prop.major_axis_length / 2))
+    minor_axis = int(round(prop.minor_axis_length / 2))
+    angle = int(round(np.degrees(prop.orientation)))
+
+    c1 = centroid[1] + major_axis * np.cos(prop.orientation)
+    r1 = centroid[0] - major_axis * np.sin(prop.orientation)
+    c2 = centroid[1] + major_axis * np.cos(prop.orientation + np.pi)
+    r2 = centroid[0] - major_axis * np.sin(prop.orientation + np.pi)
+
+    new_cent1 = ((centroid[0] + r1) / 2, (centroid[1] + c1) / 2)
+    new_cent1 = tuple(map(int, map(round, new_cent1)))
+    new_cent2 = ((centroid[0] + r2) / 2, (centroid[1] + c2) / 2)
+    new_cent2 = tuple(map(int, map(round, new_cent2)))
+
+
+    # imv = cv2.cvtColor(255 * im.astype(np.uint8), cv2.COLOR_GRAY2RGB)
+    # cv2.ellipse(imv, centroid, (minor_axis, major_axis), angle, 0, 360, (0, 0, 255), thickness=2)
+    # cv2.ellipse(imv, new_cent1, (minor_axis, int(round(major_axis / 2))), angle, 0, 360, (255, 0, 0), thickness=2)
+    # cv2.ellipse(imv, new_cent2, (minor_axis, int(round(major_axis / 2))), angle, 0, 360, (255, 0, 0), thickness=2)
+    #
+    # plt.figure()
+    # plt.imshow(imv, 'gray', interpolation='nearest')
+    # plt.hold(True)
+    # plt.plot(centroid[0], centroid[1], 'ro')
+    # plt.plot(c1, r1, 'go')
+    # plt.plot(c2, r2, 'go')
+    # plt.plot(new_cent1[0], new_cent1[1], 'co')
+    # plt.plot(new_cent2[0], new_cent2[1], 'yo')
+    # plt.axis('image')
+    # plt.show()
+
+    im1 = np.zeros_like(im).astype(np.uint8)
+    cv2.ellipse(im1, new_cent1, (minor_axis, int(round(major_axis / 2))), angle, 0, 360, 1, thickness=-1)
+    im1 *= im
+
+    im2 = np.zeros_like(im).astype(np.uint8)
+    cv2.ellipse(im2, new_cent2, (minor_axis, int(round(major_axis / 2))), angle, 0, 360, 1, thickness=-1)
+    im2 *= im
+
+    # plt.figure()
+    # plt.subplot(121), plt.imshow(im1, 'gray')
+    # plt.subplot(122), plt.imshow(im2, 'gray')
+    # plt.show()
+    #
+    # blob1 = blob(prop.label, prop.area, new_cent1, 0.5)
+    # blob2 = blob(prop.label, prop.area, new_cent2, 0.5)
+
+    # return [blob1, blob2]
+    return (im1, im2)
+
+
+def visualize_seg(data, seg, mask=None, title='visualization of segmentation', show_now=True):
+    seg_over = skicol.label2rgb(seg, data, colors=['red', 'green', 'blue'], bg_label=0)
+    seg_bounds = skiseg.mark_boundaries(data, seg, color=(1, 0, 0), mode='thick')
+
+    if mask is not None:
+        mask_bounds = skiseg.mark_boundaries(data, mask, color=(1, 0, 0), mode='thick')
+        plt.figure()
+        plt.suptitle(title)
+        plt.subplot(231), plt.imshow(data, 'gray'), plt.title('input')
+        plt.subplot(232), plt.imshow(mask, 'gray'), plt.title('init mask')
+        plt.subplot(233), plt.imshow(mask_bounds, 'gray'), plt.title('init mask')
+        plt.subplot(234), plt.imshow(seg, 'gray'), plt.title('segmentation')
+        plt.subplot(235), plt.imshow(seg_over, 'gray'), plt.title('segmentation')
+        plt.subplot(236), plt.imshow(seg_bounds, 'gray'), plt.title('segmentation')
+    else:
+        plt.figure()
+        plt.suptitle(title)
+        plt.subplot(141), plt.imshow(data, 'gray'), plt.title('input')
+        plt.subplot(142), plt.imshow(seg, 'gray'), plt.title('segmentation')
+        plt.subplot(143), plt.imshow(seg_over, 'gray'), plt.title('segmentation')
+        plt.subplot(144), plt.imshow(seg_bounds, 'gray'), plt.title('segmentation')
+    if show_now:
+        plt.show()
