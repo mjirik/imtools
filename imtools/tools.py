@@ -5,6 +5,7 @@ from collections import namedtuple
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as matpat
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 import os
 import sys
 import glob
@@ -503,20 +504,50 @@ def closing3D(data, selem=skimor.disk(3), slicewise=False, sliceId=0):
 
 
 def eroding3D(data, selem=None, selem_size=3, slicewise=False, sliceId=0):
+    # if selem is None:
+    #     if len(data.shape) == 3:
+    #         selem = np.ones((selem_size, selem_size, selem_size))
+    #     else:
+    #         selem = skimor.disk(selem_size)
+    # if slicewise:
+    #     if sliceId == 0:
+    #         for i in range(data.shape[0]):
+    #             data[i, :, :] = skimor.binary_erosion(data[i, :, :], selem)
+    #     elif sliceId == 2:
+    #         for i in range(data.shape[2]):
+    #             data[:, :, i] = skimor.binary_erosion(data[:, :, i], selem)
+    # else:
+    #     data = scindimor.binary_erosion(data, selem)
+    data = morph_ND(data, 'erosion', selem, selem_size, slicewise, sliceId)
+    return data
+
+
+def morph_ND(data, method, selem=None, selem_rad=3, slicewise=True, sliceId=0):
+    if method == 'erosion':
+        morph_func = scindimor.binary_erosion
+    elif method == 'dilation':
+        morph_func = scindimor.binary_dilation
+    elif method == 'opening':
+        morph_func = scindimor.binary_opening
+    elif method == 'closing':
+        morph_func = scindimor.binary_closing
+    else:
+        raise ValueError('Wrong morphological operation name.')
+
     if selem is None:
-        if len(data.shape) == 3:
-            selem = np.ones((selem_size, selem_size, selem_size))
-        else:
-            selem = skimor.disk(selem_size)
+        selem = np.ones((2 * selem_rad + 1,) * data.ndim)
+    if data.ndim == 2:
+        data = skimor.binary_erosion(data, selem)
+
     if slicewise:
         if sliceId == 0:
             for i in range(data.shape[0]):
-                data[i, :, :] = skimor.binary_erosion(data[i, :, :], selem)
+                data[i, :, :] = morph_func(data[i, :, :], selem)
         elif sliceId == 2:
             for i in range(data.shape[2]):
-                data[:, :, i] = skimor.binary_erosion(data[:, :, i], selem)
+                data[:, :, i] = morph_func(data[:, :, i], selem)
     else:
-        data = scindimor.binary_erosion(data, selem)
+        data = morph_func(data, selem)
     return data
 
 
@@ -1471,7 +1502,7 @@ def initialize_graycom(data_in, slice=None, distances=(1, ), scale=0.5, angles=(
     # plt.show()
 
     try:
-        blob = blob_from_gcm(gcm_to, data, slice)
+        blob, seeds, labs_f = blob_from_gcm(gcm_to, data)
         # print 'first'
     except:
         gcm_to = skimor.binary_closing(gcm_t, selem=skimor.disk(3))
@@ -1521,10 +1552,12 @@ def initialize_graycom(data_in, slice=None, distances=(1, ), scale=0.5, angles=(
     if scale != 1:
         blob = blob.astype(np.uint8)
         if blob.ndim == 2:
-            blob = cv2.resize(blob, (data_in.shape[::-1]))
+            blob = cv2.resize(blob, data_in.shape[::-1])
         else:
+            tmp = np.zeros(data_in.shape)
             for i, im in enumerate(blob):
-                blob[i, :, :] = cv2.resize(im, (data_in.shape[2], data_in.shape[1]))
+                tmp[i, :, :] = cv2.resize(im, (data_in.shape[2], data_in.shape[1]))
+            blob = tmp
 
     # visualization
     if show:
@@ -1533,17 +1566,30 @@ def initialize_graycom(data_in, slice=None, distances=(1, ), scale=0.5, angles=(
         plt.subplot(132), plt.imshow(gcm_t, 'gray'), plt.title('thresholded')
         plt.subplot(133), plt.imshow(gcm_to, 'gray'), plt.title('opened')
 
-        plt.figure()
-        plt.subplot(121), plt.imshow(data, 'gray', interpolation='nearest'), plt.title('input')
-        plt.subplot(122), plt.imshow(seeds, 'jet', interpolation='nearest'), plt.title('seeds')
-        divider = make_axes_locatable(plt.gca())
-        cax = divider.append_axes('right', size='5%', pad=0.05)
-        plt.colorbar(cax=cax, ticks=np.unique(seeds))
+        if data.ndim == 2:
+            data_vis = data
+            seeds_vis = seeds
+            labs_f_vis = labs_f
+            blob_vis = blob
+        else:
+            if slice is None:
+                slice = 0
+            data_vis = data[slice,...]
+            seeds_vis = seeds[slice,...]
+            labs_f_vis = labs_f[slice,...]
+            blob_vis = blob[slice,...]
 
         plt.figure()
-        plt.subplot(131), plt.imshow(data, 'gray'), plt.title('input')
-        plt.subplot(132), plt.imshow(labs_f, 'gray'), plt.title('labels')
-        plt.subplot(133), plt.imshow(blob, 'gray'), plt.title('init blob')
+        plt.subplot(121), plt.imshow(data_vis, 'gray', interpolation='nearest'), plt.title('input')
+        plt.subplot(122), plt.imshow(seeds_vis, 'jet', interpolation='nearest'), plt.title('seeds')
+        divider = make_axes_locatable(plt.gca())
+        cax = divider.append_axes('right', size='5%', pad=0.05)
+        plt.colorbar(cax=cax, ticks=np.unique(seeds_vis))
+
+        plt.figure()
+        plt.subplot(131), plt.imshow(data_vis, 'gray'), plt.title('input')
+        plt.subplot(132), plt.imshow(labs_f_vis, 'gray'), plt.title('labels')
+        plt.subplot(133), plt.imshow(blob_vis, 'gray'), plt.title('init blob')
 
         if show_now:
             plt.show()
@@ -1596,7 +1642,7 @@ def blob_from_gcm(gcm, data, slice=None):
     adepts_lbl, n_labels = skimea.label(labs_f, connectivity=2, return_num=True)
     areas = [(adepts_lbl == l).sum() for l in range(1, n_labels + 1)]
     blob = adepts_lbl == (np.argmax(areas) + 1)
-    return blob
+    return blob, seeds, labs_f
 
 
 def describe_blob(labs_im, area_t=200, ecc_t=0.25):
@@ -1688,7 +1734,13 @@ def split_blob(im, prop):
     return (im1, im2)
 
 
-def visualize_seg(data, seg, mask=None, title='visualization of segmentation', show_now=True):
+def visualize_seg(data, seg, mask=None, slice=None, title='visualization of segmentation', show_now=True):
+    if slice is not None:
+        data = data[slice,...]
+        seg = seg[slice,...]
+        if mask is not None:
+            mask = mask[slice,...]
+
     seg_over = skicol.label2rgb(seg, data, colors=['red', 'green', 'blue'], bg_label=0)
     seg_bounds = skiseg.mark_boundaries(data, seg, color=(1, 0, 0), mode='thick')
 
