@@ -620,11 +620,11 @@ def resize_ND(data, scale=None, shape=None, slice_id=0, method='cv2'):
     new_data = np.zeros(np.hstack((data.shape[0], new_slice_shape)), dtype=np.int)
     data = data.astype(np.uint8)
 
-    for i, im in data:
+    for i, im in enumerate(data):
         if scale is not None:
             new_data[i, ...] = cv2.resize(im, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
         elif shape is not None:
-            new_data[i, ...] = cv2.resize(im, shape, 0, 0, interpolation=cv2.INTER_NEAREST)
+            new_data[i, ...] = cv2.resize(im, (shape[2], shape[1]), interpolation=cv2.INTER_NEAREST)
 
     if expanded:
         new_data = new_data[0, ...]
@@ -1740,6 +1740,7 @@ def visualize_seg(data, seg, mask=None, slice=None, title='visualization of segm
     seg_vis = seg_vis.astype(np.uint8)
     if mask is not None:
         mask_vis = mask if data.ndim == 2 else mask[slice,...]
+        mask_vis = mask_vis.astype(np.uint8)
 
     seg_over = skicol.label2rgb(seg_vis, image=data_vis, colors=['red', 'green', 'blue'], bg_label=0)
     seg_bounds = skiseg.mark_boundaries(data_vis, seg_vis, color=(1, 0, 0), mode='thick')
@@ -1747,7 +1748,10 @@ def visualize_seg(data, seg, mask=None, slice=None, title='visualization of segm
     # seg_bounds = seg_vis
 
     if mask is not None:
-        mask_bounds = skiseg.mark_boundaries(data_vis, mask_vis, color=(1, 0, 0), mode='thick')
+        try:
+            mask_bounds = skiseg.mark_boundaries(data_vis, mask_vis, color=(1, 0, 0), mode='thick')
+        except:
+            pass
         # mask_bounds = mask_vis
         if for_save:
             fig = plt.figure(figsize=(20, 10))
