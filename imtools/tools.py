@@ -536,24 +536,29 @@ def morph_ND(data, method, selem=None, selem_rad=3, slicewise=True, sliceId=0):
 
     if selem is None:
         selem = np.ones((2 * selem_rad + 1,) * data.ndim)
-    if data.ndim == 2:
-        data = skimor.binary_erosion(data, selem)
 
-    if slicewise:
-        if sliceId == 0:
-            for i in range(data.shape[0]):
-                data[i, :, :] = morph_func(data[i, :, :], selem)
-        elif sliceId == 2:
-            for i in range(data.shape[2]):
-                data[:, :, i] = morph_func(data[:, :, i], selem)
-    else:
+    if data.ndim == 2:
         data = morph_func(data, selem)
+    else:
+        if slicewise:
+            if sliceId == 0:
+                for i in range(data.shape[0]):
+                    data[i, :, :] = morph_func(data[i, :, :], selem)
+            elif sliceId == 2:
+                for i in range(data.shape[2]):
+                    data[:, :, i] = morph_func(data[:, :, i], selem)
+        else:
+            data = morph_func(data, selem)
     return data
 
 
-def resize3D(data, scale, sliceId=2, method='cv2'):
+def resize3D(data, scale=None, shape=None, sliceId=2, method='cv2'):
     if data.ndim == 2:
-        if method == 'cv2':
+        if shape is not None:
+            new_data = cv2.resize(data.astype(np.uint8), shape, 0, 0, interpolation=cv2.INTER_NEAREST)
+        elif method == 'cv2':
+            if data.dtype == np.bool:
+                data = data.astype(np.uint8)
             new_data = cv2.resize(data, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
         else:
             new_data = scindiint.zoom(data, scale)
@@ -576,6 +581,8 @@ def resize3D(data, scale, sliceId=2, method='cv2'):
             # new_shape = cv2.resize(data[0,:,:], None, fx=scale, fy=scale).shape
             # new_shape = skitra.rescale(data[0,:,:], scale).shape
             if method == 'cv2':
+                if data.dtype == np.bool:
+                    data = data.astype(np.uint8)
                 new_shape = cv2.resize(data[0,:,:], (0,0), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST).shape
             else:
                 new_shape =  scindiint.zoom(data[0,:,:], scale).shape
@@ -587,6 +594,44 @@ def resize3D(data, scale, sliceId=2, method='cv2'):
                     new_data[i,:,:] = cv2.resize(data[i,:,:], (0,0),  fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
                 else:
                     new_data[i,:,:] = scindiint.zoom(data[i,:,:], scale)
+    return new_data
+
+
+def resize_ND(data, scale=None, shape=None, slice_id=0, method='cv2'):
+    if data.ndim == 2:
+        data = np.expand_dims(data, 0)
+        shape = array(shape).insert(0, 1)
+        expanded = True
+    else:
+        expanded = False
+
+    if slice_id == 2:
+        data = np.swapaxes(np.swapaxes(data, 0, 2), 1, 2)
+        shape = [shape[2], shape[0], shape[1]]
+        swapped = True
+    else:
+        swapped = False
+
+    if scale is not None:
+        new_slice_shape = cv2.resize(data[0,...], (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST).shape
+    else:
+        new_slice_shape = shape[1:]
+
+    new_data = np.zeros(np.hstack((data.shape[0], new_slice_shape)), dtype=np.int)
+    data = data.astype(np.uint8)
+
+    for i, im in data:
+        if scale is not None:
+            new_data[i, ...] = cv2.resize(im, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
+        elif shape is not None:
+            new_data[i, ...] = cv2.resize(im, shape, 0, 0, interpolation=cv2.INTER_NEAREST)
+
+    if expanded:
+        new_data = new_data[0, ...]
+
+    if swapped:
+        new_data = np.swapaxes(np.swapaxes(new_data, 0, 2), 1, 2)
+
     return new_data
 
 
@@ -1461,7 +1506,7 @@ def graycomatrix_3D(data, connectivity=1):
     for p, nghbs in enumerate(nghbm):
         for n in nghbs:
             if not np.isnan(n):
-                glcm[data_v[p], data_v[n]] += 1
+                glcm[data_v[p], data_v[int(n)]] += 1
 
     return glcm
 
@@ -1483,23 +1528,10 @@ def initialize_graycom(data_in, slice=None, distances=(1, ), scale=0.5, angles=(
         gcm = graycomatrix_3D(data, connectivity=1)
     print 'done'
 
-    # plt.figure()
-    # plt.subplot(121), plt.imshow(gcm, 'jet', vmax=10 * gcm.mean())
-    # plt.subplot(122), plt.imshow(gcm2, 'jet', vmax=10 * gcm.mean())
-    # plt.show()
-
     # thresholding graycomatrix (GCM)
     thresh = c_t * np.mean(gcm)
     gcm_t = gcm > thresh
     gcm_to = skimor.binary_opening(gcm_t, selem=skimor.disk(3))
-    # gcm_to = skimor.binary_closing(gcm_t, selem=skimor.disk(3))
-    # gcm_to = skimor.binary_opening(gcm_to, selem=skimor.disk(3))
-
-    # plt.figure()
-    # plt.subplot(131), plt.imshow(gcm, 'jet', vmax=10 * gcm.mean())
-    # plt.subplot(132), plt.imshow(gcm_t)
-    # plt.subplot(133), plt.imshow(gcm_to)
-    # plt.show()
 
     try:
         blob, seeds, labs_f = blob_from_gcm(gcm_to, data)
@@ -1507,7 +1539,7 @@ def initialize_graycom(data_in, slice=None, distances=(1, ), scale=0.5, angles=(
     except:
         gcm_to = skimor.binary_closing(gcm_t, selem=skimor.disk(3))
         gcm_to = skimor.binary_opening(gcm_to, selem=skimor.disk(3))
-        blob = blob_from_gcm(gcm_to, data, slice)
+        blob, seeds, labs_f = blob_from_gcm(gcm_to, data, slice)
         # print 'second - different gcm processing'
 
         # plt.figure()
@@ -1515,36 +1547,6 @@ def initialize_graycom(data_in, slice=None, distances=(1, ), scale=0.5, angles=(
         # plt.subplot(132), plt.imshow(gcm_t)
         # plt.subplot(133), plt.imshow(gcm_to)
         # plt.show()
-
-    # find peaks in the GCM and return them as random variables
-    # rvs = analyze_gcm(gcm_to)
-    #
-    # if slice is not None:
-    #     data = data[slice, ...]
-    #
-    # deriving seed points
-    # seeds = np.zeros(data.shape, dtype=np.uint8)
-    # best_probs = np.zeros(data.shape)  # assign the most probable label if more than one are possible
-    # for i, rv in enumerate(rvs):
-    #     probs = rv.pdf(data)
-    #     s = probs > probs.mean()  # probability threshold
-    #     s = fill_holes_watch_borders(s)
-    #     # s = skimor.binary_opening(s, selem=skimor.disk(3))
-    #     # plt.figure()
-    #     # plt.subplot(131), plt.imshow(s, 'gray')
-    #     # plt.subplot(132), plt.imshow(sfh, 'gray')
-    #     # plt.subplot(133), plt.imshow(sfh2, 'gray')
-    #     # plt.show()
-    #     s = np.where((probs * s) > (best_probs * s), i + 1, s)  # assign new label only if its probability is higher
-    #     best_probs = np.where(s, probs, best_probs)  # update best probs
-    #     seeds = np.where(s, i + 1, seeds)  # update seeds
-    #
-    # labs_f = scindifil.median_filter(seeds, size=3)
-    #
-    # # finding biggest blob - this would be our initialization
-    # adepts_lbl, n_labels = skimea.label(labs_f, connectivity=2, return_num=True)
-    # areas = [(adepts_lbl == l).sum() for l in range(1, n_labels + 1)]
-    # blob = adepts_lbl == (np.argmax(areas) + 1)
 
     # hole filling - adding (and then removing) a capsule of zeros, otherwise it'd fill holes touching image borders
     blob = fill_holes_watch_borders(blob)
@@ -1561,23 +1563,17 @@ def initialize_graycom(data_in, slice=None, distances=(1, ), scale=0.5, angles=(
 
     # visualization
     if show:
+        if slice is None:
+            slice = 0
+        data_vis = data if data.ndim == 2 else data[slice, ...]
+        seeds_vis = seeds if data.ndim == 2 else seeds[slice, ...]
+        labs_f_vis = labs_f if data.ndim == 2 else labs_f[slice, ...]
+        blob_vis = blob if data.ndim == 2 else blob[slice, ...]
+
         plt.figure()
         plt.subplot(131), plt.imshow(gcm, 'gray', vmax=gcm.mean()), plt.title('gcm')
         plt.subplot(132), plt.imshow(gcm_t, 'gray'), plt.title('thresholded')
         plt.subplot(133), plt.imshow(gcm_to, 'gray'), plt.title('opened')
-
-        if data.ndim == 2:
-            data_vis = data
-            seeds_vis = seeds
-            labs_f_vis = labs_f
-            blob_vis = blob
-        else:
-            if slice is None:
-                slice = 0
-            data_vis = data[slice,...]
-            seeds_vis = seeds[slice,...]
-            labs_f_vis = labs_f[slice,...]
-            blob_vis = blob[slice,...]
 
         plt.figure()
         plt.subplot(121), plt.imshow(data_vis, 'gray', interpolation='nearest'), plt.title('input')
@@ -1594,7 +1590,7 @@ def initialize_graycom(data_in, slice=None, distances=(1, ), scale=0.5, angles=(
         if show_now:
             plt.show()
 
-    return data, blob
+    return blob
 
 
 def analyze_gcm(gcm, area_t=200, ecc_t=0.35):
@@ -1642,6 +1638,7 @@ def blob_from_gcm(gcm, data, slice=None):
     adepts_lbl, n_labels = skimea.label(labs_f, connectivity=2, return_num=True)
     areas = [(adepts_lbl == l).sum() for l in range(1, n_labels + 1)]
     blob = adepts_lbl == (np.argmax(areas) + 1)
+
     return blob, seeds, labs_f
 
 
@@ -1734,32 +1731,46 @@ def split_blob(im, prop):
     return (im1, im2)
 
 
-def visualize_seg(data, seg, mask=None, slice=None, title='visualization of segmentation', show_now=True):
-    if slice is not None:
-        data = data[slice,...]
-        seg = seg[slice,...]
-        if mask is not None:
-            mask = mask[slice,...]
+def visualize_seg(data, seg, mask=None, slice=None, title='visualization of segmentation', show_now=True, for_save=False):
+    if slice is None:
+        slice = 0
+    data_vis = data if data.ndim == 2 else data[slice,...]
+    seg_vis = seg if data.ndim == 2 else seg[slice,...]
+    data_vis = data_vis.astype(np.uint8)
+    seg_vis = seg_vis.astype(np.uint8)
+    if mask is not None:
+        mask_vis = mask if data.ndim == 2 else mask[slice,...]
 
-    seg_over = skicol.label2rgb(seg, data, colors=['red', 'green', 'blue'], bg_label=0)
-    seg_bounds = skiseg.mark_boundaries(data, seg, color=(1, 0, 0), mode='thick')
+    seg_over = skicol.label2rgb(seg_vis, image=data_vis, colors=['red', 'green', 'blue'], bg_label=0)
+    seg_bounds = skiseg.mark_boundaries(data_vis, seg_vis, color=(1, 0, 0), mode='thick')
+    # seg_over = seg_vis
+    # seg_bounds = seg_vis
 
     if mask is not None:
-        mask_bounds = skiseg.mark_boundaries(data, mask, color=(1, 0, 0), mode='thick')
-        plt.figure()
+        mask_bounds = skiseg.mark_boundaries(data_vis, mask_vis, color=(1, 0, 0), mode='thick')
+        # mask_bounds = mask_vis
+        if for_save:
+            fig = plt.figure(figsize=(20, 10))
+        else:
+            fig = plt.figure()
         plt.suptitle(title)
-        plt.subplot(231), plt.imshow(data, 'gray'), plt.title('input')
-        plt.subplot(232), plt.imshow(mask, 'gray'), plt.title('init mask')
-        plt.subplot(233), plt.imshow(mask_bounds, 'gray'), plt.title('init mask')
-        plt.subplot(234), plt.imshow(seg, 'gray'), plt.title('segmentation')
-        plt.subplot(235), plt.imshow(seg_over, 'gray'), plt.title('segmentation')
-        plt.subplot(236), plt.imshow(seg_bounds, 'gray'), plt.title('segmentation')
+        plt.subplot(231), plt.imshow(data_vis, 'gray'), plt.title('input'), plt.axis('off')
+        plt.subplot(232), plt.imshow(mask_vis, 'gray'), plt.title('init mask'), plt.axis('off')
+        plt.subplot(233), plt.imshow(mask_bounds, 'gray'), plt.title('init mask'), plt.axis('off')
+        plt.subplot(234), plt.imshow(seg_vis, 'gray'), plt.title('segmentation'), plt.axis('off')
+        plt.subplot(235), plt.imshow(seg_over, 'gray'), plt.title('segmentation'), plt.axis('off')
+        plt.subplot(236), plt.imshow(seg_bounds, 'gray'), plt.title('segmentation'), plt.axis('off')
     else:
-        plt.figure()
+        if for_save:
+            fig = plt.figure(figsize=(20, 5))
+        else:
+            fig = plt.figure()
         plt.suptitle(title)
-        plt.subplot(141), plt.imshow(data, 'gray'), plt.title('input')
-        plt.subplot(142), plt.imshow(seg, 'gray'), plt.title('segmentation')
-        plt.subplot(143), plt.imshow(seg_over, 'gray'), plt.title('segmentation')
-        plt.subplot(144), plt.imshow(seg_bounds, 'gray'), plt.title('segmentation')
+        plt.subplot(141), plt.imshow(data_vis, 'gray'), plt.title('input'), plt.axis('off')
+        plt.subplot(142), plt.imshow(seg_vis, 'gray'), plt.title('segmentation'), plt.axis('off')
+        plt.subplot(143), plt.imshow(seg_over, 'gray'), plt.title('segmentation'), plt.axis('off')
+        plt.subplot(144), plt.imshow(seg_bounds, 'gray'), plt.title('segmentation'), plt.axis('off')
     if show_now:
         plt.show()
+
+    return fig
