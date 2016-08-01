@@ -387,9 +387,9 @@ def dominant_class(data, roi=None, dens_min=0, dens_max=255, peakT=0.8, show=Fal
     main = data * (roi > 0)
     class1 = np.where((main >= dom_l) * (main <= dom_r), 1, 0)
 
-    std = data[np.nonzero(class1)].std()
+    # std = data[np.nonzero(class1)].std()
     std = 10
-    rv = scista.norm(loc=max_peak_idx, scale=std)
+    rv = scista.norm(loc=bins[max_peak_idx], scale=std)
 
     if show:
         plt.figure()
@@ -1483,8 +1483,13 @@ def make_neighborhood_matrix(im, nghood=4, roi=None):
     return neighbors_m
 
 
-def graycomatrix_3D(data, connectivity=1):
+def graycomatrix_3D(data, mask=None, connectivity=1):
     ndims = data.ndim
+
+    if mask is None:
+        mask = np.ones_like(data)
+    mask_v = mask.flatten()
+
     if ndims == 2:
         if connectivity == 1:
             nghood = 4
@@ -1504,9 +1509,10 @@ def graycomatrix_3D(data, connectivity=1):
     glcm = np.zeros((256, 256), dtype=np.uint32)
     data_v = data.flatten()
     for p, nghbs in enumerate(nghbm):
-        for n in nghbs:
-            if not np.isnan(n):
-                glcm[data_v[p], data_v[int(n)]] += 1
+        if mask_v[p]:
+            for n in nghbs:
+                if not np.isnan(n) and mask_v[n]:
+                    glcm[data_v[p], data_v[int(n)]] += 1
 
     return glcm
 
