@@ -27,6 +27,7 @@ import scipy.ndimage.morphology as scindimor
 import scipy.ndimage.measurements as scindimea
 import scipy.ndimage.interpolation as scindiint
 import scipy.ndimage.filters as scindifil
+import scipy.signal as scisig
 
 import cPickle as pickle
 import gzip
@@ -370,6 +371,15 @@ def dominant_class(data, roi=None, dens_min=0, dens_max=255, peakT=0.8, show=Fal
 
     voxels = data[np.nonzero(roi)]
     hist, bins = skiexp.histogram(voxels)
+
+    hist2 = hist_smoothing(bins, hist, sigma=10)
+
+    # plt.figure()
+    # plt.fill(bins, hist, 'b', bins, hist2, 'r', alpha=0.7)
+    # plt.show()
+
+    hist = hist2.copy()
+
     max_peak = hist.max()
     max_peak_idx = hist.argmax()
 
@@ -1249,7 +1259,7 @@ def pyramid_down(image, scale=2, min_size=(30, 30), inter=None, smooth=False):
     img = resize(image, width=w, inter=inter)
     if smooth:
         # img = smoothing(image.astype(np.uint8), d=20, sigmaColor=20, sigmaSpace=20).astype(image.dtype)
-        img = smoothing(image.astype(np.uint8)).astype(image.dtype)
+        img = smoothing(img.astype(np.uint8)).astype(img.dtype)
 
     if img.shape[0] < min_size[1] or img.shape[1] < min_size[0]:
         return None
@@ -1485,6 +1495,9 @@ def make_neighborhood_matrix(im, nghood=4, roi=None):
 
 def graycomatrix_3D(data, mask=None, connectivity=1):
     ndims = data.ndim
+
+    if data.max() <= 1:
+        data = skiexp.rescale_intensity(data, (0, 1), (0, 255)).astype(np.int)
 
     if mask is None:
         mask = np.ones_like(data)
@@ -1784,3 +1797,42 @@ def visualize_seg(data, seg, mask=None, slice=None, title='visualization of segm
         plt.show()
 
     return fig
+
+
+def hist_smoothing(bins, hist, window='gaussian', win_w=20, sigma=5):
+    # # generated a density class
+    # density = scista.gaussian_kde(hist)
+    #
+    # # set the covariance_factor, lower means more detail
+    # density.covariance_factor = lambda: 0.25
+    # density._compute_covariance()
+    #
+    # # generate a fake range of x values
+    # xs = np.arange(0, 24, .1)
+    #
+    # # fill y values using density class
+    # ys = density(xs)
+    #
+    # plt.figure()
+    # plt.fill(bins, hist, 'b', bins, ys, 'r', alpha=0.5)
+    # plt.show()
+    win_types = ['flat', 'hanning', 'hamming', 'bartlett', 'blackman', 'gaussian']
+    if not window in win_types:
+        raise ValueError, "Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
+
+    # for window in win_types:
+    if window == 'flat':  # moving average
+        w = np.ones(win_w, 'd')
+    elif window == 'gaussian':
+        w = scisig.gaussian(win_w, std=sigma)
+    else:
+        w = eval('np.' + window + '(win_w)')
+
+    # w = np.hamming(win_w)
+    y = np.convolve(w / w.sum(), hist, mode='same')
+
+    #     plt.figure()
+    #     plt.fill(bins, hist, 'b', bins, y, 'r', alpha=0.5)
+    #     plt.title(window)
+    # plt.show()
+    return y
