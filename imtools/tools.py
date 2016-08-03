@@ -266,6 +266,9 @@ def smoothing(data, d=10, sigmaColor=10, sigmaSpace=10, sliceId=2):
             for idx in range(data.shape[0]):
                 data[idx, :, :] = cv2.bilateralFilter(data[idx, :, :], d=d, sigmaColor=sigmaColor, sigmaSpace=sigmaSpace)
     else:
+        if data.dtype.type == np.float64:
+            # data = skiexp.rescale_intensity(data, in_range=(0, 1), out_range=(0, 255)).astype(np.uint8)
+            data = data.astype(np.float32)
         data = cv2.bilateralFilter(data, d=d, sigmaColor=sigmaColor, sigmaSpace=sigmaSpace)
     return data
 
@@ -362,7 +365,7 @@ def analyse_histogram(data, roi=None, dens_min=20, dens_max=255, minT=0.8, maxT=
 
 
 def dominant_class(data, roi=None, dens_min=0, dens_max=255, peakT=0.8, show=False, show_now=True):
-    if roi == None:
+    if roi is None:
         #roi = np.ones(data.shape, dtype=np.bool)
         if isinstance(data.dtype, float):
             dens_min /= 255.
@@ -398,7 +401,7 @@ def dominant_class(data, roi=None, dens_min=0, dens_max=255, peakT=0.8, show=Fal
     class1 = np.where((main >= dom_l) * (main <= dom_r), 1, 0)
 
     # std = data[np.nonzero(class1)].std()
-    std = 10
+    std = 1
     rv = scista.norm(loc=bins[max_peak_idx], scale=std)
 
     if show:
@@ -412,11 +415,11 @@ def dominant_class(data, roi=None, dens_min=0, dens_max=255, peakT=0.8, show=Fal
         # plt.plot(bins, pdf * max_peak / pdf.max(), 'm')
         # plt.show()
 
-        plt.plot(bins[max_peak_idx], hist[max_peak_idx], 'ro')
-        plt.plot([bins[l_idx], bins[l_idx]], [0, hist[max_peak_idx]], 'r-')
-        plt.plot([bins[r_idx], bins[r_idx]], [0, hist[max_peak_idx]], 'r-')
-        plt.plot(bins[l_idx], hist[l_idx], 'rx')
-        plt.plot(bins[r_idx], hist[r_idx], 'rx')
+        plt.plot(bins[max_peak_idx], hist[max_peak_idx], 'ro', markersize=10)
+        plt.plot([bins[l_idx], bins[l_idx]], [0, hist[max_peak_idx]], 'r-', linewidth=4)
+        plt.plot([bins[r_idx], bins[r_idx]], [0, hist[max_peak_idx]], 'r-', linewidth=4)
+        plt.plot(bins[l_idx], hist[l_idx], 'rx', markersize=10, markeredgewidth=2)
+        plt.plot(bins[r_idx], hist[r_idx], 'rx', markersize=10, markeredgewidth=2)
         plt.title('Histogram and dominant_class.')
         if show_now:
             plt.show()
@@ -1612,8 +1615,8 @@ def initialize_graycom(data_in, slice=None, distances=(1, ), scale=0.5, angles=(
     return blob
 
 
-def analyze_gcm(gcm, area_t=200, ecc_t=0.35):
-    labs_im = skimea.label(gcm, connectivity=2)
+def analyze_glcm(glcm, area_t=200, ecc_t=0.35, show=False, show_now=True):
+    labs_im = skimea.label(glcm, connectivity=2)
 
     # plt.figure()
     # plt.subplot(121), plt.imshow(gcm, 'gray', interpolation='nearest')
@@ -1625,6 +1628,32 @@ def analyze_gcm(gcm, area_t=200, ecc_t=0.35):
     stds = 5 / np.array([b.eccentricity for b in blobs])
 
     rvs = [scista.norm(m, s) for m, s in zip(means, stds)]
+
+    if show:
+        imv = cv2.cvtColor(255 * glcm.astype(np.uint8), cv2.COLOR_GRAY2RGB)
+        for b in blobs:
+            # prop = skimea.regionprops(b)
+            # centroid = tuple(map(int, np.round(prop.centroid)))
+            # major_axis = int(round(prop.major_axis_length / 2))
+            # minor_axis = int(round(prop.minor_axis_length / 2))
+            # angle = int(round(np.degrees(prop.orientation)))
+            cv2.ellipse(imv, b.centroid, (b.minor_axis, b.major_axis), b.angle, 0, 360, (255, 0, 255), thickness=2)
+        plt.figure()
+        plt.imshow(imv)
+        plt.axis('off')
+        if show_now:
+            plt.show()
+        #
+        # plt.figure()
+        # plt.imshow(imv, 'gray', interpolation='nearest')
+        # plt.hold(True)
+        # plt.plot(centroid[0], centroid[1], 'ro')
+        # plt.plot(c1, r1, 'go')
+        # plt.plot(c2, r2, 'go')
+        # plt.plot(new_cent1[0], new_cent1[1], 'co')
+        # plt.plot(new_cent2[0], new_cent2[1], 'yo')
+        # plt.axis('image')
+        # plt.show()
 
     return rvs
 
@@ -1665,13 +1694,14 @@ def describe_blob(labs_im, area_t=200, ecc_t=0.25):
     # TODO: misto ecc kontrolovat jen major_axis?
     props = skimea.regionprops(labs_im)
     blobs = []
-    blob = namedtuple('blob', ['label', 'area', 'centroid', 'eccentricity'])
+    blob = namedtuple('blob', ['label', 'area', 'centroid', 'eccentricity', 'major_axis', 'minor_axis', 'angle'])
     for i, prop in enumerate(props):
         label = prop.label
         area = int(prop.area)
         centroid = map(int, prop.centroid)
         major_axis = prop.major_axis_length
         minor_axis = prop.minor_axis_length
+        angle = prop.orientation
         # my_ecc = minor_axis / major_axis
         try:
             eccentricity = minor_axis / major_axis
@@ -1680,7 +1710,11 @@ def describe_blob(labs_im, area_t=200, ecc_t=0.25):
         print '#{}: area={}, centroid={}, eccentricity={:.2f}'.format(i, area, centroid, eccentricity),
 
         if (area > area_t) and (eccentricity > ecc_t):
-            blobs.append(blob(label, area, centroid, eccentricity))
+            centroid = tuple(map(int, np.round(prop.centroid)))
+            major_axis = int(round(prop.major_axis_length / 2))
+            minor_axis = int(round(prop.minor_axis_length / 2))
+            angle = int(round(np.degrees(prop.orientation)))
+            blobs.append(blob(label, area, centroid, eccentricity, major_axis, minor_axis, angle))
             print '... OK'
         elif area <= area_t:
             print '... TO SMALL - DISCARDING'
