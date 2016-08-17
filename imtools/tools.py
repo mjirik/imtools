@@ -1659,7 +1659,7 @@ def analyze_glcm(glcm, area_t=200, ecc_t=0.35, show=False, show_now=True):
 
 
 def blob_from_gcm(gcm, data, slice=None):
-    rvs = analyze_gcm(gcm)
+    rvs = analyze_glcm(gcm)
 
     if slice is not None:
         data = data[slice, ...]
