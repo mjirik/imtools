@@ -1870,3 +1870,16 @@ def hist_smoothing(bins, hist, window='gaussian', win_w=20, sigma=5):
     #     plt.title(window)
     # plt.show()
     return y
+
+
+def peak_in_hist(bins, hist, min_distance=3):
+    inds = skifea.peak_local_max(hist, min_distance=min_distance, indices=True)
+    # inds = np.nonzero(mask)
+
+    # plt.figure()
+    # plt.fill(bins, hist, 'b', alpha=1)
+    # for i in inds:
+    #     plt.plot(bins[i], hist[i], 'ro', markersize=15)
+    # plt.show()
+
+    return inds
