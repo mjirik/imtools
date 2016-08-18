@@ -9,6 +9,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import os
 import sys
 import glob
+import itertools
 
 import skimage.exposure as skiexp
 import skimage.measure as skimea
@@ -1658,8 +1659,8 @@ def analyze_glcm(glcm, area_t=200, ecc_t=0.35, show=False, show_now=True):
     return rvs
 
 
-def blob_from_gcm(gcm, data, slice=None):
-    rvs = analyze_glcm(gcm)
+def blob_from_gcm(gcm, data, slice=None, show=False, show_now=True, return_rvs=False):
+    rvs = analyze_glcm(gcm, show=show, show_now=show_now)
 
     if slice is not None:
         data = data[slice, ...]
@@ -1687,7 +1688,10 @@ def blob_from_gcm(gcm, data, slice=None):
     areas = [(adepts_lbl == l).sum() for l in range(1, n_labels + 1)]
     blob = adepts_lbl == (np.argmax(areas) + 1)
 
-    return blob, seeds, labs_f
+    if return_rvs:
+        return blob, seeds, labs_f, rvs
+    else:
+        return blob, seeds, labs_f
 
 
 def describe_blob(labs_im, area_t=200, ecc_t=0.25):
@@ -1882,4 +1886,104 @@ def peak_in_hist(bins, hist, min_distance=3):
     #     plt.plot(bins[i], hist[i], 'ro', markersize=15)
     # plt.show()
 
-    return inds
+    return tuple(inds.flatten())
+
+
+def seeds_from_hist(img, mask=None, window='hanning', smooth=True, min_distance=3, seed_area_width=5, min_int=0,
+                    max_int=255, show=False, show_now=True, verbose=False):
+    if mask is None:
+        mask = np.ones_like(img)
+
+    img *= mask
+    # odstraneni bodu s velkym gradientem
+    edge = skifil.scharr(img)
+    edge = skiexp.rescale_intensity(edge, out_range=(0, 1))
+    edge_t = 0.1
+    pts = img[np.nonzero(edge < edge_t)]
+
+    # odstraneni bodu s krajnimi intenzitami
+    pts = pts[pts >= min_int]
+    pts = pts[pts <= max_int]
+
+    # urceni histogramu
+    hist, bins = skiexp.histogram(pts)
+    if smooth:
+        hist_o = hist.copy()
+        hist = hist_smoothing(bins, hist, window=window)
+
+    # vyhledani peaku v histogramu
+    inds = peak_in_hist(bins, hist, min_distance=min_distance)
+    peaks = [bins[x] for x in inds]
+
+    # urceni intervalu jednotlivych oblasti
+    seeds_intervals = []
+    for i in peaks:
+        seed_min = max(i - seed_area_width, 0)
+        seed_max = min(i + seed_area_width, 255)
+        seeds_intervals.append((seed_min, seed_max))
+        # TODO: vyresit mozne prekryvy intervalu
+
+    # urceni seedu
+    seeds = np.zeros(img.shape)
+    for i, interval in enumerate(seeds_intervals):
+        tmp = (img >= interval[0]) * (img <= interval[1])
+        # tmp = skimor.binary_closing(tmp, selem=skimor.disk(1))
+        # tmp = skimor.binary_opening(tmp, selem=skimor.disk(1))
+        seeds += (i + 1) * tmp
+
+    # vypisy
+    if verbose:
+        print 'peaks:', peaks
+        print 'seed intervals:', seeds_intervals
+
+    # vizualizace
+    if show:
+        color_iter = itertools.cycle(['g', 'c', 'm', 'y', 'k'])
+        plt.figure()
+        if smooth:
+            plt.plot(bins, hist_o, 'r', linewidth=2)
+        # plt.fill(bins, hist_s, 'b', alpha=1)
+        plt.plot(bins, hist, 'b', linewidth=3)
+        for i, (ind, interval, color) in enumerate(zip(inds, seeds_intervals, color_iter)):
+            plt.plot(bins[ind], hist[ind], color + 'o', markersize=15)
+            plt.plot((interval[0], interval[0]), (0, hist[ind] + 10), color + '-', linewidth=3)
+            plt.plot((interval[1], interval[1]), (0, hist[ind] + 10), color + '-', linewidth=3)
+        plt.xlim(xmin=0, xmax=255)
+
+        plt.figure()
+        plt.subplot(121), plt.imshow(img, 'gray')
+        plt.subplot(122), plt.imshow(seeds, 'jet', interpolation='nearest')
+        divider = make_axes_locatable(plt.gca())
+        cax = divider.append_axes('right', size='5%', pad=0.05)
+        plt.colorbar(cax=cax, ticks=range(len(peaks) + 1))
+
+        if show_now:
+            plt.show()
+    return seeds, peaks
+
+
+def seeds_from_glcm(img, mask=None, smooth=True, min_int=0, max_int=255, show=False, show_now=True, verbose=False):
+    glcm = graycomatrix_3D(img, mask=mask)
+
+    # thresholding graycomatrix (GCM)
+    c_t = 5
+    thresh = c_t * np.mean(glcm)
+    glcm_t = glcm > thresh
+    glcm_to = skimor.binary_closing(glcm_t, selem=skimor.disk(3))
+    glcm_to = skimor.binary_opening(glcm_to, selem=skimor.disk(3))
+    blob, seeds, labs_f, rvs = blob_from_gcm(glcm_to, img, return_rvs=True, show=show, show_now=False)
+
+    centers = [x.mean() for x in rvs]
+
+    if verbose:
+        print 'centers:', centers
+
+    if show:
+        plt.figure()
+        plt.subplot(131), plt.imshow(img, 'gray'), plt.title('input')
+        plt.subplot(132), plt.imshow(seeds, 'jet', interpolation='nearest'), plt.title('seeds')
+        plt.subplot(133), plt.imshow(labs_f, 'jet', interpolation='nearest'), plt.title('filtered seeds')
+        if show_now:
+            plt.show()
+
+    return seeds, centers
