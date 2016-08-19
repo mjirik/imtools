@@ -4,6 +4,7 @@ from collections import namedtuple
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.patches import Ellipse
 import matplotlib.patches as matpat
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import os
@@ -22,6 +23,8 @@ import skimage.feature as skifea
 import skimage.io as skiio
 import skimage.color as skicol
 from skimage.segmentation import mark_boundaries
+
+from sklearn.cluster import MeanShift, estimate_bandwidth
 
 import scipy.stats as scista
 import scipy.ndimage.morphology as scindimor
@@ -1907,6 +1910,25 @@ def seeds_from_hist(img, mask=None, window='hanning', smooth=True, min_distance=
 
     # urceni histogramu
     hist, bins = skiexp.histogram(pts)
+
+    # ----------
+    # pts2 = img[np.nonzero(mask)]
+    # pts2 = pts2[pts2 >= min_int]
+    # pts2 = pts2[pts2 <= max_int]
+    # hist2, bins2 = skiexp.histogram(pts2)
+    # plt.figure()
+    # # plt.subplot(211)
+    # plt.plot(bins2, hist2, color='r', lw=2)
+    # # plt.fill_between(bins2, hist2, color='b', lw=2)
+    # plt.plot(bins2, hist_smoothing(bins2, hist2, window=window), color='b', lw=2)
+    # # plt.subplot(212)
+    # plt.figure()
+    # plt.plot(bins, hist, color='r', lw=2)
+    # # plt.fill_between(bins, hist, color='b', lw=2)
+    # plt.plot(bins, hist_smoothing(bins, hist, window=window), color='b', lw=2)
+    # plt.show()
+    # ----------
+
     if smooth:
         hist_o = hist.copy()
         hist = hist_smoothing(bins, hist, window=window)
@@ -1951,11 +1973,12 @@ def seeds_from_hist(img, mask=None, window='hanning', smooth=True, min_distance=
         plt.xlim(xmin=0, xmax=255)
 
         plt.figure()
-        plt.subplot(121), plt.imshow(img, 'gray')
-        plt.subplot(122), plt.imshow(seeds, 'jet', interpolation='nearest')
-        divider = make_axes_locatable(plt.gca())
-        cax = divider.append_axes('right', size='5%', pad=0.05)
-        plt.colorbar(cax=cax, ticks=range(len(peaks) + 1))
+        plt.subplot(131), plt.imshow(img, 'gray'), plt.axis('off')
+        plt.subplot(132), plt.imshow(seeds, 'jet', interpolation='nearest'), plt.axis('off')
+        plt.subplot(133), plt.imshow(scindifil.median_filter(seeds, size=3), 'jet', interpolation='nearest'), plt.axis('off')
+        # divider = make_axes_locatable(plt.gca())
+        # cax = divider.append_axes('right', size='5%', pad=0.05)
+        # plt.colorbar(cax=cax, ticks=range(len(peaks) + 1))
 
         if show_now:
             plt.show()
@@ -1980,10 +2003,182 @@ def seeds_from_glcm(img, mask=None, smooth=True, min_int=0, max_int=255, show=Fa
 
     if show:
         plt.figure()
-        plt.subplot(131), plt.imshow(img, 'gray'), plt.title('input')
-        plt.subplot(132), plt.imshow(seeds, 'jet', interpolation='nearest'), plt.title('seeds')
-        plt.subplot(133), plt.imshow(labs_f, 'jet', interpolation='nearest'), plt.title('filtered seeds')
+        plt.subplot(131), plt.imshow(img, 'gray'), plt.title('input'), plt.axis('off')
+        plt.subplot(132), plt.imshow(seeds, 'jet', interpolation='nearest'), plt.title('seeds'), plt.axis('off')
+        plt.subplot(133), plt.imshow(labs_f, 'jet', interpolation='nearest'), plt.title('filtered seeds'), plt.axis('off')
         if show_now:
             plt.show()
 
     return seeds, centers
+
+
+def seeds_from_glcm_mesh(img, mask=None, smooth=True, min_int=0, max_int=255, show=False, show_now=True, verbose=False):
+    mask = (img > 0) * (img < 255)
+    glcm = graycomatrix_3D(img, mask=mask)
+
+    # deriving max number of classes
+    _, peaks = seeds_from_hist(img, min_int=5, max_int=254)
+    num_peaks = len(peaks)
+
+    # finding local maxima in glcm
+    inds = skifea.peak_local_max(np.triu(glcm), min_distance=20, exclude_border=False, indices=True, num_peaks=num_peaks)
+    inds = np.array([int(round(np.mean(x))) for x in inds])
+
+    # sorting the maxima
+    min_coo = -1
+    peaks_str = np.array([glcm[x, x] for x in inds])
+    sorted_idxs = np.argsort(peaks_str)[::-1]
+    inds = inds[sorted_idxs]
+
+    # finding labels
+    glcm_c = skimor.closing(glcm, selem=skimor.disk(3))
+    class_vals = [[] for i in range(len(inds))]
+    labels = []
+    for x in range(256):
+        if glcm_c[x, x] > min_coo:
+            dists = abs(inds - x)
+            idx = np.argmin(dists)
+            labels.append(idx)
+            class_vals[idx].append(x)
+        else:
+            labels.append(-1)
+
+    # deriving  class ellipses and transition lines
+    ellipses = []
+    trans = []
+    for i, c in zip(inds, class_vals):
+        if c:
+            c = np.array(c)
+            trans.append(c.max())
+            i = int(round((c.max() + c.min()) / 2.))
+            cent = [i, i]
+            major_axis = ((c.max() - c.min()) + 1) / 0.7071  # / 2
+            ellipses.append((cent, major_axis))
+
+    # deriving seeds
+    seeds = np.array(labels)[img.flatten()].reshape(img.shape)
+    seeds_f = scindifil.median_filter(seeds, size=3)
+
+    if verbose:
+        print 'inds:', inds
+
+    # visualization
+    if show:
+        # seeds
+        plt.figure()
+        plt.subplot(131), plt.imshow(img, 'gray'), plt.axis('off')
+        plt.subplot(132), plt.imshow(seeds, 'jet', interpolation='nearest'), plt.axis('off')
+        plt.subplot(133), plt.imshow(seeds_f, 'jet', interpolation='nearest'), plt.axis('off')
+
+        # plt.figure()
+        # glcm_lbls
+        # plt.suptitle('nearest neighbor')
+        # plt.subplot(121), plt.imshow(glcm, 'jet')
+        # plt.subplot(122), plt.imshow(glcm, 'jet')
+
+        # peaks
+        plt.figure()
+        plt.subplot(121), plt.imshow(glcm, 'jet')
+        plt.axis('off')
+        plt.subplot(122), plt.imshow(glcm, 'jet')
+        plt.hold(True)
+        for i in inds:
+            plt.plot(i, i, 'wo')# , markersize=14)
+        plt.axis('image')
+        plt.axis('off')
+
+        # ellipses and transition lines
+        plt.figure()
+        plt.imshow(glcm)
+        ax = plt.gca()
+        for e in ellipses:
+            ell = Ellipse(xy=e[0], width=e[1], height=15, angle=45, color='m', ec='k', lw=4)
+            ax.add_artist(ell)
+        for i in trans:
+            plt.plot((2 * i + 1, 0), (0, 2 * i + 1), 'k-', lw=4)
+        plt.axis('image')
+        plt.axis('off')
+        plt.axis([0, 255, 255, 0])
+
+        if show_now:
+            plt.show()
+
+    return seeds_f, inds
+
+def data_from_glcm(glcm):
+    pts = np.argwhere(glcm)
+    counts = [glcm[tuple(i)] for i in pts]
+    data = []
+    for p, c in zip(pts, counts):
+        for i in range(c):
+            data.append(p)
+    data = np.array(data)
+    return data
+
+
+def seeds_from_glcm_meanshift(img, mask=None, smooth=True, min_int=0, max_int=255, show=False, show_now=True, verbose=False):
+    print 'calculating glcm ...',
+    mask = (img > 0) * (img < 255)
+    glcm = graycomatrix_3D(img, mask=mask)
+    print 'done'
+
+    print 'preparing data ...',
+    data = data_from_glcm(glcm)
+    print 'done'
+
+    print 'estimating bandwidth ...',
+    bandwidth = estimate_bandwidth(data, quantile=0.08, n_samples=2000)
+    print 'done'
+
+    print 'fitting mean shift ...',
+    ms = MeanShift(bandwidth=bandwidth, bin_seeding=True)
+    # ms = MeanShift()
+    ms.fit(data)
+    labels = ms.labels_
+    cluster_centers = ms.cluster_centers_
+    print 'done'
+
+    labels_unique = np.unique(labels)
+    n_clusters_ = len(labels_unique)
+
+    print 'number of estimated clusters : %d' % n_clusters_
+    print 'cluster centers :', cluster_centers
+
+    # deriving seeds
+    int_labels = []
+    for x in range(256):
+        int_labels.append(ms.predict((x, x)))
+    seeds = np.array(int_labels)[img.flatten()].reshape(img.shape)
+    seeds_f = scindifil.median_filter(seeds, size=3)
+
+    #cluster centers
+    centers = [int(round(np.array(x).mean())) for x in ms.cluster_centers_]
+
+    # visualization
+    if show:
+        plt.figure()
+        plt.subplot(131), plt.imshow(img, 'gray'), plt.axis('off')
+        plt.subplot(132), plt.imshow(seeds, 'jet', interpolation='nearest'), plt.axis('off')
+        plt.subplot(133), plt.imshow(seeds_f, 'jet', interpolation='nearest'), plt.axis('off')
+
+        plt.figure()
+        plt.subplot(121), plt.imshow(glcm, 'jet')
+        for c in cluster_centers:
+            plt.plot(c[0], c[1], 'o', markerfacecolor='w', markeredgecolor='k', markersize=8)
+        plt.axis('image')
+        plt.axis('off')
+        plt.subplot(122), plt.imshow(glcm, 'jet')
+        colors = itertools.cycle('bgrcmykbgrcmykbgrcmykbgrcmyk')
+        for k, col in zip(range(n_clusters_), colors):
+            my_members = labels == k
+            cluster_center = cluster_centers[k]
+            plt.plot(data[my_members, 0], data[my_members, 1], col + '.')
+            plt.plot(cluster_center[0], cluster_center[1], 'o', markerfacecolor='w', markeredgecolor='k', markersize=8)
+        plt.title('Estimated number of clusters: %d' % n_clusters_)
+        plt.axis('image')
+        plt.axis('off')
+
+        if show_now:
+            plt.show()
+
+    return seeds_f, centers
