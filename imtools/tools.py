@@ -1500,7 +1500,7 @@ def make_neighborhood_matrix(im, nghood=4, roi=None):
     return neighbors_m
 
 
-def graycomatrix_3D(data, mask=None, connectivity=1):
+def graycomatrix_3D(data, mask=None, connectivity=1, min_int=0, max_int=255):
     ndims = data.ndim
 
     if data.max() <= 1:
@@ -1508,6 +1508,8 @@ def graycomatrix_3D(data, mask=None, connectivity=1):
 
     if mask is None:
         mask = np.ones_like(data)
+    mask = np.where(data < min_int, 0, mask)
+    mask = np.where(data > max_int, 0, mask)
     mask_v = mask.flatten()
 
     if ndims == 2:
