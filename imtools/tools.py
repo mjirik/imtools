@@ -469,7 +469,9 @@ def intensity_probability(data, std=20, mask=None, dens_min=10, dens_max=255):
     return probs
 
 
-def get_zunics_compatness(obj):
+def get_zunics_compactness(obj):
+    if obj.ndim == 2:
+        obj = np.expand_dims(obj, 0)
     m000 = obj.sum()
     m200 = get_central_moment(obj, 2, 0, 0)
     m020 = get_central_moment(obj, 0, 2, 0)
@@ -495,6 +497,14 @@ def get_central_moment(obj, p, q, r):
         mom += (el[0] - xc)**p + (el[1] - yc)**q + (el[2] - zc)**r
 
     return mom
+
+
+def compactness(obj):
+    border = (obj - skimor.binary_erosion(obj, np.ones((3, 3)))).sum()
+    area = obj.sum()
+    comp = float(border ** 2) / area
+
+    return comp
 
 
 def opening3D(data, selem=skimor.disk(3), sliceId=0):
@@ -968,9 +978,7 @@ def load_pickle_data(fname, slice_idx=-1, return_datap=False):
 
         # data = tools.windowing(data_dict['data3d'], level=params['win_level'], width=params['win_width'])
         data = data_dict['data3d']
-
         mask = data_dict['segmentation']
-
         voxel_size = data_dict['voxelsize_mm']
 
         # TODO: predelat na 3D data
@@ -1907,8 +1915,9 @@ def seeds_from_hist(img, mask=None, window='hanning', smooth=True, min_distance=
 
     img *= mask
     # odstraneni bodu s velkym gradientem
+    edge = np.zeros(img.shape)
     edge = skifil.scharr(img)
-    edge = skiexp.rescale_intensity(edge, out_range=(0, 1))
+    edge = skiexp.rescale_intensity(em, out_range=(0, 1))
     edge_t = 0.1
     pts = img[np.nonzero(edge < edge_t)]
 
@@ -2126,8 +2135,37 @@ def data_from_glcm(glcm):
 
 def seeds_from_glcm_meanshift(img, mask=None, smooth=True, min_int=0, max_int=255, show=False, show_now=True, verbose=False):
     print 'calculating glcm ...',
-    mask = (img > 0) * (img < 255)
+    mask = (img > min_int) * (img < max_int)
     glcm = graycomatrix_3D(img, mask=mask)
+    print 'done'
+
+    print 'filtering glcm ...',
+    min_num = 2 * glcm.mean()
+    # plt.figure()
+    # plt.subplot(231), plt.imshow(glcm > 0, 'gray')
+    # plt.subplot(232), plt.imshow(glcm > (0.1 * glcm.mean()), 'gray')
+    # plt.subplot(233), plt.imshow(glcm > (0.5 * glcm.mean()), 'gray')
+    # plt.subplot(234), plt.imshow(glcm > (0.8 * glcm.mean()), 'gray')
+    # plt.subplot(235), plt.imshow(glcm > glcm.mean(), 'gray')
+    # plt.subplot(236), plt.imshow(glcm > (2 * glcm.mean()), 'gray')
+    # plt.show()
+    glcm = np.where(glcm < min_num, 0, glcm)
+
+    # removing pts that are far from diagonal
+    diag = np.ones(glcm.shape)
+    k = 50
+    tu = np.triu(diag, -k)
+    tl = np.tril(diag, k)
+    diag = tu * tl
+    plt.figure()
+    plt.subplot(231), plt.imshow(tu, 'gray')
+    plt.subplot(232), plt.imshow(tl, 'gray')
+    plt.subplot(233), plt.imshow(diag, 'gray')
+    plt.subplot(234), plt.imshow(glcm, 'jet', vmax=glcm.mean())
+    plt.subplot(235), plt.imshow(glcm * diag.astype(glcm.dtype), 'jet', vmax=glcm.mean())
+    # plt.show()
+    glcm *= diag.astype(glcm.dtype)
+    # glcm = skimor.closing(glcm, skimor.disk(2))
     print 'done'
 
     print 'preparing data ...',
