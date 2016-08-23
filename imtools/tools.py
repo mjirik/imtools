@@ -615,9 +615,14 @@ def resize3D(data, scale=None, shape=None, sliceId=2, method='cv2'):
 
 
 def resize_ND(data, scale=None, shape=None, slice_id=0, method='cv2'):
+    if shape is None:
+        shape = list(data.shape)
+    else:
+        shape = list(shape)
+
     if data.ndim == 2:
         data = np.expand_dims(data, 0)
-        shape = array(shape).insert(0, 1)
+        shape.insert(0, 1)
         expanded = True
     else:
         expanded = False
@@ -1533,8 +1538,9 @@ def graycomatrix_3D(data, mask=None, connectivity=1, min_int=0, max_int=255):
     for p, nghbs in enumerate(nghbm):
         if mask_v[p]:
             for n in nghbs:
-                if not np.isnan(n) and mask_v[n]:
-                    glcm[data_v[p], data_v[int(n)]] += 1
+                if not np.isnan(n):
+                    if mask_v[int(n)]:
+                        glcm[data_v[p], data_v[int(n)]] += 1
 
     return glcm
 
@@ -2149,7 +2155,7 @@ def seeds_from_glcm_meanshift(img, mask=None, smooth=True, min_int=0, max_int=25
     # deriving seeds
     int_labels = []
     for x in range(256):
-        int_labels.append(ms.predict((x, x)))
+        int_labels.append(ms.predict(np.array([x, x]).reshape(1, -1)))
     seeds = np.array(int_labels)[img.flatten()].reshape(img.shape)
     seeds_f = scindifil.median_filter(seeds, size=3)
 
