@@ -2122,6 +2122,7 @@ def seeds_from_glcm_mesh(img, mask=None, smooth=True, min_int=0, max_int=255, sh
 
     return seeds_f, inds
 
+
 def data_from_glcm(glcm):
     pts = np.argwhere(glcm)
     counts = [glcm[tuple(i)] for i in pts]
@@ -2133,13 +2134,21 @@ def data_from_glcm(glcm):
     return data
 
 
+def _debug(msg, verbose=True, newline=True):
+    if verbose:
+        if newline:
+            print msg
+        else:
+            print msg,
+
+
 def seeds_from_glcm_meanshift(img, mask=None, smooth=True, min_int=0, max_int=255, show=False, show_now=True, verbose=False):
-    print 'calculating glcm ...',
+    _debug('calculating glcm ...', verbose, False)
     mask = (img > min_int) * (img < max_int)
     glcm = graycomatrix_3D(img, mask=mask)
-    print 'done'
+    _debug('done', verbose)
 
-    print 'filtering glcm ...',
+    _debug('filtering glcm ...', verbose, False)
     min_num = 2 * glcm.mean()
     # plt.figure()
     # plt.subplot(231), plt.imshow(glcm > 0, 'gray')
@@ -2153,48 +2162,48 @@ def seeds_from_glcm_meanshift(img, mask=None, smooth=True, min_int=0, max_int=25
 
     # removing pts that are far from diagonal
     diag = np.ones(glcm.shape)
-    k = 50
+    k = 20
     tu = np.triu(diag, -k)
     tl = np.tril(diag, k)
     diag = tu * tl
-    plt.figure()
-    plt.subplot(231), plt.imshow(tu, 'gray')
-    plt.subplot(232), plt.imshow(tl, 'gray')
-    plt.subplot(233), plt.imshow(diag, 'gray')
-    plt.subplot(234), plt.imshow(glcm, 'jet', vmax=glcm.mean())
-    plt.subplot(235), plt.imshow(glcm * diag.astype(glcm.dtype), 'jet', vmax=glcm.mean())
+    # plt.figure()
+    # plt.subplot(231), plt.imshow(tu, 'gray')
+    # plt.subplot(232), plt.imshow(tl, 'gray')
+    # plt.subplot(233), plt.imshow(diag, 'gray')
+    # plt.subplot(234), plt.imshow(glcm, 'jet', vmax=glcm.mean())
+    # plt.subplot(235), plt.imshow(glcm * diag.astype(glcm.dtype), 'jet', vmax=glcm.mean())
     # plt.show()
     glcm *= diag.astype(glcm.dtype)
     # glcm = skimor.closing(glcm, skimor.disk(2))
-    print 'done'
+    _debug('done', verbose)
 
-    print 'preparing data ...',
+    _debug('preparing data ...', verbose, False)
     data = data_from_glcm(glcm)
-    print 'done'
+    _debug('done', verbose)
 
-    print 'estimating bandwidth ...',
+    _debug('estimating bandwidth ...', verbose, False)
     bandwidth = estimate_bandwidth(data, quantile=0.08, n_samples=2000)
-    print 'done'
+    _debug('done', verbose)
 
-    print 'fitting mean shift ...',
+    _debug('fitting mean shift ...', verbose, False)
     ms = MeanShift(bandwidth=bandwidth, bin_seeding=True)
     # ms = MeanShift()
     ms.fit(data)
     labels = ms.labels_
     cluster_centers = ms.cluster_centers_
-    print 'done'
+    _debug('done', verbose)
 
     labels_unique = np.unique(labels)
     n_clusters_ = len(labels_unique)
 
-    print 'number of estimated clusters : %d' % n_clusters_
-    print 'cluster centers :', cluster_centers
+    _debug('number of estimated clusters : %d' % n_clusters_, verbose)
+    _debug('cluster centers: {}'.format(cluster_centers), verbose)
 
     # deriving seeds
     int_labels = []
     for x in range(256):
         int_labels.append(ms.predict(np.array([x, x]).reshape(1, -1)))
-    seeds = np.array(int_labels)[img.flatten()].reshape(img.shape)
+    seeds = np.array(int_labels)[img.flatten()].reshape(img.shape) + 1
     seeds_f = scindifil.median_filter(seeds, size=3)
 
     #cluster centers
@@ -2203,6 +2212,7 @@ def seeds_from_glcm_meanshift(img, mask=None, smooth=True, min_int=0, max_int=25
     # visualization
     if show:
         plt.figure()
+        plt.suptitle('img | seeds | filtered seeds')
         plt.subplot(131), plt.imshow(img, 'gray'), plt.axis('off')
         plt.subplot(132), plt.imshow(seeds, 'jet', interpolation='nearest'), plt.axis('off')
         plt.subplot(133), plt.imshow(seeds_f, 'jet', interpolation='nearest'), plt.axis('off')
