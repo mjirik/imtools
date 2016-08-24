@@ -1131,10 +1131,10 @@ def view_segmentation(datap_1, datap_2=None):
 
 
 def show_3d(data, range=True):
-    if not os.path.exists('../data_viewers/'):
+    if not os.path.exists('/home/tomas/projects/data_viewers'):
         print 'Package data_viewers not found.'
     else:
-        sys.path.append('../data_viewers/')
+        sys.path.append('/home/tomas/projects/data_viewers')
         from dataviewers.viewer_3D import Viewer_3D
         if isinstance(data, tuple):
             # n_data = len(data)
@@ -1162,7 +1162,8 @@ def show_3d(data, range=True):
         app = QtGui.QApplication(sys.argv)
         viewer = Viewer_3D(data_vis, range=True)
         viewer.show()
-        sys.exit(app.exec_())
+        app.exec_()
+        # sys.exit(app.exec_())
 
 
 def arange_figs(imgs, tits=None, max_r=3, max_c=5, same_range=False, colorbar=False, show_now=True):
