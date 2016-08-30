@@ -32,6 +32,7 @@ import scipy.ndimage.measurements as scindimea
 import scipy.ndimage.interpolation as scindiint
 import scipy.ndimage.filters as scindifil
 import scipy.signal as scisig
+import scipy.misc as scimis
 
 import cPickle as pickle
 import gzip
@@ -1636,15 +1637,15 @@ def initialize_graycom(data_in, slice=None, distances=(1, ), scale=0.5, angles=(
     return blob
 
 
-def analyze_glcm(glcm, area_t=200, ecc_t=0.35, show=False, show_now=True):
+def analyze_glcm(glcm, area_t=200, ecc_t=0.35, show=False, show_now=True, verbose=False):
     labs_im = skimea.label(glcm, connectivity=2)
 
-    # plt.figure()
-    # plt.subplot(121), plt.imshow(gcm, 'gray', interpolation='nearest')
-    # plt.subplot(122), plt.imshow(labs_im, 'jet', interpolation='nearest')
-    # plt.show()
+    plt.figure()
+    plt.subplot(121), plt.imshow(glcm, 'gray', interpolation='nearest')
+    plt.subplot(122), plt.imshow(labs_im, 'jet', interpolation='nearest')
+    plt.show()
 
-    blobs = describe_blob(labs_im, area_t=area_t, ecc_t=ecc_t)
+    blobs = describe_blob(labs_im, area_t=area_t, ecc_t=ecc_t, verbose=verbose)
     means = [np.array(b.centroid).mean() for b in blobs]
     stds = 5 / np.array([b.eccentricity for b in blobs])
 
@@ -1714,7 +1715,7 @@ def blob_from_gcm(gcm, data, slice=None, show=False, show_now=True, return_rvs=F
         return blob, seeds, labs_f
 
 
-def describe_blob(labs_im, area_t=200, ecc_t=0.25):
+def describe_blob(labs_im, area_t=200, ecc_t=0.25, verbose=False):
     # TODO: misto ecc kontrolovat jen major_axis?
     props = skimea.regionprops(labs_im)
     blobs = []
@@ -1731,7 +1732,7 @@ def describe_blob(labs_im, area_t=200, ecc_t=0.25):
             eccentricity = minor_axis / major_axis
         except ZeroDivisionError:
             eccentricity = 0
-        print '#{}: area={}, centroid={}, eccentricity={:.2f}'.format(i, area, centroid, eccentricity),
+        msg = '#{}: area={}, centroid={}, eccentricity={:.2f}'.format(i, area, centroid, eccentricity)
 
         if (area > area_t) and (eccentricity > ecc_t):
             centroid = tuple(map(int, np.round(prop.centroid)))
@@ -1739,16 +1740,17 @@ def describe_blob(labs_im, area_t=200, ecc_t=0.25):
             minor_axis = int(round(prop.minor_axis_length / 2))
             angle = int(round(np.degrees(prop.orientation)))
             blobs.append(blob(label, area, centroid, eccentricity, major_axis, minor_axis, angle))
-            print '... OK'
+            msg += '... OK'
         elif area <= area_t:
-            print '... TO SMALL - DISCARDING'
+            msg += '... TO SMALL - DISCARDING'
         elif eccentricity <= ecc_t:
-            print '... SPLITTING'
+            msg += '... SPLITTING'
             splitted = split_blob(labs_im == label, prop)
             for spl in splitted:
                 spl_blob = describe_blob(spl)
                 blobs += spl_blob
                 pass
+        _debug(msg, verbose)
 
     return blobs
 
@@ -2239,3 +2241,17 @@ def seeds_from_glcm_meanshift(img, mask=None, smooth=True, min_int=0, max_int=25
             plt.show()
 
     return seeds_f, centers
+
+
+def match_size(d, shape):
+    print d.shape, shape
+
+    # r = d.copy()
+    # r.resize(shape)
+    r = d.copy()
+    zoom = np.array(shape) / np.array(d.shape).astype(np.float)
+    print zoom
+    r = scindiint.zoom(d, zoom, order=1, prefilter=False)
+    print r.shape
+
+    return r
