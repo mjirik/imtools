@@ -2244,14 +2244,6 @@ def seeds_from_glcm_meanshift(img, mask=None, smooth=True, min_int=0, max_int=25
 
 
 def match_size(d, shape):
-    print d.shape, shape
-
-    # r = d.copy()
-    # r.resize(shape)
-    r = d.copy()
     zoom = np.array(shape) / np.array(d.shape).astype(np.float)
-    print zoom
     r = scindiint.zoom(d, zoom, order=1, prefilter=False)
-    print r.shape
-
     return r
