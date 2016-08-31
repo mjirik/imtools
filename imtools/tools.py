@@ -650,8 +650,11 @@ def resize_ND(data, scale=None, shape=None, slice_id=0, method='cv2'):
     else:
         new_slice_shape = shape[1:]
 
-    new_data = np.zeros(np.hstack((data.shape[0], new_slice_shape)), dtype=np.int)
-    data = data.astype(np.uint8)
+    # new_data = np.zeros(np.hstack((data.shape[0], new_slice_shape)), dtype=np.int)
+    # data = data.astype(np.uint8)
+
+    new_data = np.zeros(np.hstack((data.shape[0], new_slice_shape)), dtype=data.dtype)
+    # data = data.astype(np.uint8)
 
     for i, im in enumerate(data):
         if scale is not None:
@@ -2243,7 +2246,9 @@ def seeds_from_glcm_meanshift(img, mask=None, smooth=True, min_int=0, max_int=25
     return seeds_f, centers
 
 
-def match_size(d, shape):
+def match_size(d, shape, verbose=False):
     zoom = np.array(shape) / np.array(d.shape).astype(np.float)
     r = scindiint.zoom(d, zoom, order=1, prefilter=False)
+    if verbose:
+        print 'in: {}, req: {}, zoom: {}, out: {}'.format(d.shape, shape, zoom, r.shape)
     return r
