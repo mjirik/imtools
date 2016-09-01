@@ -1643,10 +1643,10 @@ def initialize_graycom(data_in, slice=None, distances=(1, ), scale=0.5, angles=(
 def analyze_glcm(glcm, area_t=200, ecc_t=0.35, show=False, show_now=True, verbose=False):
     labs_im = skimea.label(glcm, connectivity=2)
 
-    plt.figure()
-    plt.subplot(121), plt.imshow(glcm, 'gray', interpolation='nearest')
-    plt.subplot(122), plt.imshow(labs_im, 'jet', interpolation='nearest')
-    plt.show()
+    # plt.figure()
+    # plt.subplot(121), plt.imshow(glcm, 'gray', interpolation='nearest')
+    # plt.subplot(122), plt.imshow(labs_im, 'jet', interpolation='nearest')
+    # plt.show()
 
     blobs = describe_blob(labs_im, area_t=area_t, ecc_t=ecc_t, verbose=verbose)
     means = [np.array(b.centroid).mean() for b in blobs]
