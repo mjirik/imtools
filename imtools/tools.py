@@ -1641,6 +1641,7 @@ def initialize_graycom(data_in, slice=None, distances=(1, ), scale=0.5, angles=(
 
 
 def analyze_glcm(glcm, area_t=200, ecc_t=0.35, show=False, show_now=True, verbose=False):
+    glcm = skimor.binary_closing(glcm)
     labs_im = skimea.label(glcm, connectivity=2)
 
     # plt.figure()
