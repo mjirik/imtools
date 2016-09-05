@@ -2260,3 +2260,22 @@ def match_size(d, shape, verbose=False):
     if verbose:
         print 'in: {}, req: {}, zoom: {}, out: {}'.format(d.shape, shape, zoom, r.shape)
     return r
+
+
+def segmentation_accuracy(mask, gt):
+    if mask.shape != gt.shape:
+        mask = resize_ND(mask, shape=gt.shape)
+    precision = (mask * gt).sum() / float(mask.sum())  # how many selected items are relevant
+    recall = (mask * gt).sum() / float(gt.sum())  # how many relevant items are selected
+    if precision + recall == 0:
+        f_measure = 0
+    else:
+        f_measure = 2 * precision * recall / float((precision + recall))
+
+    # print f_measure, precision, recall
+    # plt.figure()
+    # plt.subplot(121), plt.imshow(gt, 'gray', interpolation='nearest'), plt.title('gt')
+    # plt.subplot(122), plt.imshow(mask, 'gray', interpolation='nearest'), plt.title('seg')
+    # plt.show()
+
+    return precision, recall, f_measure
