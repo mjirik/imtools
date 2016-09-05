@@ -39,6 +39,8 @@ import gzip
 
 import cv2
 
+import warnings
+
 try:
     import data_viewers
 except ImportError:
@@ -1276,9 +1278,8 @@ def pyramid(image, scale=2, min_size=(30, 30), inter=None):
 
 
 def pyramid_down(image, scale=2, min_size=(30, 30), inter=None, smooth=False):
-    import cv2
     if inter is None:
-        inter=cv2.INTER_AREA
+        inter = cv2.INTER_AREA
 
     w = int(image.shape[1] / scale)
     img = resize(image, width=w, inter=inter)
@@ -1289,6 +1290,8 @@ def pyramid_down(image, scale=2, min_size=(30, 30), inter=None, smooth=False):
     if img.shape[0] < min_size[1] or img.shape[1] < min_size[0]:
         return None
     else:
+        range = (image.min(), image.max())
+        img = skiexp.rescale_intensity(img, in_range=range, out_range=range)
         return img
 
 
@@ -1519,6 +1522,7 @@ def make_neighborhood_matrix(im, nghood=4, roi=None):
 
 
 def graycomatrix_3D(data, mask=None, connectivity=1, min_int=0, max_int=255):
+    warnings.filterwarnings("error")
     ndims = data.ndim
 
     if data.max() <= 1:
@@ -1553,7 +1557,10 @@ def graycomatrix_3D(data, mask=None, connectivity=1, min_int=0, max_int=255):
             for n in nghbs:
                 if not np.isnan(n):
                     if mask_v[int(n)]:
-                        glcm[data_v[p], data_v[int(n)]] += 1
+                        try:
+                            glcm[data_v[p], data_v[int(n)]] += 1
+                        except:
+                            pass
 
     return glcm
 
