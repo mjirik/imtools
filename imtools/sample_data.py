@@ -120,7 +120,13 @@ def get_sample_data(data_label=None, destination_dir="."):
         if hash_path is None:
             hash_path = label
 
-        computed_hash = checksum(os.path.join(destination_dir, hash_path))
+        try:
+            computed_hash = checksum(os.path.join(destination_dir, hash_path))
+        except:
+            # there is probably no checksumdir module
+            logger.warning("problem with sample_data.checksum()")
+            computed_hash = None
+
         logger.info("dataset '" + label + "'")
         logger.info("expected hash: '" + str(expected_hash) + "'")
         logger.info("computed hash: '" + str(computed_hash) + "'")
