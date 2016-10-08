@@ -86,6 +86,7 @@ data_urls= {
     "biodur_sample": ["http://147.228.240.61/queetech/sample-data/biodur_sample.zip","d459dd5b308ca07d10414b3a3a9000ea"],
     "gensei_slices": ["http://147.228.240.61/queetech/sample-data/gensei_slices.zip", "ef93b121add8e4a133bb086e9e6491c9"],
     "exp_small": ["http://147.228.240.61/queetech/sample-data/exp_small.zip", "0526ba8ea363fe8b5227f5807b7aaca7"],
+    "vincentka": ["http://147.228.240.61/queetech/vincentka.zip", "a30fdabaa39c5ce032a3223ed30b88e3"],
     # není nutné pole, stačí jen string
     # "exp_small": "http://147.228.240.61/queetech/sample-data/exp_small.zip",
 }
@@ -434,8 +435,6 @@ def main():
         logger.setLevel(logging.INFO)
     if args.debug is not None:
         logger.setLevel(int(args.debug))
-
-    print logger.level
 
     get_sample_data(args.labels, destination_dir=args.destination_dir)
 
