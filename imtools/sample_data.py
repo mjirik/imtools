@@ -87,6 +87,7 @@ data_urls= {
     "gensei_slices": ["http://147.228.240.61/queetech/sample-data/gensei_slices.zip", "ef93b121add8e4a133bb086e9e6491c9"],
     "exp_small": ["http://147.228.240.61/queetech/sample-data/exp_small.zip", "0526ba8ea363fe8b5227f5807b7aaca7"],
     "vincentka": ["http://147.228.240.61/queetech/vincentka.zip", "a30fdabaa39c5ce032a3223ed30b88e3"],
+    "vincentka_sample": ["http://147.228.240.61/queetech/sample-data/vincentka_sample.zip"],
     # není nutné pole, stačí jen string
     # "exp_small": "http://147.228.240.61/queetech/sample-data/exp_small.zip",
 }
