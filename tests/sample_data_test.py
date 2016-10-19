@@ -35,10 +35,14 @@ class SampleDataTest(unittest.TestCase):
         # vt.vt2esofspy(yaml_input, yaml_output)
 
     def sample_data_batch_test(self):
-        sd.get_sample_data(["head", "exp_small"], "delete_sample_data")
+        tmp_sample_data_path = "delete_sample_data"
+        if os.path.exists(tmp_sample_data_path):
+            shutil.rmtree(tmp_sample_data_path)
+
+        sd.get_sample_data(["head", "exp_small"], tmp_sample_data_path)
         self.assertTrue(os.path.exists("./delete_sample_data/exp_small/seeds/org-liver-orig003-seeds.pklz"))
         self.assertTrue(os.path.exists("./delete_sample_data/matlab/examples/sample_data/DICOM/digest_article/brain_001.dcm"))
-        shutil.rmtree("delete_sample_data")
+        shutil.rmtree(tmp_sample_data_path)
 
 if __name__ == "__main__":
     unittest.main()
