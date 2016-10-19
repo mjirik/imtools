@@ -8,6 +8,5 @@ pip
 nose
 numpy
 scipy
-pyyaml
 matplotlib
 # vtk
