@@ -39,6 +39,7 @@ class SampleDataTest(unittest.TestCase):
         self.assertTrue(os.path.exists("./delete_sample_data/exp_small/seeds/org-liver-orig003-seeds.pklz"))
         self.assertTrue(os.path.exists("./delete_sample_data/matlab/examples/sample_data/DICOM/digest_article/brain_001.dcm"))
         shutil.rmtree("delete_sample_data")
+        self.assertTrue(False)
 
 if __name__ == "__main__":
     unittest.main()

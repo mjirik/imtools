@@ -76,7 +76,7 @@ def downzip(url, destination='./sample_data/'):
 
 # vessels.pkl nejprve vytvoří prázný adresář s názvem vessels.pkl, pak jej při rozbalování zase smaže
 data_urls= {
-    "head": ["http://147.228.240.61/queetech/sample-data/head.zip", "d41d8cd98f00b204e9800998ecf8427e", "matlab"] ,
+    "head": ["http://147.228.240.61/queetech/sample-data/head.zip", "89e9b60fd23257f01c4a1632ff7bb800", "matlab"] ,
     "jatra_06mm_jenjatra": ["http://147.228.240.61/queetech/sample-data/jatra_06mm_jenjatra.zip", "jatra_06mm_jenjatra/*.dcm"],
     "jatra_5mm": ["http://147.228.240.61/queetech/sample-data/jatra_5mm.zip", '1b9039ffe1ff9af9caa344341c8cec03', "jatra_06mm/*.dcm"],
     "exp": ["http://147.228.240.61/queetech/sample-data/exp.zip", '74f2c10b17b6bd31bd03662df6cf884d'],
@@ -140,6 +140,10 @@ def get_sample_data(data_label=None, destination_dir="."):
             logger.info("finished")
             downloaded_hash = checksum(os.path.join(destination_dir, hash_path))
             logger.info("downloaded hash: '" + str(downloaded_hash) + "'")
+            if downloaded_hash != expected_hash:
+                logger.warning("downloaded hash is different from expected hash\n" + \
+                    "expected hash: '" + str(expected_hash) + "'\n" + \
+                    "downloaded hash: '" + str(downloaded_hash) + "'\n")
 
 def checksum(path, hashfunc='md5'):
     """
