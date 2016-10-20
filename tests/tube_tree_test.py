@@ -13,6 +13,7 @@ import sys
 
 # from imtools import qmisc
 # from imtools import misc
+import imtools.tree_processing
 from imtools.tree_processing import TreeGenerator
 import io3d
 
