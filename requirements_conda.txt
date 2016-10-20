@@ -12,4 +12,4 @@ scikit-image
 opencv
 skelet3d
 checksumdir
-pyqt
+pyqt=4.11
