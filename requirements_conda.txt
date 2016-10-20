@@ -3,7 +3,7 @@ pip
 nose
 numpy
 scipy
-pyyaml=3.9
+pyyaml=3.10
 matplotlib
 vtk
 SimpleITK
