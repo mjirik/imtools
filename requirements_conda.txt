@@ -4,7 +4,6 @@ nose
 numpy
 scipy
 pyyaml=3.9
-yaml=0.1.5
 matplotlib
 vtk
 SimpleITK
