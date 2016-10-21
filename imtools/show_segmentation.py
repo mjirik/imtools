@@ -57,7 +57,6 @@ def showSegmentation(
     segmentation = segmentation[::degrad, ::degrad, ::degrad]
     voxelsize_mm = voxelsize_mm * degrad
 
-    _stats(segmentation)
     if resize_mm is not None:
         logger.debug("resize begin")
         print "resize"
@@ -82,9 +81,15 @@ def showSegmentation(
         qt_app = QApplication(sys.argv)
         logger.debug("qapp constructed")
     if show:
-        view = viewer.QVTKViewer(vtk_file)
-        print ('show viewer')
-        view.exec_()
+
+        import vtkviewer
+        vtkv = vtkviewer.VTKViewer()
+        vtkv.AddFile(vtk_file)
+        vtkv.Start()
+
+        # view = viewer.QVTKViewer(vtk_file)
+        # print ('show viewer')
+        # view.exec_()
 
     return labels
 
@@ -93,6 +98,21 @@ def _stats(data):
     un = np.unique(data)
     for lab in un:
         print lab, " : ", np.sum(data==lab)
+
+def select_labels(segmentation, labels):
+    """
+    return ndimage with zeros and ones based on input labels
+
+    :param data: 3D ndimage
+    :param labels: labels to select
+    :return:
+    """
+    ds = np.zeros(segmentation.shape, np.bool)
+    for i in range(0, len(labels)):
+        ds = ds | (segmentation == labels[i])
+    # ds = ds.astype("uint8")
+    return ds
+
 
 def main():
     logger = logging.getLogger()
@@ -137,15 +157,14 @@ def main():
     # args.label = np.array(eval(args.label))
     # print args.label
     # import pdb; pdb.set_trace()
-    ds = np.zeros(data['data3d'].shape, np.bool)
     if "segmentation" in data.keys() and np.sum(data["segmentation"] > 0):
         segmentation_key = "segmentation"
     else:
         segmentation_key = "data3d"
 
-    for i in range(0, len(args.label)):
-        ds = ds | (data[segmentation_key] == args.label[i])
-    ds = ds.astype("uint8")
+    _stats(data[segmentation_key])
+    ds = select_labels(data[segmentation_key], args.label)
+    # ds = ds.astype("uint8")
     # tonzero_voxels_number = np.sum(ds != 0)
     # if nonzero_voxels_number == 0:
     #     ds = data["data3d"] > 0
