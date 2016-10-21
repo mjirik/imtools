@@ -156,12 +156,12 @@ def main():
     data = io3d.read(args.inputfile, dataplus_format=True)
     # args.label = np.array(eval(args.label))
     # print args.label
-    # import pdb; pdb.set_trace()
     if "segmentation" in data.keys() and np.sum(data["segmentation"] > 0):
         segmentation_key = "segmentation"
     else:
         segmentation_key = "data3d"
 
+    # import pdb; pdb.set_trace()
     _stats(data[segmentation_key])
     ds = select_labels(data[segmentation_key], args.label)
     # ds = ds.astype("uint8")

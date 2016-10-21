@@ -10,3 +10,8 @@ tools for 2D and 3D images
 # Contributors
 
 fill requirements packages into `setup.py` file
+
+
+# Volumetric data 3D visualization
+
+    python python -m  imtools.show_segmentation -i ~/lisa_data/nrn5.pklz -l 2 
