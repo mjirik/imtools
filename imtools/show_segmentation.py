@@ -32,11 +32,20 @@ import misc
 import viewer
 
 
+def _auto_segmentation(segmentation, label=None):
+    if label is None:
+        ma = np.max(segmentation)
+        mi = np.min(segmentation)
+        mn = (ma + mi) * 0.5
+
+        segmentation = segmentation > mn
+    return segmentation
+
 def showSegmentation(
         segmentation,
         voxelsize_mm=np.ones([3, 1]),
         degrad=4,
-        label=1,
+        label=None,
         smoothing=True,
         vtk_file=None,
         qt_app=None,
@@ -47,6 +56,10 @@ def showSegmentation(
     Funkce vrací trojrozměrné porobné jako data['segmentation']
     v data['slab'] je popsáno, co která hodnota znamená
     """
+
+    # if segmentation.dtype != np.bool:
+    #
+
 
     if vtk_file is None:
         vtk_file = "mesh_geom.vtk"
