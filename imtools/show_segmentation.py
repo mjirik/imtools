@@ -44,21 +44,34 @@ def _auto_segmentation(segmentation, label=None):
 def showSegmentation(
         segmentation,
         voxelsize_mm=np.ones([3, 1]),
-        degrad=4,
+        degrad=6,
         label=None,
         smoothing=True,
         vtk_file=None,
         qt_app=None,
         show=True,
-        resize_mm=None
+        resize_mm=None,
+        resize_voxel_number=None
         ):
     """
+
+    :param segmentation:
+    :param voxelsize_mm:
+    :param degrad:
+    :param label:
+    :param smoothing:
+    :param vtk_file:
+    :param qt_app:
+    :param show:
+    :param resize_mm: resize to defined size of voxel
+    :param resize_voxel_number: resize to defined voxel number (aproximatly)
+
+    :return:
+
     Funkce vrací trojrozměrné porobné jako data['segmentation']
     v data['slab'] je popsáno, co která hodnota znamená
     """
 
-    # if segmentation.dtype != np.bool:
-    #
 
 
     if vtk_file is None:
@@ -66,6 +79,11 @@ def showSegmentation(
     vtk_file = os.path.expanduser(vtk_file)
 
     labels = []
+    if resize_voxel_number is not None:
+        nvoxels = np.sum(segmentation)
+        volume = nvoxels * np.prod(voxelsize_mm)
+        voxel_volume = volume / float(resize_voxel_number)
+        resize_mm = voxel_volume ** (1.0/3.0)
 
     segmentation = segmentation[::degrad, ::degrad, ::degrad]
     voxelsize_mm = voxelsize_mm * degrad
@@ -159,6 +177,10 @@ def main():
         default=None,
         help='resize voxel to defined size in milimeters, default is None')
     parser.add_argument(
+        '-rvn', '--resize-voxel-number', type=float,
+        default=None,
+        help='resize voxel to defined number of voxels, default is None')
+    parser.add_argument(
         '-l', '--label', type=int, metavar='N', nargs='+',
         default=[1],
         help='segmentation labels, default 1')
@@ -185,7 +207,8 @@ def main():
 
     outputfile = os.path.expanduser(args.outputfile)
 
-    showSegmentation(ds, degrad=args.degrad, voxelsize_mm=data['voxelsize_mm'], vtk_file=outputfile, resize_mm=args.resize)
+    showSegmentation(ds, degrad=args.degrad, voxelsize_mm=data['voxelsize_mm'], vtk_file=outputfile,
+                     resize_mm=args.resize, resize_voxel_number=args.resize_voxel_number)
 
 if __name__ == "__main__":
     main()

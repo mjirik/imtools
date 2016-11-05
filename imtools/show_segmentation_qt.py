@@ -32,7 +32,8 @@ class ShowSegmentationWidget(QtGui.QWidget):
         self.voxelsize_mm = np.asarray(voxelsize_mm)
         self.slab = slab
         self.resize_mm = None
-        self.degrad = 6
+        self.resize_voxel_number = 10000
+        self.degrad = 1
         self.smoothing=True
         self.vtk_file = "mesh.vtk"
         self.ui_buttons = {}
@@ -54,12 +55,31 @@ class ShowSegmentationWidget(QtGui.QWidget):
         self.init_slab_ui()
 
         self._row += 1
-        resizeQLabel= QLabel('resize_mm')
+        keyword = "resize_voxel_number"
+        resizeQLabel= QLabel('Resize [voxel number]')
         self.mainLayout.addWidget(resizeQLabel, self._row, 1)
 
-        self.ui_buttons["resize_mm"] = QLineEdit()
-        self.ui_buttons["resize_mm"].setText(str(self.resize_mm))
-        self.mainLayout.addWidget(self.ui_buttons['resize_mm'], self._row, 2)
+        self.ui_buttons[keyword] = QLineEdit()
+        self.ui_buttons[keyword].setText(str(self.resize_voxel_number))
+        self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 2)
+
+        self._row += 1
+        keyword = "resize_mm"
+        resizeQLabel= QLabel('Resize [mm]')
+        self.mainLayout.addWidget(resizeQLabel, self._row, 1)
+
+        self.ui_buttons[keyword] = QLineEdit()
+        self.ui_buttons[keyword].setText(str(self.resize_mm))
+        self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 2)
+
+        self._row += 1
+        keyword = "degrad"
+        resizeQLabel= QLabel('Degradation')
+        self.mainLayout.addWidget(resizeQLabel, self._row, 1)
+
+        self.ui_buttons[keyword] = QLineEdit()
+        self.ui_buttons[keyword].setText(str(self.degrad))
+        self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 2)
 
         self._row += 1
         keyword = "smoothing"
@@ -139,19 +159,26 @@ class ShowSegmentationWidget(QtGui.QWidget):
         # self.vtkv.iren.Start()
 
 
+    def _find_None(self, lineedit):
+        text = str(lineedit.text())
 
+        print "find none ", text
+        if text == "None":
+            text = None
+        else:
+            text = float(text)
+
+        return text
 
 
     def action_ui_params(self):
-        self.resize_mm = str(self.ui_buttons['resize_mm'].text())
-        if self.resize_mm == "None":
-            self.resize_mm = None
-        else:
-            self.resize_mm = float(self.resize_mm)
-
+        self.resize_mm = self._find_None(self.ui_buttons['resize_mm'])
+        self.resize_voxel_number = self._find_None(self.ui_buttons['resize_voxel_number'])
+        self.degrad = self._find_None(self.ui_buttons['degrad'])
         self.smoothing = self.ui_buttons['smoothing'].isChecked()
-
         self.vtk_file = str(self.ui_buttons["vtk_file"].text())
+
+        print "degrad", self.degrad
 
     def init_slab(self, slab):
 
@@ -166,7 +193,8 @@ class ShowSegmentationWidget(QtGui.QWidget):
         self.ui_slab = {}
         for label, value in self.slab.iteritems():
             self._row += 1
-            self.ui_slab[label] = QCheckBox(str(label) + "(" + str(value) + ")", self)
+            nvoxels =  np.sum(self.segmentation==value)
+            self.ui_slab[label] = QCheckBox(str(label) + "(" + str(value) + "): " + str(nvoxels), self)
             self.mainLayout.addWidget(self.ui_slab[label], self._row, 1, 1, 6)
             if value != 0:
                 self.ui_slab[label].setCheckState(QtCore.Qt.Checked)
@@ -199,6 +227,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
             voxelsize_mm=self.voxelsize_mm,
             vtk_file=self.vtk_file,
             resize_mm=self.resize_mm,
+            resize_voxel_number=self.resize_voxel_number,
             smoothing=self.smoothing,
             show=False
         )
