@@ -14,34 +14,126 @@ import logging
 
 logger = logging.getLogger(__name__)
 import argparse
-from PyQt4.QtGui import QGridLayout, QLabel, QPushButton, QLineEdit
+from PyQt4.QtGui import QGridLayout, QLabel, QPushButton, QLineEdit, QCheckBox
 from PyQt4 import QtGui
+from PyQt4 import QtCore
 import sys
+import numpy as np
 
 
 class ShowSegmentationWidget(QtGui.QWidget):
-    def __init__(self, data3d, segmentation, slab=None, **nargs):
+    def __init__(self, segmentation, voxelsize_mm=[1,1,1], slab=None, **nargs):
         super(ShowSegmentationWidget, self).__init__()
+        # self.data3d = data3d
+        self.segmentation = segmentation
+        self.voxelsize_mm = np.asarray(voxelsize_mm)
+        self.slab = slab
+        self.resize_mm = None
+        self.degrad = 6
+        self.smoothing=True
+        self.vtk_file = "mesh.vtk"
+        self.ui_buttons = {}
+
+        self.init_slab(slab)
+
         self.initUI()
 
+
+
     def initUI(self):
+
         self.mainLayout = QGridLayout(self)
 
+        self._row = 0
         lblSegConfig = QLabel('Choose configure')
-        self.mainLayout.addWidget(lblSegConfig, 1, 1, 1, 6)
-        self.initLabels()
+        self.mainLayout.addWidget(lblSegConfig, self._row, 1, 1, 6)
 
-        lblSegType = QLabel('Choose type of segmentation')
-        self.mainLayout.addWidget(lblSegType, 5, 1, 1, 6)
-        self.initConfigs()
+        self.init_slab_ui()
 
-        self.lblSegError = QLabel()
-        self.lblSegError.setStyleSheet("color: red;");
-        self.mainLayout.addWidget(self.lblSegError, 10, 1, 1, 6)
+        self._row += 1
+        resizeQLabel= QLabel('resize_mm')
+        self.mainLayout.addWidget(resizeQLabel, self._row, 1)
 
-        lblSegConfigBETA = QLabel('Choose configure (beta)')
-        self.mainLayout.addWidget(lblSegConfigBETA, 11, 1, 1, 6)
-        self.initLabelsAuto()
+        self.ui_buttons["resize_mm"] = QLineEdit()
+        self.ui_buttons["resize_mm"].setText(str(self.resize_mm))
+        self.mainLayout.addWidget(self.ui_buttons['resize_mm'], self._row, 2)
+
+        self._row += 1
+        keyword = "smoothing"
+        # smoothingQLabel= QLabel(keyword)
+        # self.mainLayout.addWidget(smoothingQLabel, self._row, 1)
+
+        self.ui_buttons[keyword] = QCheckBox(keyword, self)
+        # self.ui_buttons[keyword].setTristate(False)
+        if self.smoothing:
+            sm_state = QtCore.Qt.Checked
+        else:
+            sm_state =  QtCore.Qt.Unchecked
+        self.ui_buttons[keyword].setCheckState(sm_state)
+        self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 1)
+
+        self._row += 1
+        self.ui_buttons["Show"] = QPushButton("Show", self)
+        self.ui_buttons["Show"].clicked.connect(self.actionShow)
+        self.mainLayout.addWidget(self.ui_buttons['Show'], self._row, 1, 1, 6)
+
+    def action_ui_params(self):
+        self.resize_mm = str(self.ui_buttons['resize_mm'].text())
+        if self.resize_mm == "None":
+            self.resize_mm = None
+        else:
+            self.resize_mm = float(self.resize_mm)
+
+        self.smoothing = self.ui_buttons['smoothing'].isChecked()
+
+
+    def init_slab(self, slab):
+
+        if slab is None:
+            labels = np.unique(self.segmentation)
+            slab = {}
+            for label in labels:
+                slab[label] = label
+        self.slab = slab
+
+    def init_slab_ui(self):
+        self.ui_slab = {}
+        for label, value in self.slab.iteritems():
+            self._row += 1
+            self.ui_slab[label] = QCheckBox(str(label) + "(" + str(value) + ")", self)
+            self.mainLayout.addWidget(self.ui_slab[label], self._row, 1, 1, 6)
+            if value != 0:
+                self.ui_slab[label].setCheckState(QtCore.Qt.Checked)
+            # self.ui_buttons["Show"].clicked.connect(self.actionShow)
+
+
+
+        pass
+
+    def action_check_slab_ui(self):
+        labels = []
+        for key, val in self.ui_slab.iteritems():
+            if val.isChecked():
+                labels.append(self.slab[key])
+
+        return labels
+
+
+
+    def actionShow(self):
+        import show_segmentation
+        labels = self.action_check_slab_ui()
+        ds = show_segmentation.select_labels(self.segmentation, labels)
+
+        show_segmentation.showSegmentation(
+            # self.segmentation,
+            ds,
+            degrad=self.degrad,
+            voxelsize_mm=self.voxelsize_mm,
+            vtk_file=self.vtk_file,
+            resize_mm=self.resize_mm,
+            smoothing=self.smoothing
+        )
 
     def initLabels(self):
         btnHearth = QPushButton("Hearth", self)
@@ -200,6 +292,8 @@ def main():
     # w = QtGui.QWidget()
     # w = DictEdit(dictionary={'jatra':2, 'ledviny':7})
     datap = io3d.read(args.inputfile, dataplus_format=True)
+    if not 'segmentation' in datap.keys():
+        datap['segmentation'] = datap['data3d']
 
     w = ShowSegmentationWidget(**datap)
     w.resize(250, 150)
