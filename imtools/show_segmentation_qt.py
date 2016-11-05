@@ -14,11 +14,14 @@ import logging
 
 logger = logging.getLogger(__name__)
 import argparse
-from PyQt4.QtGui import QGridLayout, QLabel, QPushButton, QLineEdit, QCheckBox
+from PyQt4.QtGui import QGridLayout, QLabel, QPushButton, QLineEdit, QCheckBox, QFileDialog
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 import sys
 import numpy as np
+
+import vtk
+from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 
 class ShowSegmentationWidget(QtGui.QWidget):
@@ -45,7 +48,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
         self.mainLayout = QGridLayout(self)
 
         self._row = 0
-        lblSegConfig = QLabel('Choose configure')
+        lblSegConfig = QLabel('Labels')
         self.mainLayout.addWidget(lblSegConfig, self._row, 1, 1, 6)
 
         self.init_slab_ui()
@@ -72,10 +75,72 @@ class ShowSegmentationWidget(QtGui.QWidget):
         self.ui_buttons[keyword].setCheckState(sm_state)
         self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 1)
 
+
         self._row += 1
-        self.ui_buttons["Show"] = QPushButton("Show", self)
-        self.ui_buttons["Show"].clicked.connect(self.actionShow)
-        self.mainLayout.addWidget(self.ui_buttons['Show'], self._row, 1, 1, 6)
+        keyword = "vtk_file"
+        vtk_fileQLabel= QLabel("Output VTK file")
+        self.mainLayout.addWidget(vtk_fileQLabel, self._row, 1)
+
+        self.ui_buttons[keyword] = QLineEdit()
+        self.ui_buttons[keyword].setText(str(self.vtk_file))
+        self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 2)
+        keyword = "vkt_file_button"
+        self.ui_buttons[keyword] = QPushButton("Set", self)
+        self.ui_buttons[keyword].clicked.connect(self.action_select_vtk_file)
+        self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 3)
+
+        self._row += 1
+        keyword = "Show"
+        self.ui_buttons[keyword] = QPushButton(keyword, self)
+        self.ui_buttons[keyword].clicked.connect(self.actionShow)
+        self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 1, 1, 3)
+
+        self._row += 1
+        keyword = "Add extern file"
+        self.ui_buttons[keyword] = QPushButton(keyword, self)
+        self.ui_buttons[keyword].clicked.connect(self.action_add_file)
+        self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 1, 1, 3)
+
+        # vtk + pyqt
+        self.renderer = vtk.vtkRenderer()
+        self.vtkWidget = QVTKRenderWindowInteractor(self)
+        self.mainLayout.addWidget(self.vtkWidget, 0, 4, self._row + 1, 1)
+        self.renWin = self.vtkWidget.GetRenderWindow()
+        self.renWin.AddRenderer(self.renderer)
+
+
+        # vtkviewer
+        import vtkviewer
+        self.vtkv = vtkviewer.VTKViewer()
+        self.vtkv.renderer = self.renderer
+        self.vtkv.iren = self.vtkWidget
+        self.vtkv.renWin = self.renWin
+        self.vtkWidget.resize(300,300)
+        self.updateGeometry()
+        self.vtkv_started = False
+
+
+
+    def vtkv_start(self):
+        if not self.vtkv_started:
+            self.vtkv.Start()
+
+
+    def action_select_vtk_file(self):
+        self.ui_buttons["vtk_file"].setText(QFileDialog.getSaveFileName())
+
+    def action_add_file(self):
+        self.vtkv.AddFile(str(QFileDialog.getOpenFileName()))
+        self.vtkv_start()
+
+        # self.vtkv.Start()
+        # or show win
+        # self.renWin.Render()
+        # self.vtkv.iren.Start()
+
+
+
+
 
     def action_ui_params(self):
         self.resize_mm = str(self.ui_buttons['resize_mm'].text())
@@ -86,6 +151,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
 
         self.smoothing = self.ui_buttons['smoothing'].isChecked()
 
+        self.vtk_file = str(self.ui_buttons["vtk_file"].text())
 
     def init_slab(self, slab):
 
@@ -123,6 +189,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
     def actionShow(self):
         import show_segmentation
         labels = self.action_check_slab_ui()
+        self.action_ui_params()
         ds = show_segmentation.select_labels(self.segmentation, labels)
 
         show_segmentation.showSegmentation(
@@ -132,118 +199,15 @@ class ShowSegmentationWidget(QtGui.QWidget):
             voxelsize_mm=self.voxelsize_mm,
             vtk_file=self.vtk_file,
             resize_mm=self.resize_mm,
-            smoothing=self.smoothing
+            smoothing=self.smoothing,
+            show=False
         )
 
-    def initLabels(self):
-        btnHearth = QPushButton("Hearth", self)
-        btnHearth.setCheckable(True)
-        btnHearth.clicked.connect(self.configEvent)
-        self.mainLayout.addWidget(btnHearth, 2, 1)
+        # self._run_viewer()
+        self.vtkv.AddFile(self.vtk_file)
+        self.vtkv.Start()
 
-        btnKidneyL = QPushButton("Kidney Left", self)
-        btnKidneyL.setCheckable(True)
-        btnKidneyL.clicked.connect(self.configEvent)
-        self.mainLayout.addWidget(btnKidneyL, 2, 2)
 
-        btnKidneyR = QPushButton("Kidney Right", self)
-        btnKidneyR.setCheckable(True)
-        btnKidneyR.clicked.connect(self.configEvent)
-        self.mainLayout.addWidget(btnKidneyR, 2, 3)
-
-        btnLiver = QPushButton("Liver", self)
-        btnLiver.setCheckable(True)
-        btnLiver.clicked.connect(self.configEvent)
-        self.mainLayout.addWidget(btnLiver, 2, 4)
-
-        self.group = QtGui.QButtonGroup()
-        self.group.addButton(btnHearth)
-        self.group.addButton(btnKidneyL)
-        self.group.addButton(btnKidneyR)
-        self.group.addButton(btnLiver)
-        self.group.setId(btnHearth, 1)
-        self.group.setId(btnKidneyL, 2)
-        self.group.setId(btnKidneyR, 3)
-        self.group.setId(btnLiver, 4)
-
-    def initLabelsAuto(self):
-        position = 1
-        self.groupA = QtGui.QButtonGroup()
-        for key, value in self.oseg.slab.items():
-            btnLabel = QPushButton(key)
-            btnLabel.setCheckable(True)
-            btnLabel.clicked.connect(self.configAutoEvent)
-            self.mainLayout.addWidget(btnLabel, 12, position)
-            self.groupA.addButton(btnLabel)
-            self.groupA.setId(btnLabel, position)
-            position += 1
-
-    def configAutoEvent(self):
-        alt_seg_params = {
-            "output_label": 'left kidney',
-            'clean_seeds_after_update_parameters': True,
-        }
-        id = self.groupA.checkedId()
-        print id
-        selected_label = self.oseg.slab.keys()[id - 1]
-        alt_seg_params['output_label'] = selected_label
-        self.oseg.update_parameters(alt_seg_params)
-
-    def initConfigs(self):
-        self.btnSegManual = QPushButton("Manual", self)
-        # btnSegManual.clicked.connect(self.btnManualSeg)
-        self.mainLayout.addWidget(self.btnSegManual, 6, 1)
-
-        self.btnSegSemiAuto = QPushButton("Semi-automatic", self)
-        # btnSegSemiAuto.clicked.connect(self.btnSemiautoSeg)
-        self.mainLayout.addWidget(self.btnSegSemiAuto, 6, 2)
-
-        self.btnSegMask = QPushButton("Mask", self)
-        # btnSegMask.clicked.connect(self.maskRegion)
-        self.mainLayout.addWidget(self.btnSegMask, 6, 3)
-
-        self.btnSegPV = QPushButton("Portal Vein", self)
-        # btnSegPV.clicked.connect(self.btnPortalVeinSegmentation)
-        self.mainLayout.addWidget(self.btnSegPV, 6, 4)
-
-        self.btnSegHV = QPushButton("Hepatic Vein", self)
-        # btnSegHV.clicked.connect(self.btnHepaticVeinsSegmentation)
-        self.mainLayout.addWidget(self.btnSegHV, 6, 5)
-
-        self.disableSegType()
-
-    def configEvent(self, event):
-        id = self.group.checkedId()
-        self.lblSegError.setText("")
-        if id == 1:
-            self.oseg.update_parameters_based_on_label("label hearth")
-            self.enableSegType()
-        elif id == 2:
-            self.oseg.update_parameters_based_on_label("label kidney L")
-            self.enableSegType()
-        elif id == 3:
-            self.oseg.update_parameters_based_on_label("label kidney R")
-            self.enableSegType()
-        elif id == 4:
-            self.oseg.update_parameters_based_on_label("label liver")
-            self.enableSegType()
-        else:
-            self.lblSegError.setText("Unknown error: Config have not been set.")
-            self.disableSegType()
-
-    def enableSegType(self):
-        self.btnSegManual.setDisabled(False)
-        self.btnSegSemiAuto.setDisabled(False)
-        self.btnSegMask.setDisabled(False)
-        self.btnSegPV.setDisabled(False)
-        self.btnSegHV.setDisabled(False)
-
-    def disableSegType(self):
-        self.btnSegManual.setDisabled(True)
-        self.btnSegSemiAuto.setDisabled(True)
-        self.btnSegMask.setDisabled(True)
-        self.btnSegPV.setDisabled(True)
-        self.btnSegHV.setDisabled(True)
 
 
 def main():

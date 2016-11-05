@@ -90,10 +90,10 @@ def showSegmentation(
         mesh_data = gen_mesh_from_voxels_mc(segmentation, voxelsize_mm * 1.0e-2)
         # mesh_data.coors +=
     mesh_data.write(vtk_file)
-    if qt_app is None:
-        qt_app = QApplication(sys.argv)
-        logger.debug("qapp constructed")
     if show:
+        if qt_app is None:
+            qt_app = QApplication(sys.argv)
+            logger.debug("qapp constructed")
 
         import vtkviewer
         vtkv = vtkviewer.VTKViewer()
