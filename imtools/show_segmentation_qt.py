@@ -25,8 +25,14 @@ from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 
 class ShowSegmentationWidget(QtGui.QWidget):
-    def __init__(self, segmentation, voxelsize_mm=[1,1,1], slab=None, **nargs):
+    def __init__(self, *args, **kwargs):
         super(ShowSegmentationWidget, self).__init__()
+        self.ui_buttons = {}
+        self.ui_slab = {}
+        self.add_data(*args, **kwargs)
+        self.initUI()
+
+    def add_data(self, segmentation, voxelsize_mm=[1,1,1], slab=None, **kwargs):
         # self.data3d = data3d
         self.segmentation = segmentation
         self.voxelsize_mm = np.asarray(voxelsize_mm)
@@ -36,11 +42,10 @@ class ShowSegmentationWidget(QtGui.QWidget):
         self.degrad = 1
         self.smoothing=True
         self.vtk_file = "mesh.vtk"
-        self.ui_buttons = {}
 
         self.init_slab(slab)
 
-        self.initUI()
+
 
 
 
@@ -52,8 +57,12 @@ class ShowSegmentationWidget(QtGui.QWidget):
         lblSegConfig = QLabel('Labels')
         self.mainLayout.addWidget(lblSegConfig, self._row, 1, 1, 6)
 
-        self.init_slab_ui()
+        # self.slab_widget = QGridLayout(self)
+        # self.mainLayout.addWidget(self.slab_widget, self._row, 1)
 
+        self.update_slab_ui()
+
+        self._row = 10
         self._row += 1
         keyword = "resize_voxel_number"
         resizeQLabel= QLabel('Resize [voxel number]')
@@ -183,16 +192,22 @@ class ShowSegmentationWidget(QtGui.QWidget):
     def init_slab(self, slab):
 
         if slab is None:
-            labels = np.unique(self.segmentation)
             slab = {}
-            for label in labels:
-                slab[label] = label
+            if self.segmentation is not None:
+                labels = np.unique(self.segmentation)
+                for label in labels:
+                    slab[label] = label
         self.slab = slab
 
-    def init_slab_ui(self):
+    def update_slab_ui(self):
+        # remove old widgets
+        for key, val in self.ui_slab.iteritems():
+            val.deleteLater()
         self.ui_slab = {}
+        # _row_slab = 0
         for label, value in self.slab.iteritems():
             self._row += 1
+            # _row_slab += 1
             nvoxels =  np.sum(self.segmentation==value)
             self.ui_slab[label] = QCheckBox(str(label) + "(" + str(value) + "): " + str(nvoxels), self)
             self.mainLayout.addWidget(self.ui_slab[label], self._row, 1, 1, 6)
