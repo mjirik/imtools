@@ -30,7 +30,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
         self.ui_buttons = {}
         self.ui_slab = {}
 
-        self.show_load_button = True
+        self.show_load_button = False
         if "show_load_button" in kwargs:
             self.show_load_button = kwargs.pop("show_load_button")
 
@@ -74,7 +74,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
             keyword = "add_data_file"
             self.ui_buttons[keyword] = QPushButton("Load volumetric data", self)
             self.ui_buttons[keyword].clicked.connect(self._ui_callback_add_data_file)
-            self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 1)
+            self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 1, 1, 3)
 
         self._row += 1
         lblSegConfig = QLabel('Labels')
@@ -99,6 +99,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
         keyword = "resize_mm"
         resizeQLabel= QLabel('Resize [mm]')
         self.mainLayout.addWidget(resizeQLabel, self._row, 1)
+        self.mainLayout.setColumnMinimumWidth(2, 100)
 
         self.ui_buttons[keyword] = QLineEdit()
         self.ui_buttons[keyword].setText(str(self.resize_mm))
@@ -237,7 +238,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
             # _row_slab += 1
             nvoxels =  np.sum(self.segmentation==value)
             self.ui_slab[label] = QCheckBox(str(label) + "(" + str(value) + "): " + str(nvoxels), self)
-            self.mainLayout.addWidget(self.ui_slab[label], _row, 1) #, 1, 6)
+            self.mainLayout.addWidget(self.ui_slab[label], _row, 1, 1, 2)
             if value != 0:
                 self.ui_slab[label].setCheckState(QtCore.Qt.Checked)
             # self.ui_buttons["Show"].clicked.connect(self.actionShow)
@@ -307,7 +308,7 @@ def main():
     parser.add_argument(
         '-i', '--inputfile',
         default=None,
-        required=True,
+        # required=True,
         help='input file'
     )
     parser.add_argument(
@@ -328,11 +329,17 @@ def main():
 
     # w = QtGui.QWidget()
     # w = DictEdit(dictionary={'jatra':2, 'ledviny':7})
-    datap = io3d.read(args.inputfile, dataplus_format=True)
-    if not 'segmentation' in datap.keys():
-        datap['segmentation'] = datap['data3d']
+    if args.inputfile is None:
+        datap = {
+            'segmentation': None
+        }
+    else:
+        datap = io3d.read(args.inputfile, dataplus_format=True)
+        if not 'segmentation' in datap.keys():
+            datap['segmentation'] = datap['data3d']
 
-    w = ShowSegmentationWidget(**datap)
+    # import ipdb; ipdb.set_trace()
+    w = ShowSegmentationWidget(show_load_button=True,**datap)
     w.resize(250, 150)
     w.move(300, 300)
     w.setWindowTitle('Simple')
