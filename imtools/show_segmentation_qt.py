@@ -29,8 +29,21 @@ class ShowSegmentationWidget(QtGui.QWidget):
         super(ShowSegmentationWidget, self).__init__()
         self.ui_buttons = {}
         self.ui_slab = {}
+
+        self.show_load_button = True
+        if "show_load_button" in kwargs:
+            self.show_load_button = kwargs.pop("show_load_button")
+
         self.add_data(*args, **kwargs)
         self.initUI()
+
+    def add_data_file(self, filename):
+        import io3d
+        datap = io3d.read(filename, dataplus_format=True)
+        if not 'segmentation' in datap.keys():
+            datap['segmentation'] = datap['data3d']
+
+        self.add_data(**datap)
 
     def add_data(self, segmentation, voxelsize_mm=[1,1,1], slab=None, **kwargs):
         # self.data3d = data3d
@@ -45,6 +58,8 @@ class ShowSegmentationWidget(QtGui.QWidget):
 
         self.init_slab(slab)
 
+        self.update_slab_ui()
+
 
 
 
@@ -54,13 +69,21 @@ class ShowSegmentationWidget(QtGui.QWidget):
         self.mainLayout = QGridLayout(self)
 
         self._row = 0
+
+        if self.show_load_button:
+            keyword = "add_data_file"
+            self.ui_buttons[keyword] = QPushButton("Load volumetric data", self)
+            self.ui_buttons[keyword].clicked.connect(self._ui_callback_add_data_file)
+            self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 1)
+
+        self._row += 1
         lblSegConfig = QLabel('Labels')
         self.mainLayout.addWidget(lblSegConfig, self._row, 1, 1, 6)
 
         # self.slab_widget = QGridLayout(self)
         # self.mainLayout.addWidget(self.slab_widget, self._row, 1)
 
-        self.update_slab_ui()
+        self._row = self.update_slab_ui()
 
         self._row = 10
         self._row += 1
@@ -127,7 +150,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
         self._row += 1
         keyword = "Add extern file"
         self.ui_buttons[keyword] = QPushButton(keyword, self)
-        self.ui_buttons[keyword].clicked.connect(self.action_add_file)
+        self.ui_buttons[keyword].clicked.connect(self._ui_action_add_vtk_file)
         self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 1, 1, 3)
 
         # vtk + pyqt
@@ -158,7 +181,10 @@ class ShowSegmentationWidget(QtGui.QWidget):
     def action_select_vtk_file(self):
         self.ui_buttons["vtk_file"].setText(QFileDialog.getSaveFileName())
 
-    def action_add_file(self):
+    def _ui_callback_add_data_file(self):
+        self.add_data_file(str(QFileDialog.getOpenFileName()))
+
+    def _ui_action_add_vtk_file(self):
         self.vtkv.AddFile(str(QFileDialog.getOpenFileName()))
         self.vtkv_start()
 
@@ -200,20 +226,23 @@ class ShowSegmentationWidget(QtGui.QWidget):
         self.slab = slab
 
     def update_slab_ui(self):
+        _row = 1
         # remove old widgets
         for key, val in self.ui_slab.iteritems():
             val.deleteLater()
         self.ui_slab = {}
         # _row_slab = 0
         for label, value in self.slab.iteritems():
-            self._row += 1
+            _row += 1
             # _row_slab += 1
             nvoxels =  np.sum(self.segmentation==value)
             self.ui_slab[label] = QCheckBox(str(label) + "(" + str(value) + "): " + str(nvoxels), self)
-            self.mainLayout.addWidget(self.ui_slab[label], self._row, 1, 1, 6)
+            self.mainLayout.addWidget(self.ui_slab[label], _row, 1) #, 1, 6)
             if value != 0:
                 self.ui_slab[label].setCheckState(QtCore.Qt.Checked)
             # self.ui_buttons["Show"].clicked.connect(self.actionShow)
+
+        return _row
 
 
 
