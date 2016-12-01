@@ -227,7 +227,7 @@ ok)')
         output = uiT.run()
 
     # Vypocet binarni matice.
-    if output == None:  # noqa
+    if output is None:  # noqa
 
         logger.debug('Zadna data k vraceni! (output == None)')
 
