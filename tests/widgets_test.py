@@ -58,7 +58,7 @@ class MyTestCase(unittest.TestCase):
         app.exec_()
 
 
-    # @attr('interactive')
+    @attr('interactive')
     def test_show_segmentation_qt_widget_hidden_buttons(self):
         # = np.zeros([10, 10, 10])
         import imtools
