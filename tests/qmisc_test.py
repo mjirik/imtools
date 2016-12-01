@@ -140,6 +140,7 @@ class QmiscTest(unittest.TestCase):
         new_filename = misc.suggest_filename(filename, exists=False)
         self.assertTrue(new_filename == "mujsoubor-a24.txt")
 
+    @unittest.skip("getVersionString is not used anymore")
     def test_getVersionString(self):
         """
         getVersionString is not used anymore
