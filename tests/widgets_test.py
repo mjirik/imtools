@@ -73,6 +73,7 @@ class MyTestCase(unittest.TestCase):
         sw = ssqt.ShowSegmentationWidget(None, show_load_button=True)
         self.assertIn("add_data_file", sw.ui_buttons.keys())
 
+    @attr('interactive')
     def test_add_data_and_show(self):
         """
         creates VTK file from input data
