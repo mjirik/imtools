@@ -52,6 +52,7 @@ requirements:
     - vtk
     - skelet3d >=1.5.3
     - checksumdir
+    - vtkviewer
 #    - opencv
 
 test:
