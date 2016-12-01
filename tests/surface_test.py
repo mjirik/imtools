@@ -30,7 +30,7 @@ class SurfaceTest(unittest.TestCase):
         import imtools.sample_data
         data_path = 'sample_data/gensei_slices/'
         if not os.path.exists(data_path):
-            imtools.sample_data.get_sample_data("gensei_slices", 'sample_data/')
+            imtools.sample_data.get("gensei_slices", 'sample_data/')
         dr = io3d.datareader.DataReader()
         datap = dr.Get3DData(datapath=data_path,
                              dataplus_format=True)

@@ -64,6 +64,9 @@ def downzip(url, destination='./sample_data/'):
     """
 
     # url = "http://147.228.240.61/queetech/sample-data/jatra_06mm_jenjatra.zip"
+    logmsg = "downloading from '" + url + "'"
+    print logmsg
+    logger.debug(logmsg)
     local_file_name = os.path.join(destination, 'tmp.zip')
     urllibr.urlretrieve(url, local_file_name)
     datafile = zipfile.ZipFile(local_file_name)
@@ -94,6 +97,15 @@ data_urls= {
 }
 
 def get_sample_data(data_label=None, destination_dir="."):
+    """
+    Same as get() due to back compatibility
+    :param data_label:
+    :param destination_dir:
+    :return:
+    """
+    get(data_label=data_label, destination_dir=destination_dir)
+
+def get(data_label=None, destination_dir="."):
     """
     Download sample data by data label. Labels can be listed by sample_data.data_urls.keys()
     :param data_label: label of data. If it is set to None, all data are downloaded
@@ -442,7 +454,7 @@ def main():
     if args.debug is not None:
         logger.setLevel(int(args.debug))
 
-    get_sample_data(args.labels, destination_dir=args.destination_dir)
+    get(args.labels, destination_dir=args.destination_dir)
 
                 #submodule_update()
 
