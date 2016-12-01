@@ -105,7 +105,8 @@ def showSegmentation(
         # mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
 
     else:
-        mesh_data = gen_mesh_from_voxels_mc(segmentation, voxelsize_mm * 1.0e-2)
+        pass
+        # mesh_data = gen_mesh_from_voxels_mc(segmentation, voxelsize_mm * 1.0e-2)
         # mesh_data.coors +=
     mesh_data.write(vtk_file)
     if show:

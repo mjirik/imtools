@@ -143,10 +143,11 @@ class ShowSegmentationWidget(QtGui.QWidget):
         self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 3)
 
         self._row += 1
-        keyword = "Show"
+        keyword = "Show volume"
         self.ui_buttons[keyword] = QPushButton(keyword, self)
         self.ui_buttons[keyword].clicked.connect(self.actionShow)
         self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 1, 1, 3)
+
 
         self._row += 1
         keyword = "Add extern file"
@@ -154,10 +155,20 @@ class ShowSegmentationWidget(QtGui.QWidget):
         self.ui_buttons[keyword].clicked.connect(self._ui_action_add_vtk_file)
         self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 1, 1, 3)
 
+        self._row += 1
+        keyword = "Clear"
+        self.ui_buttons[keyword] = QPushButton(keyword, self)
+        self.ui_buttons[keyword].clicked.connect(self.clear_3d_viewer)
+        self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 1, 1, 3)
+
         # vtk + pyqt
+        self._viewer_height = self._row
+        self._init_3d_viewer()
+
+    def _init_3d_viewer(self):
         self.renderer = vtk.vtkRenderer()
         self.vtkWidget = QVTKRenderWindowInteractor(self)
-        self.mainLayout.addWidget(self.vtkWidget, 0, 4, self._row + 1, 1)
+        self.mainLayout.addWidget(self.vtkWidget, 0, 4, self._viewer_height + 1, 1)
         self.renWin = self.vtkWidget.GetRenderWindow()
         self.renWin.AddRenderer(self.renderer)
 
@@ -197,6 +208,22 @@ class ShowSegmentationWidget(QtGui.QWidget):
         # self.renWin.Render()
         # self.vtkv.iren.Start()
 
+    def clear_3d_viewer(self):
+        ren = self.renderer
+        actors = self.renderer.GetActors()
+        act = actors.GetLastActor()
+        while act is not None:
+            ren.RemoveActor(act)
+            act = actors.GetLastActor()
+
+        # self.renderer.removeAllViewProps()
+        # self.renderer = None
+        # self.mainLayout.removeWidget(self.vtkWidget)
+        # self.vtkWidget.deleteLater()
+        # self.vtkWidget = None
+        # self.renWin = None
+        # self._init_3d_viewer()
+        # self.vtkWidget.show()
 
     def _find_None(self, lineedit):
         text = str(lineedit.text())

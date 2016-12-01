@@ -80,20 +80,35 @@ class MyTestCase(unittest.TestCase):
         :return:
         """
         import numpy as np
-        segmentation = np.zeros([10, 10, 10])
-        segmentation[3:7, 2:7, 2:8] = 1
-        segmentation[8, 2, 5:8] = 0
-        segmentation[3:4, 4:7, 2:4] = 0
-        segmentation[6:7, 2, :] = 0
+        segmentation = np.zeros([20, 30, 40])
+        # generate test data
+        segmentation[6:10, 7:24, 10:37] = 1
+        segmentation[6:10, 7, 10] = 0
+        segmentation[6:10, 23, 10] = 0
+        segmentation[6:10, 7, 36] = 0
+        segmentation[6:10, 23, 36] = 0
+        segmentation[2:18, 12:19, 18:28] = 2
+
+        data3d = segmentation * 100 + np.random.random(segmentation.shape) * 30
+        voxelsize_mm=[3,2,1]
+
+        import io3d
+        datap = {
+            'data3d': data3d,
+            'segmentation': segmentation,
+            'voxelsize_mm': voxelsize_mm
+        }
+        io3d.write(datap, "donut.pklz")
 
         import imtools.show_segmentation_qt as ssqt
         app = QApplication(sys.argv)
         sw = ssqt.ShowSegmentationWidget(None, show_load_button=True)
-        sw.add_data(segmentation)
-        QTest.mouseClick(sw.ui_buttons['Show'], Qt.LeftButton)
-        sw.show()
+        sw.smoothing = False
+        sw.add_data(segmentation, voxelsize_mm=voxelsize_mm)
+        QTest.mouseClick(sw.ui_buttons['Show volume'], Qt.LeftButton)
         # sw.add_vtk_file("~/projects/imtools/mesh.vtk")
-        # app.exec_()
+        sw.show()
+        app.exec_()
 
 
 if __name__ == '__main__':
