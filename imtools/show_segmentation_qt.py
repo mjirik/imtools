@@ -185,9 +185,12 @@ class ShowSegmentationWidget(QtGui.QWidget):
     def _ui_callback_add_data_file(self):
         self.add_data_file(str(QFileDialog.getOpenFileName()))
 
-    def _ui_action_add_vtk_file(self):
-        self.vtkv.AddFile(str(QFileDialog.getOpenFileName()))
+    def add_vtk_file(self, filename):
+        self.vtkv.AddFile(filename)
         self.vtkv_start()
+
+    def _ui_action_add_vtk_file(self):
+        self.add_vtk_file(str(QFileDialog.getOpenFileName()))
 
         # self.vtkv.Start()
         # or show win

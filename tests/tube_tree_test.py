@@ -63,29 +63,6 @@ class TubeTreeTest(unittest.TestCase):
         vt.vt2esofspy(yaml_input, yaml_output)
 
 
-    def test_show_segmentation_qt_widget(self):
-        import PyQt4
-        from PyQt4.QtGui import QApplication, QFileDialog
-        # from teigen.dictwidgetqt import DictWidget
-        # from teigen.generators.cylindersqt import CylindersWidget
-        import imtools.show_segmentation_qt as ssqt
-        app = QApplication(sys.argv)
-        sw = ssqt.ShowSegmentationWidget(None)
-        sw.show()
-        app.exec_()
-
-    def test_show_segmentation_qt_widget_hidden_buttons(self):
-        import PyQt4
-        from PyQt4.QtGui import QApplication, QFileDialog
-        # from teigen.dictwidgetqt import DictWidget
-        # from teigen.generators.cylindersqt import CylindersWidget
-        import imtools.show_segmentation_qt as ssqt
-        app = QApplication(sys.argv)
-        sw = ssqt.ShowSegmentationWidget(None, show_buttons=False)
-        # sw.show()
-        sw.show_file("~/projects/imtools/mesh.vtk")
-        app.exec_()
-
 
 if __name__ == "__main__":
     unittest.main()
