@@ -18,13 +18,14 @@ class MyTestCase(unittest.TestCase):
         uit = imtools.uiThreshold.uiThreshold(datap['data3d'], datap['voxelsize_mm'], interactivity=False, threshold=100)
         uit.run()
 
+    @attr('interactive')
     def test_ui_threshold(self):
         datap = imtools.sample_data.generate()
         uit = imtools.uiThreshold.uiThreshold(datap['data3d'], datap['voxelsize_mm'], interactivity=True, threshold=100)
         uit.run()
         plt.show()
 
-
+    @attr('interactive')
     def test_ui_threshold_qt(self):
         datap = imtools.sample_data.generate()
         uit = imtools.uiThreshold.uiThreshold(datap['data3d'], datap['voxelsize_mm'], interactivity=True, threshold=100)
