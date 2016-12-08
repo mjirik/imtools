@@ -33,6 +33,8 @@ from PyQt4 import QtGui, QtCore
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 
+import numpy as np
+
 class uiThresholdQt(QtGui.QDialog):
     def __init__(self, *pars, **params):
     # def __init__(self,parent=None):
@@ -88,7 +90,7 @@ class uiThreshold:
                  useSeedsOfCompactObjects=True,
                  binaryClosingIterations=2, binaryOpeningIterations=0,
                  seeds=None, cmap=matplotlib.cm.Greys_r, fillHoles=True, 
-                 figure=None, auto_method=''):
+                 figure=None, auto_method='', threshold_upper=None):
         """
 
         Inicialitacni metoda.
@@ -139,6 +141,8 @@ class uiThreshold:
         self.seeds = seeds
         self.useSeedsOfCompactObjects = useSeedsOfCompactObjects
         self.fillHoles = fillHoles
+
+        self.threshold_upper = threshold_upper
 
         if (sys.version_info[0] < 3):
 
@@ -444,7 +448,7 @@ class uiThreshold:
 
         # Prahovani (smin, smax)
 
-        max_threshold = -1
+        max_threshold = self.threshold_upper
         min_threshold = self.threshold
 
         if self.interactivity:
@@ -459,15 +463,19 @@ class uiThreshold:
 
             self.threshold = min_threshold
 
-        if (self.threshold == -1) and self.firstRun:
+        if (self.threshold is None) and self.firstRun:
             logger.debug("This line should be never runned")
 
             min_threshold = thresholding_functions.calculateAutomaticThreshold(
                 self.imgFiltering, self.arrSeed)
 
         self.imgFiltering = thresholding_functions.thresholding(
-            self.imgFiltering, min_threshold, max_threshold, True,
-            self.interactivity)
+            self.imgFiltering,
+            min_threshold,
+            max_threshold,
+            use_min_threshold=True,
+            use_max_Threshold=max_threshold is None
+        )
 
         # Operace binarni otevreni a uzavreni.
 

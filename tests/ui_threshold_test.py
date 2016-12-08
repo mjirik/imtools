@@ -6,7 +6,8 @@ from nose.plugins.attrib import attr
 import imtools.sample_data
 import imtools.uiThreshold
 import matplotlib.pyplot as plt
-
+import sys
+from PyQt4.QtGui import QApplication, QDialog, QGridLayout, QPushButton
 
 class MyTestCase(unittest.TestCase):
     @attr('interactive')
@@ -27,9 +28,10 @@ class MyTestCase(unittest.TestCase):
 
     @attr('interactive')
     def test_ui_threshold_qt(self):
+        app = QApplication(sys.argv)
         datap = imtools.sample_data.generate()
-        uit = imtools.uiThreshold.uiThreshold(datap['data3d'], datap['voxelsize_mm'], interactivity=True, threshold=100)
+        uit = imtools.uiThreshold.uiThresholdQt(datap['data3d'], datap['voxelsize_mm'], interactivity=True, threshold=100)
         uit.run()
-        plt.show()
+        # plt.show()
 if __name__ == '__main__':
     unittest.main()
