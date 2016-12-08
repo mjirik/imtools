@@ -433,14 +433,17 @@ class uiThreshold:
         # Zjisteni jakou sigmu pouzit
         if(self.firstRun == True and self.inputSigma >= 0):
             sigma = numpy.round(self.inputSigma, 2)
-        else:
+        elif self.interactivity:
             sigma = numpy.round(self.ssigma.val, 2)
-        sigmaNew = thresholding_functions.calculateSigma(self.voxel, sigma)
+        else:
+            sigma = numpy.round(self.inputSigma, 2)
 
-        self.imgFiltering = thresholding_functions.gaussFilter(
-            self.imgFiltering, sigmaNew)
+        if sigma > 0:
+            sigmaNew = thresholding_functions.calculateSigma(self.voxel, sigma)
+            self.imgFiltering = thresholding_functions.gaussFilter(
+                self.imgFiltering, sigmaNew)
 
-        del(sigmaNew)
+            del(sigmaNew)
 
         # Prahovani (smin, smax)
 

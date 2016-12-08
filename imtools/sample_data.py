@@ -8,6 +8,8 @@ import glob
 # import traceback
 
 import logging
+import numpy as np
+
 logger = logging.getLogger(__name__)
 
 import argparse
@@ -320,6 +322,27 @@ def get_conda_path():
     # return conda_pth
     return dstdir
 
+def generate(size = 100, liver_intensity=100, noise_intensity=20, portal_vein_intensity=130):
+    boundary = int(size/4)
+    voxelsize_mm = [1.0, 1.5, 1.5]
+
+    segmentation = np.zeros([size, size, size], dtype=np.uint8)
+    segmentation[boundary:-boundary, boundary:-2*boundary, 2*boundary:-boundary] = 1
+    segmentation[:, boundary*2:boundary*2+5, boundary*2:boundary*2+5] = 2
+
+    noise = (np.random.random(segmentation.shape) * noise_intensity).astype(np.int)
+    data3d = np.zeros(segmentation.shape, dtype=np.int)
+    data3d [segmentation == 1] = liver_intensity
+    data3d [segmentation == 2] = portal_vein_intensity
+    data3d += noise
+
+    datap = {
+        'data3d': data3d,
+        'segmentation': segmentation,
+        'voxelsize_mm': voxelsize_mm
+    }
+    return datap
+
 
 def file_copy_and_replace_lines(in_path, out_path):
     import shutil
@@ -335,10 +358,10 @@ def file_copy_and_replace_lines(in_path, out_path):
     # print 'ip ', in_path
     # print 'op ', out_path
     # print 'cp ', conda_path
-    for line in fileinput.input(out_path, inplace=True):
+    for line in fileinput.input(out_path, inplace=true):
         # coma on end makes no linebreak
-        line = line.replace("@{LISA_PATH}", lisa_path)
-        line = line.replace("@{CONDA_PATH}", conda_path)
+        line = line.replace("@{lisa_path}", lisa_path)
+        line = line.replace("@{conda_path}", conda_path)
         print line
 
 
