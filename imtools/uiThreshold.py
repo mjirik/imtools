@@ -83,7 +83,7 @@ class uiThreshold:
 
     """
 
-    def __init__(self, data, voxel, threshold=-1, interactivity=True,
+    def __init__(self, data, voxel, threshold=None, interactivity=True,
                  number=100.0, inputSigma=-1, nObj=10,  biggestObjects=True,
                  useSeedsOfCompactObjects=True,
                  binaryClosingIterations=2, binaryOpeningIterations=0,
@@ -161,6 +161,20 @@ class uiThreshold:
 
         self.arrSeed = None
 
+        if self.threshold is None:
+            try:
+                if auto_method is 'otsu':
+                    logger.debug('using otsu threshold')
+                    self.threshold = thresholding_functions.calculateAutomaticThresholdOtsu(
+                        self.data, self.arrSeed)
+                else:
+                    self.threshold = thresholding_functions.calculateAutomaticThreshold(
+                        self.data, self.arrSeed)
+            except:
+                logger.info(traceback.format_exc())
+                thres = (self.max0 + self.min0) / 2
+
+        self.firstRun = True
         if self.interactivity == True:
 
             if figure is None:
@@ -254,27 +268,11 @@ class uiThreshold:
             minBinaryOpening = 0
             minSigma = 0.00
 
-            self.firstRun = True
 
-            thres = self.threshold
-            if thres == -1:
-                try:
-                    if auto_method is 'otsu':
-                        logger.debug('using otsu threshold')
-                        thres = thresholding_functions.calculateAutomaticThresholdOtsu(
-                            self.data, self.arrSeed)
-                    else:
-                        thres = thresholding_functions.calculateAutomaticThreshold(
-                            self.data, self.arrSeed)
-                except:
-                    logger.info(traceback.format_exc())
-                    thres = (self.max0 + self.min0) / 2
-            # snad jsem pridanim nasledujiciho radku nic nerozbyl
-            self.threshold = thres
 
             self.smin = Slider(
                 self.axmin, 'Min. threshold   ' + str(self.min0),
-                self.min0, self.max0, valinit=thres, dragging=True)
+                self.min0, self.max0, valinit=self.threshold, dragging=True)
             self.smax = Slider(
                 self.axmax, 'Max. threshold   ' + str(self.min0),
                 self.min0, self.max0, valinit=self.max0, dragging=True)
@@ -423,7 +421,6 @@ class uiThreshold:
             self.imgFiltering = copy.copy(self.data)
 
         else:
-
             self.imgFiltering = self.data.copy()
         # import ipdb
         # ipdb.set_trace()
