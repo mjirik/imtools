@@ -474,7 +474,7 @@ class uiThreshold:
             min_threshold,
             max_threshold,
             use_min_threshold=True,
-            use_max_Threshold=max_threshold is None
+            use_max_threshold=max_threshold is not None
         )
 
         # Operace binarni otevreni a uzavreni.

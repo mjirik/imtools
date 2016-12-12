@@ -57,7 +57,7 @@ def gaussFilter(data, sigma):
 
 
 def thresholding(data, min_threshold, max_threshold, use_min_threshold=True,
-                 use_max_Threshold=True):
+                 use_max_threshold=True):
     """
 
     Prahovani podle minimalniho a maximalniho prahu.
@@ -73,7 +73,7 @@ def thresholding(data, min_threshold, max_threshold, use_min_threshold=True,
         data = data * (data >= min_threshold)
         # out += data >= min_threshold
 
-    if use_max_Threshold:
+    if use_max_threshold:
 
         data = data * (data <= max_threshold)
         # out += data <= max_threshold
@@ -445,7 +445,7 @@ def getPriorityObjects(data, nObj=1, seeds=None, seeds_multi_index=None, debug=F
                 break
 
             if arrayLabels[label] != 0:
-                if returning == None:
+                if returning is None:
                     # "Prvni" iterace
                     returning = data * (dataLabels == arrayLabels[label])
                 else:

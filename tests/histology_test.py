@@ -55,7 +55,6 @@ class HistologyTest(unittest.TestCase):
         yaml_output = os.path.join(path_to_script, "delme_esofspy.txt")
         vt.vt2esofspy(yaml_input, yaml_output)
 
-
     @attr("actual")
     def test_surface_density_gensei_data(self):
         import io3d
@@ -77,7 +76,6 @@ class HistologyTest(unittest.TestCase):
         self.assertLess(Sv, 0.4)
 
     def test_surface_measurement(self):
-
 # box
         data1 = np.zeros([30, 30, 30])
         voxelsize_mm = [1, 1, 1]

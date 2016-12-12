@@ -61,9 +61,27 @@ class MyTestCase(unittest.TestCase):
         selection = imtools.thresholding_functions.getPriorityObjects(thresholded, nObj=nobj, seeds_multi_index=seeds_multi_index)
 
         lab = skimage.morphology.label(selection)
-        output_nobj = np.unique(lab)
+        output_nobj = len(np.unique(lab))
 
-        self.assertEqual(nobj, nobj)
+        self.assertEqual(output_nobj, nobj)
+
+    @unittest.skip("not completed")
+    def test_thresholding(self):
+        import skimage.morphology
+        datap = imtools.sample_data.generate()
+
+        max_threshold = None
+        selection = imtools.thresholding_functions.thresholding(
+            datap['data3d'],
+            min_threshold=80,
+            max_threshold=max_threshold,
+            use_min_threshold=True,
+            use_max_threshold=max_threshold is None
+        )
+        lab = skimage.morphology.label(selection)
+        output_nobj = len(np.unique(lab))
+
+        self.assertEqual(output_nobj, 1)
 
 if __name__ == '__main__':
     unittest.main()
