@@ -322,24 +322,43 @@ def get_conda_path():
     # return conda_pth
     return dstdir
 
-def generate(size = 100, liver_intensity=100, noise_intensity=20, portal_vein_intensity=130):
+def generate(size = 100, liver_intensity=100, noise_intensity=20, portal_vein_intensity=130, spleen_intensity=90):
     boundary = int(size/4)
     voxelsize_mm = [1.0, 1.5, 1.5]
+    slab = {
+        'liver': 1,
+        'porta': 2,
+        'spleen': 17
+    }
 
     segmentation = np.zeros([size, size, size], dtype=np.uint8)
     segmentation[boundary:-boundary, boundary:-2*boundary, 2*boundary:-boundary] = 1
     segmentation[:, boundary*2:boundary*2+5, boundary*2:boundary*2+5] = 2
+    segmentation[:, boundary*2:boundary*2+5, boundary*2:boundary*2+5] = 2
+    segmentation[:, -5:, -boundary:] = 17
+
+
+    seeds = np.zeros([size, size, size], dtype=np.uint8)
+    seeds[
+    boundary + 1 : boundary + 4,
+    boundary + 1 : boundary + 4,
+    2 * boundary + 1 : 2 * boundary + 4
+    ] = 1
 
     noise = (np.random.random(segmentation.shape) * noise_intensity).astype(np.int)
     data3d = np.zeros(segmentation.shape, dtype=np.int)
     data3d [segmentation == 1] = liver_intensity
     data3d [segmentation == 2] = portal_vein_intensity
+    data3d [segmentation == 17] = spleen_intensity
     data3d += noise
+
 
     datap = {
         'data3d': data3d,
         'segmentation': segmentation,
-        'voxelsize_mm': voxelsize_mm
+        'voxelsize_mm': voxelsize_mm,
+        'seeds': seeds,
+        'slab': slab
     }
     return datap
 

@@ -392,7 +392,7 @@ def getSeeds(data, seeds):
     return arrSeed
 
 
-def getPriorityObjects(data, nObj=1, seeds=None, debug=False):
+def getPriorityObjects(data, nObj=1, seeds=None, seeds_multi_index=None, debug=False):
     """
 
     Vraceni N nejvetsich objektu.
@@ -410,6 +410,10 @@ def getPriorityObjects(data, nObj=1, seeds=None, debug=False):
     # Oznaceni dat.
     # labels - oznacena data.
     # length - pocet rozdilnych oznaceni.
+    if seeds is not None:
+        logger.warning("'seeds' parameter is obsolete. Use 'seeds_multi_index' instead of it.")
+        seeds_multi_index = seeds
+
     dataLabels, length = scipy.ndimage.label(data)
 
     logger.info('Olabelovano oblasti: ' + str(length))
@@ -418,7 +422,7 @@ def getPriorityObjects(data, nObj=1, seeds=None, debug=False):
         logger.debug('data labels: ' + str(dataLabels))
 
     # Uzivatel si nevybral specificke objekty.
-    if (seeds == None):
+    if (seeds_multi_index == None):
 
         logger.info('Vraceni bez seedu')
         logger.debug('Objekty: ' + str(nObj))
@@ -472,7 +476,7 @@ def getPriorityObjects(data, nObj=1, seeds=None, debug=False):
         # Zalozeni pole pro ulozeni seedu
         arrSeed = []
         # Zjisteni poctu seedu.
-        stop = seeds[0].size
+        stop = seeds_multi_index[0].size
         tmpSeed = 0
         dim = numpy.ndim(dataLabels)
         for index in range(0, stop):
@@ -480,10 +484,10 @@ def getPriorityObjects(data, nObj=1, seeds=None, debug=False):
             if dim == 3:
                 # 3D data.
                 tmpSeed = dataLabels[
-                    seeds[0][index], seeds[1][index], seeds[2][index]]
+                    seeds_multi_index[0][index], seeds_multi_index[1][index], seeds_multi_index[2][index]]
             elif dim == 2:
                 # 2D data.
-                tmpSeed = dataLabels[seeds[0][index], seeds[1][index]]
+                tmpSeed = dataLabels[seeds_multi_index[0][index], seeds_multi_index[1][index]]
 
             # Tady opet pocitam s tim, ze oznaceni nulou pripada cerne oblasti
             # (pozadi).
@@ -548,7 +552,7 @@ def areaIndexes(labels, num):
 
     arrayLabelsSum = []
     arrayLabels = []
-    for index in range(0, num):
+    for index in range(0, num + 1):
         arrayLabels.append(index)
         sumOfLabel = numpy.sum(labels == index)
         arrayLabelsSum.append(sumOfLabel)
