@@ -63,7 +63,7 @@ class MyTestCase(unittest.TestCase):
         lab = skimage.morphology.label(selection)
         output_nobj = len(np.unique(lab))
 
-        self.assertEqual(output_nobj, nobj)
+        self.assertEqual(output_nobj, nobj + 1)  # one is for background label
 
     @unittest.skip("not completed")
     def test_thresholding(self):
