@@ -5,6 +5,7 @@ import unittest
 from nose.plugins.attrib import attr
 
 import sys
+import os
 import PyQt4
 from PyQt4.QtGui import QApplication, QFileDialog
 from PyQt4.QtTest import QTest
@@ -69,11 +70,13 @@ class MyTestCase(unittest.TestCase):
         # from teigen.generators.cylindersqt import CylindersWidget
         import imtools.show_segmentation_qt as ssqt
         app = QApplication(sys.argv)
+        if "TRAVIS" in os.environ:
+            app.setGraphicsSystem("openvg")
         # sw = ssqt.ShowSegmentationWidget(None, show_buttons=False)
         sw = ssqt.ShowSegmentationWidget(None, show_load_button=True)
         self.assertIn("add_data_file", sw.ui_buttons.keys())
         sw.show()
-        app.exec_()
+        sw.close()
 
     # @attr('interactive')
     def test_add_data_and_show(self):
