@@ -58,7 +58,7 @@ class MyTestCase(unittest.TestCase):
         app.exec_()
 
 
-    @attr('interactive')
+    # @attr('interactive')
     def test_show_segmentation_qt_widget_hidden_buttons(self):
         # = np.zeros([10, 10, 10])
         import imtools
@@ -72,8 +72,10 @@ class MyTestCase(unittest.TestCase):
         # sw = ssqt.ShowSegmentationWidget(None, show_buttons=False)
         sw = ssqt.ShowSegmentationWidget(None, show_load_button=True)
         self.assertIn("add_data_file", sw.ui_buttons.keys())
+        sw.show()
+        app.exec_()
 
-    @attr('interactive')
+    # @attr('interactive')
     def test_add_data_and_show(self):
         """
         creates VTK file from input data
@@ -108,7 +110,8 @@ class MyTestCase(unittest.TestCase):
         QTest.mouseClick(sw.ui_buttons['Show volume'], Qt.LeftButton)
         # sw.add_vtk_file("~/projects/imtools/mesh.vtk")
         sw.show()
-        app.exec_()
+        sw.close()
+        # app.exec_()
 
 
 if __name__ == '__main__':

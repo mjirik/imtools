@@ -15,6 +15,12 @@ addons:
 
 virtualenv:
   system_site_packages: true
+before_script:
+    # GUI
+    - "export DISPLAY=:99.0"
+    - "sh -e /etc/init.d/xvfb start"
+    - sleep 3 # give xvfb sume time to start
+
 before_install:
     - sudo apt-get install -qq $(< requirements_apt.txt)
     - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
@@ -22,9 +28,6 @@ before_install:
     - ./miniconda.sh -b
     - export PATH=/home/travis/miniconda2/bin:$PATH
     - conda update --yes conda
-    # GUI
-    - "export DISPLAY=:99.0"
-    - sh -e /etc/init.d/xvfb start
 #    - wget http://147.228.240.61/queetech/sample-extra-data/io3d_sample_data.zip && unzip io3d_sample_data.zip
 # command to install dependencies
 install:
