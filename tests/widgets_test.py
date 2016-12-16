@@ -59,7 +59,7 @@ class MyTestCase(unittest.TestCase):
         app.exec_()
 
 
-    # @attr('interactive')
+    @attr('interactive')
     def test_show_segmentation_qt_widget_hidden_buttons(self):
         # = np.zeros([10, 10, 10])
         import imtools
@@ -70,8 +70,8 @@ class MyTestCase(unittest.TestCase):
         # from teigen.generators.cylindersqt import CylindersWidget
         import imtools.show_segmentation_qt as ssqt
         app = QApplication(sys.argv)
-        if "TRAVIS" in os.environ:
-            app.setGraphicsSystem("openvg")
+        # if "TRAVIS" in os.environ:
+        #     app.setGraphicsSystem("openvg")
         # sw = ssqt.ShowSegmentationWidget(None, show_buttons=False)
         sw = ssqt.ShowSegmentationWidget(None, show_load_button=True)
         self.assertIn("add_data_file", sw.ui_buttons.keys())
@@ -84,29 +84,35 @@ class MyTestCase(unittest.TestCase):
         creates VTK file from input data
         :return:
         """
-        import numpy as np
-        segmentation = np.zeros([20, 30, 40])
-        # generate test data
-        segmentation[6:10, 7:24, 10:37] = 1
-        segmentation[6:10, 7, 10] = 0
-        segmentation[6:10, 23, 10] = 0
-        segmentation[6:10, 7, 36] = 0
-        segmentation[6:10, 23, 36] = 0
-        segmentation[2:18, 12:19, 18:28] = 2
+        import imtools.sample_data
+        datap = imtools.sample_data.donut()
+        # import numpy as np
+        # segmentation = np.zeros([20, 30, 40])
+        # # generate test data
+        # segmentation[6:10, 7:24, 10:37] = 1
+        # segmentation[6:10, 7, 10] = 0
+        # segmentation[6:10, 23, 10] = 0
+        # segmentation[6:10, 7, 36] = 0
+        # segmentation[6:10, 23, 36] = 0
+        # segmentation[2:18, 12:19, 18:28] = 2
+        #
+        # data3d = segmentation * 100 + np.random.random(segmentation.shape) * 30
+        # voxelsize_mm=[3,2,1]
+        #
+        # import io3d
+        # datap = {
+        #     'data3d': data3d,
+        #     'segmentation': segmentation,
+        #     'voxelsize_mm': voxelsize_mm
+        # }
+        # io3d.write(datap, "donut.pklz")
 
-        data3d = segmentation * 100 + np.random.random(segmentation.shape) * 30
-        voxelsize_mm=[3,2,1]
-
-        import io3d
-        datap = {
-            'data3d': data3d,
-            'segmentation': segmentation,
-            'voxelsize_mm': voxelsize_mm
-        }
-        io3d.write(datap, "donut.pklz")
+        segmentation = datap['segmentation']
+        voxelsize_mm = datap['voxelsize_mm']
 
         import imtools.show_segmentation_qt as ssqt
         app = QApplication(sys.argv)
+        # app.setGraphicsSystem("openvg")
         sw = ssqt.ShowSegmentationWidget(None, show_load_button=True)
         sw.smoothing = False
         sw.add_data(segmentation, voxelsize_mm=voxelsize_mm)
