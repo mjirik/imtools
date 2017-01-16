@@ -81,9 +81,10 @@ class MyTestCase(unittest.TestCase):
         # if "TRAVIS" in os.environ:
         #     app.setGraphicsSystem("openvg")
         # sw = ssqt.ShowSegmentationWidget(None, show_buttons=False)
-        sw = ssqt.ShowSegmentationWidget(None, show_load_button=True)
+        sw = ssqt.ShowSegmentationWidget(None, show_load_interface=True)
         self.assertIn("add_data_file", sw.ui_buttons.keys())
         sw.show()
+        # app.exec_()
         sw.close()
         sw.deleteLater()
         sw = None
@@ -113,6 +114,7 @@ class MyTestCase(unittest.TestCase):
         QTest.mouseClick(sw.ui_buttons['Show volume'], Qt.LeftButton)
         # sw.add_vtk_file("~/projects/imtools/mesh.vtk")
         sw.show()
+        app.exec_()
         sw.close()
         sw.deleteLater()
 

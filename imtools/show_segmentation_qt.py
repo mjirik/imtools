@@ -30,9 +30,11 @@ class ShowSegmentationWidget(QtGui.QWidget):
         self.ui_buttons = {}
         self.ui_slab = {}
 
-        self.show_load_button = False
+        self.show_load_interface = False
         if "show_load_button" in kwargs:
-            self.show_load_button = kwargs.pop("show_load_button")
+            self.show_load_interface = kwargs.pop("show_load_button")
+        if "show_load_interface" in kwargs:
+            self.show_load_interface = kwargs.pop("show_load_interface")
 
         self.add_data(*args, **kwargs)
         self.initUI()
@@ -70,96 +72,96 @@ class ShowSegmentationWidget(QtGui.QWidget):
 
         self._row = 0
 
-        if self.show_load_button:
+        if self.show_load_interface:
             keyword = "add_data_file"
             self.ui_buttons[keyword] = QPushButton("Load volumetric data", self)
             self.ui_buttons[keyword].clicked.connect(self._ui_callback_add_data_file)
             self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 1, 1, 3)
 
-        self._row += 1
-        lblSegConfig = QLabel('Labels')
-        self.mainLayout.addWidget(lblSegConfig, self._row, 1, 1, 6)
+            self._row += 1
+            lblSegConfig = QLabel('Labels')
+            self.mainLayout.addWidget(lblSegConfig, self._row, 1, 1, 6)
 
         # self.slab_widget = QGridLayout(self)
         # self.mainLayout.addWidget(self.slab_widget, self._row, 1)
 
-        self._row = self.update_slab_ui()
+            self._row = self.update_slab_ui()
 
-        self._row = 10
-        self._row += 1
-        keyword = "resize_voxel_number"
-        resizeQLabel= QLabel('Resize [voxel number]')
-        self.mainLayout.addWidget(resizeQLabel, self._row, 1)
+            self._row = 10
+            self._row += 1
+            keyword = "resize_voxel_number"
+            resizeQLabel= QLabel('Resize [voxel number]')
+            self.mainLayout.addWidget(resizeQLabel, self._row, 1)
 
-        self.ui_buttons[keyword] = QLineEdit()
-        self.ui_buttons[keyword].setText(str(self.resize_voxel_number))
-        self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 2)
+            self.ui_buttons[keyword] = QLineEdit()
+            self.ui_buttons[keyword].setText(str(self.resize_voxel_number))
+            self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 2)
 
-        self._row += 1
-        keyword = "resize_mm"
-        resizeQLabel= QLabel('Resize [mm]')
-        self.mainLayout.addWidget(resizeQLabel, self._row, 1)
-        self.mainLayout.setColumnMinimumWidth(2, 100)
+            self._row += 1
+            keyword = "resize_mm"
+            resizeQLabel= QLabel('Resize [mm]')
+            self.mainLayout.addWidget(resizeQLabel, self._row, 1)
+            self.mainLayout.setColumnMinimumWidth(2, 100)
 
-        self.ui_buttons[keyword] = QLineEdit()
-        self.ui_buttons[keyword].setText(str(self.resize_mm))
-        self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 2)
+            self.ui_buttons[keyword] = QLineEdit()
+            self.ui_buttons[keyword].setText(str(self.resize_mm))
+            self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 2)
 
-        self._row += 1
-        keyword = "degrad"
-        resizeQLabel= QLabel('Degradation')
-        self.mainLayout.addWidget(resizeQLabel, self._row, 1)
+            self._row += 1
+            keyword = "degrad"
+            resizeQLabel= QLabel('Degradation')
+            self.mainLayout.addWidget(resizeQLabel, self._row, 1)
 
-        self.ui_buttons[keyword] = QLineEdit()
-        self.ui_buttons[keyword].setText(str(self.degrad))
-        self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 2)
+            self.ui_buttons[keyword] = QLineEdit()
+            self.ui_buttons[keyword].setText(str(self.degrad))
+            self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 2)
 
-        self._row += 1
-        keyword = "smoothing"
-        # smoothingQLabel= QLabel(keyword)
-        # self.mainLayout.addWidget(smoothingQLabel, self._row, 1)
+            self._row += 1
+            keyword = "smoothing"
+            # smoothingQLabel= QLabel(keyword)
+            # self.mainLayout.addWidget(smoothingQLabel, self._row, 1)
 
-        self.ui_buttons[keyword] = QCheckBox(keyword, self)
-        # self.ui_buttons[keyword].setTristate(False)
-        if self.smoothing:
-            sm_state = QtCore.Qt.Checked
-        else:
-            sm_state =  QtCore.Qt.Unchecked
-        self.ui_buttons[keyword].setCheckState(sm_state)
-        self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 1)
-
-
-        self._row += 1
-        keyword = "vtk_file"
-        vtk_fileQLabel= QLabel("Output VTK file")
-        self.mainLayout.addWidget(vtk_fileQLabel, self._row, 1)
-
-        self.ui_buttons[keyword] = QLineEdit()
-        self.ui_buttons[keyword].setText(str(self.vtk_file))
-        self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 2)
-        keyword = "vkt_file_button"
-        self.ui_buttons[keyword] = QPushButton("Set", self)
-        self.ui_buttons[keyword].clicked.connect(self.action_select_vtk_file)
-        self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 3)
-
-        self._row += 1
-        keyword = "Show volume"
-        self.ui_buttons[keyword] = QPushButton(keyword, self)
-        self.ui_buttons[keyword].clicked.connect(self.actionShow)
-        self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 1, 1, 3)
+            self.ui_buttons[keyword] = QCheckBox(keyword, self)
+            # self.ui_buttons[keyword].setTristate(False)
+            if self.smoothing:
+                sm_state = QtCore.Qt.Checked
+            else:
+                sm_state =  QtCore.Qt.Unchecked
+            self.ui_buttons[keyword].setCheckState(sm_state)
+            self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 1)
 
 
-        self._row += 1
-        keyword = "Add extern file"
-        self.ui_buttons[keyword] = QPushButton(keyword, self)
-        self.ui_buttons[keyword].clicked.connect(self._ui_action_add_vtk_file)
-        self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 1, 1, 3)
+            self._row += 1
+            keyword = "vtk_file"
+            vtk_fileQLabel= QLabel("Output VTK file")
+            self.mainLayout.addWidget(vtk_fileQLabel, self._row, 1)
 
-        self._row += 1
-        keyword = "Clear"
-        self.ui_buttons[keyword] = QPushButton(keyword, self)
-        self.ui_buttons[keyword].clicked.connect(self.clear_3d_viewer)
-        self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 1, 1, 3)
+            self.ui_buttons[keyword] = QLineEdit()
+            self.ui_buttons[keyword].setText(str(self.vtk_file))
+            self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 2)
+            keyword = "vkt_file_button"
+            self.ui_buttons[keyword] = QPushButton("Set", self)
+            self.ui_buttons[keyword].clicked.connect(self.action_select_vtk_file)
+            self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 3)
+
+            self._row += 1
+            keyword = "Show volume"
+            self.ui_buttons[keyword] = QPushButton(keyword, self)
+            self.ui_buttons[keyword].clicked.connect(self.actionShow)
+            self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 1, 1, 3)
+
+
+            self._row += 1
+            keyword = "Add extern file"
+            self.ui_buttons[keyword] = QPushButton(keyword, self)
+            self.ui_buttons[keyword].clicked.connect(self._ui_action_add_vtk_file)
+            self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 1, 1, 3)
+
+            self._row += 1
+            keyword = "Clear"
+            self.ui_buttons[keyword] = QPushButton(keyword, self)
+            self.ui_buttons[keyword].clicked.connect(self.clear_3d_viewer)
+            self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 1, 1, 3)
 
         # vtk + pyqt
         self._viewer_height = self._row
@@ -198,6 +200,10 @@ class ShowSegmentationWidget(QtGui.QWidget):
 
     def add_vtk_file(self, filename):
         self.vtkv.AddFile(filename)
+        self.vtkv_start()
+
+    def add_vtk_polydata(self, polydata, colormap=None):
+        self.vtkv.AddPolyData(polydata, colormap)
         self.vtkv_start()
 
     def _ui_action_add_vtk_file(self):
