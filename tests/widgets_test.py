@@ -114,7 +114,7 @@ class MyTestCase(unittest.TestCase):
         QTest.mouseClick(sw.ui_buttons['Show volume'], Qt.LeftButton)
         # sw.add_vtk_file("~/projects/imtools/mesh.vtk")
         sw.show()
-        app.exec_()
+        # app.exec_(exec_)
         sw.close()
         sw.deleteLater()
 
