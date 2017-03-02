@@ -42,7 +42,7 @@ def _auto_segmentation(segmentation, label=None):
     return segmentation
 
 def showSegmentation(
-        segmentation,
+        segmentation=None,
         voxelsize_mm=np.ones([3, 1]),
         degrad=6,
         label=None,
@@ -163,7 +163,7 @@ def main():
             \npython show_segmentation.py -i resection.pkl -l 2 3 4 -d 4')
     parser.add_argument(
         '-i', '--inputfile',
-        default='organ.pkl',
+        default="organ.pklz",
         help='input file')
     parser.add_argument(
         '-o', '--outputfile',
@@ -188,6 +188,12 @@ def main():
     args = parser.parse_args()
 
     # data = misc.obj_from_file(args.inputfile, filetype='pickle')
+    # if args.inputfile is None:
+    #     ds = None
+    #     data = {
+    #         "voxelsize_mm": [1, 1, 1]
+    #     }
+    # else:
     import io3d
     data = io3d.read(args.inputfile, dataplus_format=True)
     # args.label = np.array(eval(args.label))
@@ -204,7 +210,6 @@ def main():
     # tonzero_voxels_number = np.sum(ds != 0)
     # if nonzero_voxels_number == 0:
     #     ds = data["data3d"] > 0
-
 
     outputfile = os.path.expanduser(args.outputfile)
 
