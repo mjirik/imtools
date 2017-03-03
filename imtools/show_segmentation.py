@@ -78,12 +78,16 @@ def showSegmentation(
         vtk_file = "mesh_geom.vtk"
     vtk_file = os.path.expanduser(vtk_file)
 
-    labels = []
     if resize_voxel_number is not None:
-        nvoxels = np.sum(segmentation)
+        nvoxels = np.sum(segmentation > 0)
         volume = nvoxels * np.prod(voxelsize_mm)
         voxel_volume = volume / float(resize_voxel_number)
-        resize_mm = voxel_volume ** (1.0/3.0)
+        resize_mm = voxel_volume ** (1.0 / 3.0)
+
+
+    orig_dtype = segmentation.dtype
+    if orig_dtype == np.bool:
+        segmentation = segmentation.astype(np.int8)
 
     segmentation = segmentation[::degrad, ::degrad, ::degrad]
     voxelsize_mm = voxelsize_mm * degrad
@@ -122,8 +126,10 @@ def showSegmentation(
         # view = viewer.QVTKViewer(vtk_file)
         # print ('show viewer')
         # view.exec_()
+    # if orig_dtype is np.bool:
+    #     segmentation = segmentation.astype(np.bool)
 
-    return labels
+    return segmentation
 
 def _stats(data):
     print "stats"
