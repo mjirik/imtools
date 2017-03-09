@@ -102,7 +102,7 @@ def combinecrinfo(crinfo1, crinfo2):
     return crinfo
 
 
-def crinfo_from_specific_data(data, margin):
+def crinfo_from_specific_data(data, margin=0):
     """
     Create crinfo of minimum orthogonal nonzero block in input data.
 
@@ -115,6 +115,9 @@ def crinfo_from_specific_data(data, margin):
     logger.debug(str(margin))
     nzi = np.nonzero(data)
     logger.debug(str(nzi))
+
+    if np.isscalar(margin):
+        margin = [margin] * 3
 
     x1 = np.min(nzi[0]) - margin[0]
     x2 = np.max(nzi[0]) + margin[0] + 1
