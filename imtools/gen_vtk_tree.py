@@ -216,6 +216,16 @@ def vt_file_2_vtk_file(infile, outfile, text_label=None):
     vt2vtk_file(tree_raw_data, outfile, text_label)
 
 
+def vt2polyData(vessel_tree, text_label=None):
+    trees = fix_tree_structure(vessel_tree)
+
+    tkeys = trees.keys()
+    if text_label is None:
+        text_label = tkeys[0]
+
+    tree_data = compatibility_processing(trees[text_label])
+    polyData = gen_tree(tree_data)
+    return polyData
 
 def vt2vtk_file(vessel_tree, outfile, text_label=None):
     """
@@ -225,14 +235,8 @@ def vt2vtk_file(vessel_tree, outfile, text_label=None):
     :param text_label: text label like 'porta' or 'hepatic_veins'
     :return:
     """
-    trees = fix_tree_structure(vessel_tree)
 
-    tkeys = trees.keys()
-    if text_label is None:
-        text_label = tkeys[0]
-
-    tree_data = compatibility_processing(trees[text_label])
-    polyData = gen_tree(tree_data)
+    polyData = vt2polyData(vessel_tree, text_label=text_label)
 
     writer = vtk.vtkPolyDataWriter()
     writer.SetFileName(outfile)
@@ -242,6 +246,7 @@ def vt2vtk_file(vessel_tree, outfile, text_label=None):
         logger.warning("old vtk is used")
         writer.SetInput(polyData)
     writer.Write()
+    return polyData
 
 
 def main():
