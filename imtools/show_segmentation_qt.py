@@ -207,7 +207,15 @@ class ShowSegmentationWidget(QtGui.QWidget):
         self.vtkv_start()
 
     def _ui_action_add_vtk_file(self):
-        self.add_vtk_file(str(QFileDialog.getOpenFileName()))
+        fn = str(QFileDialog.getOpenFileName())
+        import os.path as op
+        ext = op.splitext(fn)[1]
+        if ext == ".yaml":
+            import gen_vtk_tree
+            polydata = gen_vtk_tree.vt_file2polyData(fn)
+            self.add_vtk_polydata(polydata)
+        else:
+            self.add_vtk_file(fn)
 
         # self.vtkv.Start()
         # or show win
