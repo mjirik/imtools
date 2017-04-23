@@ -26,7 +26,7 @@ try:
 except:
 
     print('dicom2fem not found')
-    # logger.warning('dicom2fem not found')
+    logger.warning('dicom2fem not found')
     from seg2mesh import gen_mesh_from_voxels, smooth_mesh
 import misc
 import viewer

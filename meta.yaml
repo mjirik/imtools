@@ -53,6 +53,7 @@ requirements:
     - skelet3d >=1.5.3
     - checksumdir
     - vtkviewer
+    - dicom2fem # because of seg2fem
 #    - opencv
 
 test:
