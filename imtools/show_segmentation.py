@@ -18,19 +18,13 @@ import argparse
 
 
 import numpy as np
-try:
-    import dicom2fem
-    import dicom2fem.seg2fem
-    # from dicom2fem import seg2fem
-    from dicom2fem.seg2fem import gen_mesh_from_voxels_mc, smooth_mesh
-except:
+# import dicom2fem
+# import dicom2fem.seg2fem
+# from dicom2fem import seg2fem
+from dicom2fem.seg2fem import gen_mesh_from_voxels_mc, smooth_mesh
 
-    print('dicom2fem not found')
-    logger.warning('dicom2fem not found')
-    from seg2mesh import gen_mesh_from_voxels, smooth_mesh
-import misc
-import viewer
-
+# import misc
+# import viewer
 
 def _auto_segmentation(segmentation, label=None):
     if label is None:

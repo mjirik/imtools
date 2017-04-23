@@ -41,6 +41,7 @@ requirements:
     - mock
     - nose
     - vtk
+    - dicom2fem
 
   run:
     - python
