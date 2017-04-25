@@ -80,8 +80,10 @@ class Trainer3D():
 
     def predict(self, data3d, voxelsize_mm):
         data3dr = qmisc.resize_to_mm(data3d, voxelsize_mm, self.working_voxelsize_mm)
+        print data3dr.shape
         fv = self._fv(data3dr)
         pred = self.cl.predict(fv)
+        print pred.shape
         return qmisc.resize_to_shape(pred.reshape(data3dr.shape), data3d.shape)
 
     def predict_w(self, data3d, voxelsize_mm, weight, label0=0, label1=1):
