@@ -115,7 +115,7 @@ class Trainer3D():
         data3dr = qmisc.resize_to_mm(data3d, voxelsize_mm, self.working_voxelsize_mm)
         segmentationr = qmisc.resize_to_shape(segmentation, data3dr.shape)
 
-        print np.unique(segmentationr), data3dr.shape, segmentationr.shape
+        # print np.unique(segmentationr), data3dr.shape, segmentationr.shape
         self._add_to_training_data(data3dr, segmentationr)
         #f1 scipy.ndimage.filters.gaussian_filter(data3dr, sigma=5)
 
