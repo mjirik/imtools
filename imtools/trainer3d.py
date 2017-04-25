@@ -59,10 +59,10 @@ class Trainer3D():
         return self.feature_function(data3dr, self.working_voxelsize_mm)
 
 
-    def _add_to_training_data(self, data3dr, segmentationr):
+    def _add_to_training_data(self, data3dr, segmentationr, nth=50):
         fv = self._fv(data3dr)
-        data = fv[::50]
-        target = np.reshape(segmentationr, [-1, 1])[::50]
+        data = fv[::nth]
+        target = np.reshape(segmentationr, [-1, 1])[::nth]
         #         print "shape ", data.shape, "  ", target.shape
 
         if self.data is None:
@@ -111,11 +111,11 @@ class Trainer3D():
     def __preprocessing(data3d):
         pass
 
-    def add_train_data(self, data3d, segmentation, voxelsize_mm):
+    def add_train_data(self, data3d, segmentation, voxelsize_mm, nth=50):
         data3dr = qmisc.resize_to_mm(data3d, voxelsize_mm, self.working_voxelsize_mm)
         segmentationr = qmisc.resize_to_shape(segmentation, data3dr.shape)
 
         # print np.unique(segmentationr), data3dr.shape, segmentationr.shape
-        self._add_to_training_data(data3dr, segmentationr)
+        self._add_to_training_data(data3dr, segmentationr, nth)
         #f1 scipy.ndimage.filters.gaussian_filter(data3dr, sigma=5)
 
