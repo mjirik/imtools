@@ -227,12 +227,12 @@ def resize_to_mm(data3d, voxelsize_mm, new_voxelsize_mm, mode='nearest'):
     :mode: default is 'nearest'
     """
 
-    if new_voxelsize_mm == 'orig':
+    if new_voxelsize_mm is 'orig':
         new_voxelsize_mm = np.array(voxelsize_mm)
 
-    elif new_voxelsize_mm == 'orig*2':
+    elif new_voxelsize_mm is 'orig*2':
         new_voxelsize_mm = np.array(voxelsize_mm) * 2
-    elif new_voxelsize_mm == 'orig*4':
+    elif new_voxelsize_mm is 'orig*4':
         new_voxelsize_mm = np.array(voxelsize_mm) * 4
         # vx_size = np.array(metadata['voxelsize_mm']) * 4
 
