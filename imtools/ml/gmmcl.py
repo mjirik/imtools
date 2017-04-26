@@ -57,7 +57,13 @@ class GMMCl():
 
         for i, label in enumerate(self.cls.keys()):
             score_l[label] = i
-            sc = self.cls[label].score(x)
+            from distutils.version import StrictVersion
+
+            if StrictVersion(sklearn.__version__) >= StrictVersion("0.18.0"):
+                sc = self.cls[label].score_samples(x)
+            else:
+                logger.warning("Support for sklearn version < 0.18.0 will be removed in the future")
+                sc = self.cls[label].score(x)
             score.append(sc)
         target_tmp = np.argmax(score, 0)
         return self.__relabel(target_tmp, score_l)
