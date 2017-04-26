@@ -24,7 +24,7 @@ def externfv(data3d, voxelsize_mm):        # scale
     return fv
 
 class Trainer3D():
-    def __init__(self, feature_function = None):
+    def __init__(self, feature_function=None):
         self.working_voxelsize_mm = [1.5, 1.5, 1.5]
         self.data=None
         self.target=None
