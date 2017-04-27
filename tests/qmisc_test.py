@@ -16,6 +16,7 @@ import os
 
 from imtools import qmisc
 from imtools import misc
+import imtools.sample_data
 
 
 #
@@ -96,6 +97,22 @@ class QmiscTest(unittest.TestCase):
         img_uncropped = qmisc.uncrop(img_cropped, crinfo, shape)
 
         self.assertTrue(img_uncropped[4, 4, 3] == img_in[4, 4, 3])
+
+
+    def test_crop_from_specific_data(self):
+
+        datap = imtools.sample_data.generate()
+        data3d = datap["data3d"]
+        segmentation = datap["segmentation"]
+        crinfo_auto1 = imtools.qmisc.crinfo_from_specific_data(segmentation, [5])
+        crinfo_auto2 = imtools.qmisc.crinfo_from_specific_data(segmentation, 5)
+        crinfo_auto3 = imtools.qmisc.crinfo_from_specific_data(segmentation, [5,5, 5])
+
+        crinfo_expected = [[0, 99], [20, 99], [45, 99]]
+
+        self.assertEquals(crinfo_auto1, crinfo_expected)
+        self.assertEquals(crinfo_auto1, crinfo_auto2)
+        self.assertEquals(crinfo_auto1, crinfo_auto3)
 
     def test_multiple_crop_and_uncrop(self):
         """
