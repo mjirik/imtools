@@ -93,14 +93,16 @@ from operator import add
 
 _FLAG_FIRST = object()
 
-def flattenDict(d, join=add, lift=lambda x:x):
+def flatten_dict(d, separator=None, join=add, lift=lambda x:x):
     """
-
 
     Based on ninjagecko code on stackoveflow
     http://stackoverflow.com/questions/6027558/flatten-nested-python-dictionaries-compressing-keys
 
     :param d: dict to flatten
+    :param separator: use preset values for join and lift.
+    Use empty list or tuple [], () for key hierarchy stored in list.
+    If simple_mode is string it is used as a separator.
     :param join: join operation. To join keys with '_' use join=lambda a,b:a+'_'+b
     :param lift:  to have all hierarchy keys in lise use lift=lambda x:(x,))
     :return:
@@ -111,6 +113,14 @@ def flattenDict(d, join=add, lift=lambda x:x):
     For all keys from abve hierarchy separated by '_' use:
     dict( flattenDict(testData, join=lambda a,b:a+'_'+b) )
     """
+
+    if type(separator) is str:
+        join = lambda a, b: a + separator + b
+    elif type(separator) in (list, tuple):
+        lift = lambda x:(x,)
+
+
+
     results = []
     def visit(subdict, results, partialKey):
         for k,v in subdict.items():
