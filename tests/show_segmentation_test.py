@@ -42,6 +42,7 @@ class ShowSegmemtationCase(unittest.TestCase):
 
 
     @attr('long')
+    # @attr('interactive')
     def test_from_file(self):
         input_file = "~/lisa_data/jatra_5mm_new.pklz"
         output_file = "jatra.vtk"
@@ -69,7 +70,7 @@ class ShowSegmemtationCase(unittest.TestCase):
             # resize_mm=self.resize_mm,
             resize_voxel_number=90000,
             # smoothing=self.smoothing,
-            # show=False
+            show=False
         )
         # import sed3
         #
