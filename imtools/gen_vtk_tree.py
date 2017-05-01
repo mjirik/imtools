@@ -231,17 +231,22 @@ def vt2polyData(vessel_tree, text_label=None):
     polyData = gen_tree(tree_data)
     return polyData
 
-def vt2vtk_file(vessel_tree, outfile, text_label=None):
+def vt2vtk_file(vessel_tree, outfile, text_label=None, lc_all="C"):
     """
     vessel_tree structure
     :param vessel_tree:  vt structure
     :param outfile: filename with .vtk extension
     :param text_label: text label like 'porta' or 'hepatic_veins'
+    :param lc_all: LC_ALL locale settings. Controls float numbers
+        format (dot or colon). If is set to "C" dot is used.
+        If None is used no processing is done
     :return:
     """
 
     polyData = vt2polyData(vessel_tree, text_label=text_label)
-
+    if lc_all is not None:
+        import locale
+        locale.setlocale(locale.LC_ALL, 'C')
     writer = vtk.vtkPolyDataWriter()
     writer.SetFileName(outfile)
     try:
