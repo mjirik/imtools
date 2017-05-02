@@ -17,7 +17,7 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "./extern/sPickle"))
 # import numpy as np
 
-from .manipulation import resize_to_mm, resize_to_shape
+from .image_manipulation import resize_to_mm, resize_to_shape
 
 def suggest_filename(file_path, exists=None):
     """

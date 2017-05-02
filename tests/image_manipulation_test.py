@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 # import funkcí z jiného adresáře
+import logging
+logger = logging.getLogger(__name__)
 import sys
 import os.path
 
@@ -14,14 +16,13 @@ import numpy as np
 import os
 
 
-from imtools import qmisc
-from imtools import misc
+from imtools import image_manipulation as imm
 import imtools.sample_data
 
 
 #
 
-class QmiscTest(unittest.TestCase):
+class ImageManipulationTest(unittest.TestCase):
     interactivetTest = False
     # interactivetTest = True
 
@@ -34,57 +35,10 @@ class QmiscTest(unittest.TestCase):
         data[1, 2, 0] = 1
         data[2, 1, 1] = 3
 
-        dataSM = qmisc.SparseMatrix(data)
+        dataSM = imm.SparseMatrix(data)
 
         data2 = dataSM.todense()
         self.assertTrue(np.all(data == data2))
-
-    def test_obj_to_and_from_file_yaml(self):
-        testdata = np.random.random([4, 4, 3])
-        test_object = {'a': 1, 'data': testdata}
-
-        filename = 'test_obj_to_and_from_file.yaml'
-        misc.obj_to_file(test_object, filename, 'yaml')
-        saved_object = misc.obj_from_file(filename, 'yaml')
-
-        self.assertTrue(saved_object['a'] == 1)
-        self.assertTrue(saved_object['data'][1, 1, 1] == testdata[1, 1, 1])
-
-        os.remove(filename)
-
-    def test_obj_to_and_from_file_pickle(self):
-        testdata = np.random.random([4, 4, 3])
-        test_object = {'a': 1, 'data': testdata}
-
-        filename = 'test_obj_to_and_from_file.pkl'
-        misc.obj_to_file(test_object, filename, 'pickle')
-        saved_object = misc.obj_from_file(filename, 'pickle')
-
-        self.assertTrue(saved_object['a'] == 1)
-        self.assertTrue(saved_object['data'][1, 1, 1] == testdata[1, 1, 1])
-
-        os.remove(filename)
-
-    # def test_obj_to_and_from_file_exeption(self):
-    #    test_object = [1]
-    #    filename = 'test_obj_to_and_from_file_exeption'
-    #    self.assertRaises(misc.obj_to_file(test_object, filename ,'yaml'))
-
-    def test_obj_to_and_from_file_with_directories(self):
-        import shutil
-        testdata = np.random.random([4, 4, 3])
-        test_object = {'a': 1, 'data': testdata}
-
-        dirname = '__test_write_and_read'
-        filename = '__test_write_and_read/test_obj_to_and_from_file.pkl'
-
-        misc.obj_to_file(test_object, filename, 'pickle')
-        saved_object = misc.obj_from_file(filename, 'pickle')
-
-        self.assertTrue(saved_object['a'] == 1)
-        self.assertTrue(saved_object['data'][1, 1, 1] == testdata[1, 1, 1])
-
-        shutil.rmtree(dirname)
 
     def test_crop_and_uncrop(self):
         shape = [10, 10, 5]
@@ -92,9 +46,9 @@ class QmiscTest(unittest.TestCase):
 
         crinfo = [[2, 8], [3, 9], [2, 5]]
 
-        img_cropped = qmisc.crop(img_in, crinfo)
+        img_cropped = imm.crop(img_in, crinfo)
 
-        img_uncropped = qmisc.uncrop(img_cropped, crinfo, shape)
+        img_uncropped = imm.uncrop(img_cropped, crinfo, shape)
 
         self.assertTrue(img_uncropped[4, 4, 3] == img_in[4, 4, 3])
 
@@ -125,62 +79,69 @@ class QmiscTest(unittest.TestCase):
         crinfo1 = [[2, 8], [3, 9], [2, 5]]
         crinfo2 = [[2, 5], [1, 4], [1, 2]]
 
-        img_cropped = qmisc.crop(img_in, crinfo1)
-        img_cropped = qmisc.crop(img_cropped, crinfo2)
+        img_cropped = imm.crop(img_in, crinfo1)
+        img_cropped = imm.crop(img_cropped, crinfo2)
 
-        crinfo_combined = qmisc.combinecrinfo(crinfo1, crinfo2)
+        crinfo_combined = imm.combinecrinfo(crinfo1, crinfo2)
 
-        img_uncropped = qmisc.uncrop(img_cropped, crinfo_combined, shape)
+        img_uncropped = imm.uncrop(img_cropped, crinfo_combined, shape)
 
         self.assertTrue(img_uncropped[4, 4, 3] == img_in[4, 4, 3])
+        self.assertEquals(img_in.shape, img_uncropped.shape)
 
-    # @unittest.skip("waiting for implementation")
-    def test_suggest_filename(self):
+    @unittest.skip("crinfo_combine should be tested in different way")
+    def test_random_multiple_crop_and_uncrop(self):
         """
-        Testing some files. Not testing recursion in filenames. It is situation
-        if there exist file0, file1, file2 and input file is file
-        """
-        filename = "mujsoubor"
-        # import ipdb; ipdb.set_trace() # BREAKPOINT
-        new_filename = misc.suggest_filename(filename, exists=True)
-        self.assertTrue(new_filename == "mujsoubor2")
-
-        filename = "mujsoubor112"
-        new_filename = misc.suggest_filename(filename, exists=True)
-        self.assertTrue(new_filename == "mujsoubor113")
-
-        filename = "mujsoubor-2.txt"
-        new_filename = misc.suggest_filename(filename, exists=True)
-        self.assertTrue(new_filename == "mujsoubor-3.txt")
-
-        filename = "mujsoubor-a24.txt"
-        new_filename = misc.suggest_filename(filename, exists=False)
-        self.assertTrue(new_filename == "mujsoubor-a24.txt")
-
-    @unittest.skip("getVersionString is not used anymore")
-    def test_getVersionString(self):
-        """
-        getVersionString is not used anymore
+        test combination of multiple crop
         """
 
-        vfn = "../__VERSION__"
-        existed = False
-        if not os.path.exists(vfn):
-            with open(vfn, 'a') as the_file:
-                the_file.write('1.1.1\n')
-            existed = False
+        shape = np.random.randint(10, 30, 3)
+        # shape = [10, 10, 5]
+        img_in = np.random.random(shape)
 
-        verstr = qmisc.getVersionString()
+        crinfo1 = [
+            sorted(np.random.randint(0, shape[0], 2)),
+            sorted(np.random.randint(0, shape[1], 2)),
+            sorted(np.random.randint(0, shape[2], 2))
+        ]
+        crinfo2 = [
+            sorted(np.random.randint(0, shape[0], 2)),
+            sorted(np.random.randint(0, shape[1], 2)),
+            sorted(np.random.randint(0, shape[2], 2))
+        ]
 
-        self.assertTrue(type(verstr) == str)
-        if existed:
-            os.remove(vfn)
+        img_cropped = imm.crop(img_in, crinfo1)
+        img_cropped = imm.crop(img_cropped, crinfo2)
+
+        crinfo_combined = imm.combinecrinfo(crinfo1, crinfo2)
+
+        img_uncropped = imm.uncrop(img_cropped, crinfo_combined, shape)
+        logger.debug("shape " + str(shape))
+        logger.debug("crinfo_combined " + str(crinfo_combined))
+        logger.debug("img_cropped.shape" + str(img_cropped.shape))
+        logger.debug("img_uncropped.shape" + str(img_uncropped.shape))
+
+
+        self.assertEquals(img_in.shape, img_uncropped.shape)
+        # sonda indexes inside cropped area
+        # cr_com = np.asarray(crinfo_combined)
+        # if np.all((cr_com[:, 1] - cr_com[:, 0]) > 1):
+        if np.all(img_cropped.shape > 1):
+            # sometimes the combination of crinfo has zero size in one dimension
+            sonda = np.array([
+                np.random.randint(crinfo_combined[0][0], crinfo_combined[0][1] - 1),
+                np.random.randint(crinfo_combined[1][0], crinfo_combined[1][1] - 1),
+                np.random.randint(crinfo_combined[2][0], crinfo_combined[2][1] - 1),
+                ])
+            sonda_intensity_uncropped = img_uncropped[sonda[0], sonda[1], sonda[2]]
+            sonda_intensity_in = img_in[sonda[0], sonda[1], sonda[2]]
+            self.assertEquals(sonda_intensity_in, sonda_intensity_uncropped)
 
     def test_resize_to_shape(self):
 
         data = np.random.rand(3, 4, 5)
         new_shape = [5, 6, 6]
-        data_out = qmisc.resize_to_shape(data, new_shape)
+        data_out = imm.resize_to_shape(data, new_shape)
         # print data_out.shape
         # print data
         # print data_out
@@ -188,7 +149,7 @@ class QmiscTest(unittest.TestCase):
 
     def test_fix_crinfo(self):
         crinfo = [[10, 15], [30, 40], [1, 50]]
-        cri_fixed = qmisc.fix_crinfo(crinfo)
+        cri_fixed = imm.fix_crinfo(crinfo)
 
         # print crinfo
         # print cri_fixed
@@ -202,7 +163,7 @@ class QmiscTest(unittest.TestCase):
         voxelsize_mm = [2, 3, 1]
         new_voxelsize_mm = [1, 3, 2]
         expected_shape = [6, 4, 3]
-        data_out = qmisc.resize_to_mm(data, voxelsize_mm, new_voxelsize_mm)
+        data_out = imm.resize_to_mm(data, voxelsize_mm, new_voxelsize_mm)
         print data_out.shape
         # print data
         # print data_out

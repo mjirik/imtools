@@ -17,7 +17,7 @@ import subprocess
 import scipy
 import scipy.ndimage
 
-from .manipulation import *
+from .image_manipulation import *
 
 def getVersionString():
     """
