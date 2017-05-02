@@ -42,7 +42,7 @@ class ShowSegmemtationCase(unittest.TestCase):
 
 
     @attr('long')
-    # @attr('interactive')
+    @attr('interactive')
     def test_from_file(self):
         input_file = "~/lisa_data/jatra_5mm_new.pklz"
         output_file = "jatra.vtk"
