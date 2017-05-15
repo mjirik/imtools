@@ -28,7 +28,7 @@ def sliver_reader(filename_end_mask="*[0-9].mhd", sliver_reference_dir="~/data/m
     :param read_seg: read segmentation data if is set True
     :return: numeric_label, vs_mm, oname, orig_data, rname, ref_data
     """
-    sliver_reference_dir = op.expanduser("~/data/medical/orig/sliver07/training/")
+    sliver_reference_dir = op.expanduser(sliver_reference_dir)
     orig_fnames = glob.glob(sliver_reference_dir + "*orig" +  filename_end_mask)
     ref_fnames = glob.glob(sliver_reference_dir + "*seg"+ filename_end_mask)
 
