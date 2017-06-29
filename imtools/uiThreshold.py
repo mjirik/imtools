@@ -551,15 +551,21 @@ class uiThreshold:
                 self.imgFiltering, self.nObj, self.seeds)
 
     def __drawSegmentedSlice(self, ax, contour, i):
+        """
+        Used for visualization of midle slice of the data3d
+        :param ax:
+        :param contour:
+        :param i:
+        :return:
+        """
         ax.cla()
         ax.imshow(self.data[i, :, :], cmap=self.cmap)
 
         ax.set_xticklabels([])
         ax.set_yticklabels([])
         if contour is not None:
-            ax.contour(contour[i, :, :])
-            # import sed3
-            # sed3.sed3(contour, show=True)
+            #ax.contour(contour[i, :, :])
+            ax.contour(contour[i, :, :] + 1)
 
     def drawVisualization(self):
         """

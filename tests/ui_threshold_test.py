@@ -29,6 +29,7 @@ class MyTestCase(unittest.TestCase):
         uit.run()
         plt.show()
 
+
     @attr('interactive')
     def test_ui_threshold_qt(self):
         app = QApplication(sys.argv)
