@@ -173,3 +173,20 @@ def df_drop_duplicates(df, ignore_key_pattern="time"):
 
     df = df.drop_duplicates(ks)
     return df
+
+
+def ndarray_to_list_in_structure(item):
+    """ Change ndarray in structure of lists and dicts into lists.
+    """
+    tp = type(item)
+
+    if tp == np.ndarray:
+        item = item.squeeze().tolist()
+    elif tp == list:
+        for i in range(len(item)):
+            item[i] = ndarray_to_list_in_structure(item[i])
+    elif tp == dict:
+        for lab in item:
+            item[lab] = ndarray_to_list_in_structure(item[lab])
+
+    return item
