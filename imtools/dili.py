@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 import collections
 import inspect
 import copy
+import numpy as np
 
 
 def get_default_args(obj):
