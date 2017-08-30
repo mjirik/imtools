@@ -18,7 +18,7 @@ import sed3
 
 sys.path.append(op.expanduser("~/projects/bodynavigation"))
 
-import bodynavigation
+# import bodynavigation
 pt = op.expanduser("~/projects/imtools")
 sys.path.append(pt)
 import imtools

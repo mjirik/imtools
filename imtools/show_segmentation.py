@@ -77,6 +77,7 @@ def showSegmentation(
         volume = nvoxels * np.prod(voxelsize_mm)
         voxel_volume = volume / float(resize_voxel_number)
         resize_mm = voxel_volume ** (1.0 / 3.0)
+    degrad = int(degrad)
 
 
     orig_dtype = segmentation.dtype
