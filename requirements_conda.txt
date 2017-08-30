@@ -13,5 +13,5 @@ opencv
 skelet3d
 checksumdir
 pyqt=4.11.4
-vtkviewer>=0.0.6
+vtkviewer
 dicom2fem
