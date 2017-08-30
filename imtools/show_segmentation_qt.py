@@ -25,7 +25,7 @@ from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 
 class ShowSegmentationWidget(QtGui.QWidget):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, segmentation=None, *args, **kwargs):
         super(ShowSegmentationWidget, self).__init__()
         self.ui_buttons = {}
         self.ui_slab = {}
@@ -36,8 +36,13 @@ class ShowSegmentationWidget(QtGui.QWidget):
         if "show_load_interface" in kwargs:
             self.show_load_interface = kwargs.pop("show_load_interface")
 
-        self.add_data(*args, **kwargs)
+        self.segmentation = None
+        self.init_parameters()
+        self.init_slab()
         self.initUI()
+        if segmentation is not None:
+            logger.debug("segmentation is not none")
+            self.add_data(segmentation, *args, **kwargs)
 
     def add_data_file(self, filename):
         import io3d
@@ -47,23 +52,23 @@ class ShowSegmentationWidget(QtGui.QWidget):
 
         self.add_data(**datap)
 
-    def add_data(self, segmentation, voxelsize_mm=[1,1,1], slab=None, **kwargs):
-        # self.data3d = data3d
-        self.segmentation = segmentation
-        self.voxelsize_mm = np.asarray(voxelsize_mm)
-        self.slab = slab
+    def init_parameters(self):
         self.resize_mm = None
         self.resize_voxel_number = 10000
         self.degrad = 1
         self.smoothing=True
         self.vtk_file = "mesh.vtk"
 
+    def add_data(self, segmentation, voxelsize_mm=[1,1,1], slab=None, **kwargs):
+        # self.data3d = data3d
+        self.segmentation = segmentation
+        self.voxelsize_mm = np.asarray(voxelsize_mm)
+        self.slab = slab
+        self.init_parameters()
+
         self.init_slab(slab)
 
         self.update_slab_ui()
-
-
-
 
 
     def initUI(self):
@@ -168,6 +173,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
         self._init_3d_viewer()
 
     def _init_3d_viewer(self):
+        logger.debug("init 3d view")
         self.renderer = vtk.vtkRenderer()
         self.vtkWidget = QVTKRenderWindowInteractor(self)
         self.mainLayout.addWidget(self.vtkWidget, 0, 4, self._viewer_height + 1, 1)
@@ -260,7 +266,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
 
         print "degrad", self.degrad
 
-    def init_slab(self, slab):
+    def init_slab(self, slab=None):
 
         if slab is None:
             slab = {}
@@ -304,6 +310,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
 
 
     def actionShow(self):
+        logger.debug("actionShow")
         import show_segmentation
         labels = self.action_check_slab_ui()
         self.action_ui_params()

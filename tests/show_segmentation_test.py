@@ -34,7 +34,8 @@ class ShowSegmemtationCase(unittest.TestCase):
             # resize_mm=self.resize_mm,
             # resize_voxel_number=self.resize_voxel_number,
             # smoothing=self.smoothing,
-            show=False
+            # show=False
+            show=True
         )
 
         self.assertTrue(op.exists("donut.vtk"))
