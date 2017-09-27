@@ -38,7 +38,8 @@ def subdict(dct, keys):
     return p
 
 
-def list_filter(lst, startswith=None, notstartswith=None):
+def list_filter(lst, startswith=None, notstartswith=None,
+                contain=None, notcontain=None):
     """ Keep in list items according to filter parameters.
 
     :param lst: item list
@@ -54,6 +55,12 @@ def list_filter(lst, startswith=None, notstartswith=None):
                 keep = True
         if notstartswith is not None:
             if not item.startswith(notstartswith):
+                keep = True
+        if contain is not None:
+            if contain in item:
+                keep = True
+        if notcontain is not None:
+            if not notcontain in item:
                 keep = True
 
         if keep:
