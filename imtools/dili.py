@@ -37,6 +37,29 @@ def subdict(dct, keys):
     # p = {key: value for key, value in dct.items() if key in keys}
     return p
 
+
+def list_filter(lst, startswith=None, notstartswith=None):
+    """ Keep in list items according to filter parameters.
+
+    :param lst: item list
+    :param startswith: keep items starting with
+    :param notstartswith: remove items starting with
+    :return:
+    """
+    keeped = []
+    for item in lst:
+        keep = False
+        if startswith is not None:
+            if item.startswith(startswith):
+                keep = True
+        if notstartswith is not None:
+            if not item.startswith(notstartswith):
+                keep = True
+
+        if keep:
+            keeped.append(item)
+    return keeped
+
 def kick_from_dict(dct, keys):
     if type(dct) == collections.OrderedDict:
         p = collections.OrderedDict()

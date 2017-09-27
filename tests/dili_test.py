@@ -43,6 +43,11 @@ class DictListTestCase(unittest.TestCase):
         dct = dict(dct)
         self.assertIn("c;cc;aaa", dct.keys())
 
+    def test_list_filter(self):
+        lst = ["aa", "sss", "aaron", "rew"]
+        output = dili.list_filter(lst, notstartswith="aa")
+        self.assertTrue(["sss", "rew"] == output)
+
 
 def main():
     unittest.main()
