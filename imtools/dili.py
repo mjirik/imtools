@@ -229,7 +229,6 @@ def ordered_dict_to_dict(config):
     """
 
     if type(config) == collections.OrderedDict:
-        print "hu"
         config = dict(config)
     if type(config) == list:
         for i in range(0, len(config)):
