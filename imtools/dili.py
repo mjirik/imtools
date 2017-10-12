@@ -221,3 +221,22 @@ def ndarray_to_list_in_structure(item):
             item[lab] = ndarray_to_list_in_structure(item[lab])
 
     return item
+
+
+def ordered_dict_to_dict(config):
+    """
+    Use dict instead of ordered dict in structure.
+    """
+
+    if type(config) == collections.OrderedDict:
+        print "hu"
+        config = dict(config)
+    if type(config) == list:
+        for i in range(0, len(config)):
+            config[i] = ordered_dict_to_dict(config[i])
+    elif type(config) == dict:
+        for key in config:
+            config[key] = ordered_dict_to_dict(config[key])
+
+    return config
+
