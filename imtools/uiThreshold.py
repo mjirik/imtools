@@ -739,7 +739,7 @@ class uiThreshold:
 def main():
     import numpy as np
     data = np.random.randint(0, 30, [15, 16, 18])
-    print data.shape
+    print(data.shape)
     data[5:11, 7:13, 2:10] += 20
     uit = uiThreshold(data=data, voxel=[1, 2, 1.5])
     uit.run()

@@ -688,7 +688,7 @@ def get_overlay(mask, alpha=0.3, color='r'):
     elif color == 'y':
         layer = alpha * np.dstack((mask, mask, np.zeros_like(mask)))
     else:
-        print 'Unknown color, using red as default.'
+        print('Unknown color, using red as default.')
         layer = alpha * np.dstack((mask, np.zeros_like(mask), np.zeros_like(mask)))
     return layer
 
@@ -848,12 +848,12 @@ def label_3D(data, class_labels, background=-1):
     for c in class_labels:
         x = data == c
         labs, n_labels = scindimea.label(x)
-        print 'labels: ', np.unique(labs)
+        print('labels: ', np.unique(labs))
         # py3DSeedEditor.py3DSeedEditor(labs).show()
         for l in range(n_labels + 1):
             labels = np.where(labs == l, curr_l, labels)
             curr_l += 1
-    print 'min = %i, max = %i' % (labels.min(), labels.max())
+    print('min = %i, max = %i' % (labels.min(), labels.max()))
     return labels
 
 
@@ -1094,7 +1094,7 @@ def save_figs(data_fname, subdir, data, mask, imgs, ranges=None, cmaps=None):
 
     fig = plt.figure(figsize=(20, 5))
     for s in range(len(imgs)):
-        print get_status_text('\tSaving figures', iter=s, max_iter=len(imgs)),
+        print(get_status_text('\tSaving figures', iter=s, max_iter=len(imgs)),)
         # print 'Saving figure #%i/%i ...' % (s + 1, len(res)),
         for i, (title, im) in enumerate(imgs[s]):
             plt.subplot(1, len(imgs[s]), i + 1)
@@ -1119,12 +1119,12 @@ def save_figs(data_fname, subdir, data, mask, imgs, ranges=None, cmaps=None):
         fig.savefig(os.path.join(fig_patient_dir, 'slice_%i.png' % s))
         fig.clf()
         # print 'done'
-    print get_status_text('\tSaving figures', iter=-1, max_iter=len(imgs))
+    print(get_status_text('\tSaving figures', iter=-1, max_iter=len(imgs)))
 
 
 def view_segmentation(datap_1, datap_2=None):
     if not os.path.exists('../data_viewers/'):
-        print 'Package data_viewers not found.'
+        print('Package data_viewers not found.')
     else:
         sys.path.append('../data_viewers/')
         from dataviewers.seg_viewer import SegViewer
@@ -1138,7 +1138,7 @@ def view_segmentation(datap_1, datap_2=None):
 
 def show_3d(data, range=True):
     if not os.path.exists('/home/tomas/projects/data_viewers'):
-        print 'Package data_viewers not found.'
+        print('Package data_viewers not found.')
     else:
         sys.path.append('/home/tomas/projects/data_viewers')
         from dataviewers.viewer_3D import Viewer_3D
@@ -1492,7 +1492,7 @@ def make_neighborhood_matrix(im, nghood=4, roi=None):
         nc = np.array(np.hstack((nc_border, nc_center, nc_border)))
         ns = np.array(np.hstack((-np.ones_like(nr_border), np.zeros_like(nr_center), np.ones_like(nr_border))))
     else:
-        print 'Wrong neighborhood passed. Exiting.'
+        print('Wrong neighborhood passed. Exiting.')
         return None
 
     lind = np.ravel_multi_index(np.indices(im.shape), im.shape)  # linear indices in array form
@@ -1573,14 +1573,14 @@ def initialize_graycom(data_in, slice=None, distances=(1, ), scale=0.5, angles=(
         data = data_in.copy()
 
     # computing gray co-occurence matrix
-    print 'Computing gray co-occurence matrix ...',
+    print('Computing gray co-occurence matrix ...',)
     if data.ndim == 2:
         gcm = skifea.greycomatrix(data, distances, angles, symmetric=symmetric)
         # summing over distances and directions
         gcm = gcm.sum(axis=3).sum(axis=2)
     else:
         gcm = graycomatrix_3D(data, connectivity=1)
-    print 'done'
+    print('done')
 
     # thresholding graycomatrix (GCM)
     thresh = c_t * np.mean(gcm)
@@ -1986,8 +1986,8 @@ def seeds_from_hist(img, mask=None, window='hanning', smooth=True, min_distance=
 
     # vypisy
     if verbose:
-        print 'peaks:', peaks
-        print 'seed intervals:', seeds_intervals
+        print('peaks:', peaks)
+        print('seed intervals:', seeds_intervals)
 
     # vizualizace
     if show:
@@ -2030,7 +2030,7 @@ def seeds_from_glcm(img, mask=None, smooth=True, min_int=0, max_int=255, show=Fa
     centers = [x.mean() for x in rvs]
 
     if verbose:
-        print 'centers:', centers
+        print('centers:', centers)
 
     if show:
         plt.figure()
@@ -2258,7 +2258,7 @@ def match_size(d, shape, verbose=False):
     zoom = np.array(shape) / np.array(d.shape).astype(np.float)
     r = scindiint.zoom(d, zoom, order=1, prefilter=False)
     if verbose:
-        print 'in: {}, req: {}, zoom: {}, out: {}'.format(d.shape, shape, zoom, r.shape)
+        print('in: {}, req: {}, zoom: {}, out: {}'.format(d.shape, shape, zoom, r.shape))
     return r
 
 

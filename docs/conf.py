@@ -296,7 +296,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'imtools', u'imtools Documentation',
-   u'M. Jirik', 'imtools', 'One line description of project.',
+   u'M. Jirik', 'imtools', 'Tools useful for image processing.',
    'Miscellaneous'),
 ]
 
@@ -317,9 +317,9 @@ texinfo_documents = [
 
 # Bibliographic Dublin Core info.
 epub_title = u'imtools'
-epub_author = u'Author'
-epub_publisher = u'Author'
-epub_copyright = u'2014, Author'
+epub_author = u'Miroslav Jirik'
+epub_publisher = u'Miroslav Jirik'
+epub_copyright = u'2014, Miroslav Jirik'
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = u'imtools'

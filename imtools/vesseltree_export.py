@@ -34,8 +34,8 @@ def vt2esofspy(vesseltree, outputfilename="tracer.txt", axisorder=[0, 1, 2]):
         vt = io3d.misc.obj_from_file(vesseltree)
     else:
         vt = vesseltree
-    print vt['general']
-    print vt.keys()
+    print(vt['general'])
+    print(vt.keys())
     vtgm = vt['graph']['microstructure']
     lines = []
     vs = vt['general']['voxel_size_mm']

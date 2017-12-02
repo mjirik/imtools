@@ -248,7 +248,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
     def _find_None(self, lineedit):
         text = str(lineedit.text())
 
-        print "find none ", text
+        print("find none ", text)
         if text == "None":
             text = None
         else:
@@ -264,7 +264,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
         self.smoothing = self.ui_buttons['smoothing'].isChecked()
         self.vtk_file = str(self.ui_buttons["vtk_file"].text())
 
-        print "degrad", self.degrad
+        print("degrad", self.degrad)
 
     def init_slab(self, slab=None):
 

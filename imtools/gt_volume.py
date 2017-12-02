@@ -74,7 +74,7 @@ logger.warning("Module is moved to package skelet3d.gt_vtk. This placeholder wil
 #             except:
 #                 import traceback
 #                 traceback.print_exc()
-#                 print "except in drawing line"
+#                 print("except in drawing line")
 #                 import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 #
 #         # cuting size of 3d space needed for calculating distances (smaller ==
@@ -125,7 +125,6 @@ logger.warning("Module is moved to package skelet3d.gt_vtk. This placeholder wil
 #         }
 #
 #         misc.obj_to_file(data, outputfile, filetype=filetype)
-#         print "saved"
 #         #dw = datawriter.DataWriter()
 #         #dw.Write3DData(self.data3d, outputfile, filetype)
 #

@@ -32,7 +32,7 @@ def suggest_filename(file_path, exists=None):
 
     if exists:
         file_path, file_extension = os.path.splitext(file_path)
-        # print file_path
+        # print(file_path)
         m = re.search(r"\d+$", file_path)
         if m is None:
             # cislo = 2

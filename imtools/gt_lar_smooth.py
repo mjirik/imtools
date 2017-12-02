@@ -391,7 +391,6 @@ logger.warning("Module is moved to package skelet3d.gt_vtk. This placeholder wil
 #
 #         # V = [[0,0,0],[5,5,1],[0,5,5],[5,5,5]]
 #         # CV = [[0,1,2,3]]
-#         # print 'V, CV ', V, CV
 #         #for joint in self.joints_lar:
 #
 #         # out = STRUCT([MKPOL([V, AA(AA(lambda k:k + 1))(CV), []])] + self.joints_lar)

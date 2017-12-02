@@ -28,14 +28,14 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 
 def submodule_update():
     # update submodules codes
-    print ('Updating submodules')
+    print('Updating submodules')
     try:
         # import pdb; pdb.set_trace()
         subprocess.call('git submodule update --init --recursive', shell=True)
         # subprocess.call('git submodule update --init --recursive')
 
     except:
-        print ('Probem with git submodules')
+        print('Probem with git submodules')
 
 
 def check_python_architecture(pythondir, target_arch_str):
@@ -55,7 +55,7 @@ def remove(local_file_name):
     try:
         os.remove(local_file_name)
     except Exception as e:
-        print ("Cannot remove file '" + local_file_name + "'. Please remove\
+        print("Cannot remove file '" + local_file_name + "'. Please remove\
         it manually.")
         print (e)
 
@@ -407,7 +407,7 @@ def file_copy_and_replace_lines(in_path, out_path):
         # coma on end makes no linebreak
         line = line.replace("@{lisa_path}", lisa_path)
         line = line.replace("@{conda_path}", conda_path)
-        print line
+        print(line)
 
 
 def make_icon():
@@ -433,8 +433,8 @@ def __make_icon_linux():
 
     in_path = os.path.join(path_to_script, "applications/lisa.desktop.in")
     in_path_ha = os.path.join(path_to_script, "applications/ha.desktop.in")
-    print "icon input path:"
-    print in_path, in_path_ha
+    print("icon input path:")
+    print(in_path, in_path_ha)
 
     home_path = os.path.expanduser('~')
 
@@ -443,7 +443,7 @@ def __make_icon_linux():
     elif os.path.exists(os.path.join(home_path, 'Plocha')):
         desktop_path = os.path.join(home_path, 'Plocha')
     else:
-        print "Cannot find desktop directory"
+        print("Cannot find desktop directory")
         desktop_path = None
 
     # copy desktop files to desktop
@@ -452,8 +452,8 @@ def __make_icon_linux():
         out_path_ha = os.path.join(desktop_path, "ha.desktop")
 
         # fi = fileinput.input(out_path, inplace=True)
-        print "icon output path:"
-        print out_path, out_path_ha
+        print("icon output path:")
+        print(out_path, out_path_ha)
         file_copy_and_replace_lines(in_path, out_path)
         file_copy_and_replace_lines(in_path_ha, out_path_ha)
 
@@ -465,13 +465,13 @@ def __make_icon_linux():
 
         out_path_ha = os.path.join(local_app_path, "ha.desktop")
 
-        print "icon output path:"
-        print out_path, out_path_ha
+        print("icon output path:")
+        print(out_path, out_path_ha)
         file_copy_and_replace_lines(in_path, out_path)
         file_copy_and_replace_lines(in_path_ha, out_path_ha)
 
     else:
-        print "Couldnt find $HOME/.local/share/applications/."
+        print("Couldnt find $HOME/.local/share/applications/.")
 
 
 def main():
