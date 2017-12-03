@@ -1889,7 +1889,7 @@ def hist_smoothing(bins, hist, window='gaussian', win_w=20, sigma=5):
     # plt.show()
     win_types = ['flat', 'hanning', 'hamming', 'bartlett', 'blackman', 'gaussian']
     if not window in win_types:
-        raise ValueError, "Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
+        raise ValueError("Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'")
 
     # for window in win_types:
     if window == 'flat':  # moving average
