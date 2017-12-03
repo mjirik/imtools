@@ -18,8 +18,8 @@ import argparse
 
 import numpy as np
 import seg2fem
-import misc
-import viewer
+from . import misc
+from . import viewer
 
 
 def export_to_lar(segmentation, degrad):
