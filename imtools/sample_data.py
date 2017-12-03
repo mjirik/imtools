@@ -57,7 +57,7 @@ def remove(local_file_name):
     except Exception as e:
         print("Cannot remove file '" + local_file_name + "'. Please remove\
         it manually.")
-        print (e)
+        print(e)
 
 
 def downzip(url, destination='./sample_data/'):
@@ -67,7 +67,7 @@ def downzip(url, destination='./sample_data/'):
 
     # url = "http://147.228.240.61/queetech/sample-data/jatra_06mm_jenjatra.zip"
     logmsg = "downloading from '" + url + "'"
-    print logmsg
+    print(logmsg)
     logger.debug(logmsg)
     local_file_name = os.path.join(destination, 'tmp.zip')
     urllibr.urlretrieve(url, local_file_name)

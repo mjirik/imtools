@@ -2091,7 +2091,7 @@ def seeds_from_glcm_mesh(img, mask=None, smooth=True, min_int=0, max_int=255, sh
     seeds_f = scindifil.median_filter(seeds, size=3)
 
     if verbose:
-        print 'inds:', inds
+        print('inds:', inds)
 
     # visualization
     if show:
@@ -2151,9 +2151,9 @@ def data_from_glcm(glcm):
 def _debug(msg, verbose=True, newline=True):
     if verbose:
         if newline:
-            print msg
+            print(msg)
         else:
-            print msg,
+            print(msg,)
 
 
 def seeds_from_glcm_meanshift(img, mask=None, smooth=True, min_int=0, max_int=255, show=False, show_now=True, verbose=False):
