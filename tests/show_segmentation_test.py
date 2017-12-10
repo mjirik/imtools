@@ -16,7 +16,7 @@ import imtools.show_segmentation as ss
 
 
 class ShowSegmemtationCase(unittest.TestCase):
-    @attr('interactive')
+    # @attr('interactive')
     def test_donut(self):
         datap = imtools.sample_data.donut()
 

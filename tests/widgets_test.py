@@ -7,7 +7,7 @@ from nose.plugins.attrib import attr
 import sys
 import os
 import PyQt4
-from PyQt4.QtGui import QApplication, QFileDialog
+from PyQt4.QtGui import QApplication, QFileDialog, QWidget, QPushButton, QVBoxLayout
 from PyQt4.QtTest import QTest
 from PyQt4.QtCore import Qt
 
@@ -59,11 +59,33 @@ class MyTestCase(unittest.TestCase):
         # from teigen.dictwidgetqt import DictWidget
         # from teigen.generators.cylindersqt import CylindersWidget
         import imtools.show_segmentation_qt as ssqt
+        # app = QtGui.QApplication(sys.argv)
         app = QApplication(sys.argv)
         sw = ssqt.ShowSegmentationWidget(None)
         sw.show()
         app.exec_()
 
+    # def test_show_segmentation_qt_widget_2(self):
+        # import imtools.show_segmentation_qt as ssqt
+        # app = QApplication(sys.argv)
+        # slab = {"la": 5, "sdfa":7}
+        # sw = ssqt.SelectLabelWidget(slab=slab)
+        # sw.show()
+        # app.exec_()
+
+    @attr('interactive')
+    def test_show_qtwidget(self):
+        # from teigen.dictwidgetqt import DictWidget
+        # from teigen.generators.cylindersqt import CylindersWidget
+        import imtools.show_segmentation_qt as ssqt
+        app = QApplication(sys.argv)
+        qw = QWidget()
+        button = QPushButton('Test')
+        layout = QVBoxLayout()
+        layout.addWidget(button)
+        # sw = ssqt.ShowSegmentationWidget(None, qapp=app)
+        qw.show()
+        app.exec_()
 
     # @attr('interactive')
     def test_show_segmentation_qt_widget_hidden_buttons(self):

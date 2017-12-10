@@ -23,12 +23,77 @@ import numpy as np
 import vtk
 from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
+class SelectLabelWidget(QtGui.QWidget):
+    def __init__(self, *args, **kwargs):
+        super(SelectLabelWidget, self).__init__()
+        self.ui_slab = {}
+
+        self.mainLayout = QGridLayout(self)
+        self.init_slab(*args, **kwargs)
+        self.update_slab_ui()
+
+    def init_slab(self, slab=None, segmentation=None, voxelsize_mm=None):
+        """
+        Create widget with segmentation labels information used to select labels.
+
+        :param slab: dict with label name and its id
+        :param segmentation: 3D label ndarray
+        :param voxelsize_mm: size of voxel in mm
+        :return:
+        """
+        self.segmentation = segmentation
+        self.voxelsize_mm = voxelsize_mm
+
+        if slab is None:
+            slab = {}
+            if self.segmentation is not None:
+                labels = np.unique(self.segmentation)
+                for label in labels:
+                    slab[label] = label
+        self.slab = slab
+
+    def update_slab_ui(self):
+        _row = 1
+        # remove old widgets
+        for key, val in self.ui_slab.iteritems():
+            val.deleteLater()
+        self.ui_slab = {}
+        # _row_slab = 0
+        for label, value in self.slab.iteritems():
+            _row += 1
+            # _row_slab += 1
+            txt = str(label) + "(" + str(value) + "): "
+            if self.segmentation is not None:
+                nvoxels =  np.sum(self.segmentation==value)
+                if self.voxelsize_mm is not None:
+                    vx_vol = np.prod(self.voxelsize_mm)
+                    txt += str(nvoxels * vx_vol) + " [mm^3], "
+                txt += str(nvoxels)
+            self.ui_slab[label] = QCheckBox(txt, self)
+            self.mainLayout.addWidget(self.ui_slab[label], _row, 1, 1, 2)
+            if value != 0:
+                self.ui_slab[label].setCheckState(QtCore.Qt.Checked)
+                # self.ui_buttons["Show"].clicked.connect(self.actionShow)
+
+        return _row
+
+
+
+        pass
+
+    def action_check_slab_ui(self):
+        labels = []
+        for key, val in self.ui_slab.iteritems():
+            if val.isChecked():
+                labels.append(self.slab[key])
+
+        return labels
+
 
 class ShowSegmentationWidget(QtGui.QWidget):
     def __init__(self, segmentation=None, *args, **kwargs):
         super(ShowSegmentationWidget, self).__init__()
         self.ui_buttons = {}
-        self.ui_slab = {}
 
         self.show_load_interface = False
         if "show_load_button" in kwargs:
@@ -38,11 +103,15 @@ class ShowSegmentationWidget(QtGui.QWidget):
 
         self.segmentation = None
         self.init_parameters()
-        self.init_slab()
+        # self.slab_wg =
+        # self.init_slab()
         self.initUI()
         if segmentation is not None:
             logger.debug("segmentation is not none")
             self.add_data(segmentation, *args, **kwargs)
+
+    # def init_slab(self):
+    #     self.
 
     def add_data_file(self, filename):
         import io3d
@@ -70,6 +139,17 @@ class ShowSegmentationWidget(QtGui.QWidget):
 
         self.update_slab_ui()
 
+    def init_slab(self, slab=None):
+        """
+
+        :param slab:
+        :return:
+        """
+
+        self.slab_wg.init_slab(slab=slab, segmentation=self.segmentation, voxelsize_mm=self.voxelsize_mm)
+
+    def update_slab_ui(self):
+        self.slab_wg.update_slab_ui()
 
     def initUI(self):
 
@@ -90,7 +170,12 @@ class ShowSegmentationWidget(QtGui.QWidget):
         # self.slab_widget = QGridLayout(self)
         # self.mainLayout.addWidget(self.slab_widget, self._row, 1)
 
-            self._row = self.update_slab_ui()
+            self._row += 1
+            self.slab_wg = SelectLabelWidget()
+            self.slab_wg.init_slab()
+            self.slab_wg.update_slab_ui()
+            self.mainLayout.addWidget(self.slab_wg, self._row, 1, 1, 3)
+            # self._row = self.update_slab_ui()
 
             self._row = 10
             self._row += 1
@@ -264,55 +349,15 @@ class ShowSegmentationWidget(QtGui.QWidget):
         self.smoothing = self.ui_buttons['smoothing'].isChecked()
         self.vtk_file = str(self.ui_buttons["vtk_file"].text())
 
-        print("degrad", self.degrad)
+        # print("degrad", self.degrad)
 
-    def init_slab(self, slab=None):
-
-        if slab is None:
-            slab = {}
-            if self.segmentation is not None:
-                labels = np.unique(self.segmentation)
-                for label in labels:
-                    slab[label] = label
-        self.slab = slab
-
-    def update_slab_ui(self):
-        _row = 1
-        # remove old widgets
-        for key, val in self.ui_slab.iteritems():
-            val.deleteLater()
-        self.ui_slab = {}
-        # _row_slab = 0
-        for label, value in self.slab.iteritems():
-            _row += 1
-            # _row_slab += 1
-            nvoxels =  np.sum(self.segmentation==value)
-            self.ui_slab[label] = QCheckBox(str(label) + "(" + str(value) + "): " + str(nvoxels), self)
-            self.mainLayout.addWidget(self.ui_slab[label], _row, 1, 1, 2)
-            if value != 0:
-                self.ui_slab[label].setCheckState(QtCore.Qt.Checked)
-            # self.ui_buttons["Show"].clicked.connect(self.actionShow)
-
-        return _row
-
-
-
-        pass
-
-    def action_check_slab_ui(self):
-        labels = []
-        for key, val in self.ui_slab.iteritems():
-            if val.isChecked():
-                labels.append(self.slab[key])
-
-        return labels
 
 
 
     def actionShow(self):
         logger.debug("actionShow")
         import show_segmentation
-        labels = self.action_check_slab_ui()
+        labels = self.slab_wg.action_check_slab_ui()
         self.action_ui_params()
         ds = show_segmentation.select_labels(self.segmentation, labels)
 
@@ -391,6 +436,7 @@ def main():
 
     # import ipdb; ipdb.set_trace()
     w = ShowSegmentationWidget(show_load_button=True,**datap)
+    # w = SelectLabelWidget(segmentation=datap["segmentation"])
     w.resize(250, 150)
     w.move(300, 300)
     w.setWindowTitle('Simple')
