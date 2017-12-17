@@ -168,7 +168,7 @@ ok)')
 
 
         import sed3
-        pyed = sed3.sed3qt(preparedData, contours=segmentation, windowW=400, windowC=50)
+        pyed = sed3.sed3qt(preparedData, contour=segmentation, windowW=400, windowC=50)
         # pyed.show()
         pyed.exec_()
 
