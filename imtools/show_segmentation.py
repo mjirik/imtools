@@ -22,6 +22,7 @@ import numpy as np
 # import dicom2fem.seg2fem
 # from dicom2fem import seg2fem
 from dicom2fem.seg2fem import gen_mesh_from_voxels_mc, smooth_mesh
+from .image_manipulation import select_labels
 
 # import misc
 # import viewer
@@ -131,21 +132,6 @@ def _stats(data):
     for lab in un:
         print(lab, " : ", np.sum(data==lab))
 
-def select_labels(segmentation, labels):
-    """
-    return ndimage with zeros and ones based on input labels
-
-    :param data: 3D ndimage
-    :param labels: labels to select
-    :return:
-    """
-    if type(labels) != list:
-        labels = [labels]
-    ds = np.zeros(segmentation.shape, np.bool)
-    for i in range(0, len(labels)):
-        ds = ds | (segmentation == labels[i])
-    # ds = ds.astype("uint8")
-    return ds
 
 
 def main():

@@ -18,6 +18,196 @@ import scipy
 import scipy.ndimage
 
 
+def select_labels(segmentation, labels, slab=None):
+    """
+    return ndimage with zeros and ones based on input labels
+
+    :param data: 3D ndimage
+    :param labels: labels to select
+    :param slab: dictionary{string_label: numeric_label}. Allow to use
+    string labels if it is defined
+    :return:
+    """
+
+    if slab is not None:
+        labels = get_nlabels(slab, labels)
+
+    if type(labels) != list:
+        labels = [labels]
+    ds = np.zeros(segmentation.shape, np.bool)
+    for lab in labels:
+        dadd = (segmentation == lab)
+
+        ds = ds | dadd
+
+    return ds
+
+def get_nlabels(slab, labels, labels_meta=None):
+    """
+    Check one or more labels and return its numeric value.
+
+    Look at the get_nlabel function for more details.
+
+    :param slab:
+    :param labels:
+    :param labels_meta:
+    :return:
+    """
+
+    return_one = False
+    if type(labels) != list:
+        labels = [labels]
+        labels_meta = [labels_meta]
+        return_one = True
+
+    nlabels = []
+    for label, label_meta in zip(labels, labels_meta):
+        nlab = get_nlabel(slab, label, label_meta)
+        nlabels.append(nlab)
+
+    if return_one:
+        nlabels=nlabels[0]
+    return nlabels
+
+
+def get_nlabel(slab, label, label_meta=None):
+
+    """
+    Add label if it is necessery and return its numeric value.
+
+    If "new" keyword is used and no other information is provided, the max + 1 label is created.
+    If "new" keyword is used and additional numeric info is provided, the number is used also as a key.
+    :param label: string, number or "new"
+    :param label_meta: string, number or "new
+    :return:
+    """
+
+    if type(label) == str:
+        if label_meta is None:
+            if label not in slab.keys():
+                free_numeric_label = np.max(slab.values()) + 1
+                if label == "new":
+                    label = str(free_numeric_label)
+                slab[label] = free_numeric_label
+                return slab[label]
+            else:
+                return slab[label]
+        else:
+            if label == "new":
+                label = str(label_meta)
+            add_slab_label_carefully(slab, label_meta, label)
+            return label_meta
+    else:
+        if label_meta is None:
+            add_slab_label_carefully(slab, label, str(label))
+            return label
+        else:
+            if label_meta == "new":
+                label_meta = str(label)
+            add_slab_label_carefully(slab, label, label_meta)
+            return label
+
+def add_slab_label_carefully(slab, numeric_label, string_label):
+    """ Add label to slab if it is not there yet.
+
+    :param numeric_label:
+    :param string_label:
+    :return:
+    """
+    slab_tmp = {string_label: numeric_label}
+    slab_tmp.update(slab)
+    slab = slab_tmp
+    logger.debug('self.slab')
+    logger.debug(str(slab))
+
+def add_missing_labels(segmentation, slab):
+    labels = np.unique(segmentation)
+    get_nlabels(slab, labels)
+
+def get_nlabels(slab, labels, labels_meta=None):
+    """
+    Check one or more labels and return its numeric value.
+
+    Look at the get_nlabel function for more details.
+
+    :param slab:
+    :param labels:
+    :param labels_meta:
+    :return:
+    """
+
+    return_one = False
+    if type(labels) != list:
+        labels = [labels]
+        labels_meta = [labels_meta]
+        return_one = True
+
+    nlabels = []
+    for label, label_meta in zip(labels, labels_meta):
+        nlab = get_nlabel(slab, label, label_meta)
+        nlabels.append(nlab)
+
+    if return_one:
+        nlabels=nlabels[0]
+    return nlabels
+
+
+def get_nlabel(slab, label, label_meta=None):
+
+    """
+    Add label if it is necessery and return its numeric value.
+
+    If "new" keyword is used and no other information is provided, the max + 1 label is created.
+    If "new" keyword is used and additional numeric info is provided, the number is used also as a key.
+    :param label: string, number or "new"
+    :param label_meta: string, number or "new
+    :return:
+    """
+
+    if type(label) == str:
+        if label_meta is None:
+            if label not in slab.keys():
+                free_numeric_label = np.max(slab.values()) + 1
+                if label == "new":
+                    label = str(free_numeric_label)
+                slab[label] = free_numeric_label
+                return slab[label]
+            else:
+                return slab[label]
+        else:
+            if label == "new":
+                label = str(label_meta)
+            add_slab_label_carefully(slab, label_meta, label)
+            return label_meta
+    else:
+        if label_meta is None:
+            add_slab_label_carefully(slab, label, str(label))
+            return label
+        else:
+            if label_meta == "new":
+                label_meta = str(label)
+            add_slab_label_carefully(slab, label, label_meta)
+            return label
+
+def add_slab_label_carefully(slab, numeric_label, string_label):
+    """ Add label to slab if it is not there yet.
+
+    :param numeric_label:
+    :param string_label:
+    :return:
+    """
+    slab_tmp = {string_label: numeric_label}
+    slab_tmp.update(slab)
+    slab = slab_tmp
+    logger.debug('self.slab')
+    logger.debug(str(slab))
+
+def add_missing_labels(segmentation, slab):
+    labels = np.unique(segmentation)
+    get_nlabels(slab, labels)
+
+
+
 class SparseMatrix():
     def __init__(self, ndarray):
         self.coordinates = ndarray.nonzero()
