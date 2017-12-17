@@ -60,6 +60,9 @@ def get_nlabels(slab, labels, labels_meta=None):
         labels_meta = [labels_meta]
         return_one = True
 
+    if labels_meta is None:
+        labels_meta = [None] * len(labels)
+
     nlabels = []
     for label, label_meta in zip(labels, labels_meta):
         nlab = get_nlabel(slab, label, label_meta)
