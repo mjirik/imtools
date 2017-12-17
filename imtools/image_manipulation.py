@@ -108,7 +108,7 @@ def get_nlabel(slab, label, label_meta=None):
             return label
 
 def update_slab(slab, numeric_label, string_label):
-    """ Add label to slab if it is not there yet.
+    """ Add label to segmentation label dictionary if it is not there yet.
 
     :param numeric_label:
     :param string_label:

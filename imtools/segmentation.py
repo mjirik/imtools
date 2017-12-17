@@ -25,6 +25,7 @@ import scipy.ndimage
 
 import image_manipulation
 
+
 def vesselSegmentation(data, segmentation=-1, threshold=-1,
                        voxelsize_mm=[1, 1, 1],
                        inputSigma=-1, dilationIterations=0,
@@ -120,7 +121,7 @@ vybrat prioritni objekty!')
     target_organ_segmentation = image_manipulation.select_labels(segmentation, organ_label, slab)
     # Operace dilatace (dilation) nad samotnymi jatry ("segmentation").
     if(dilationIterations > 0.0):
-        segmentation = scipy.ndimage.binary_dilation(
+        target_organ_segmentation = scipy.ndimage.binary_dilation(
             input=target_organ_segmentation, structure=dilationStructure,
             iterations=dilationIterations)
 
@@ -149,7 +150,7 @@ ok)')
         return None
 
     del(data)
-    del(segmentation)
+    # del(segmentation)
 
     # Nastaveni rozmazani a prahovani dat.
     if(inputSigma == -1):
