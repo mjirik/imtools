@@ -42,6 +42,7 @@ def select_labels(segmentation, labels, slab=None):
 
     return ds
 
+
 def get_nlabels(slab, labels, labels_meta=None):
     """
     Get one or more labels, create a new one if necessary and return its numeric value.
@@ -102,7 +103,8 @@ def get_nlabel(slab, label, label_meta=None):
             return label_meta
     else:
         if label_meta is None:
-            update_slab(slab, label, str(label))
+            if label not in slab.values():
+                update_slab(slab, label, str(label))
             return label
         else:
             if label_meta == "new":
@@ -140,70 +142,7 @@ def add_missing_labels(segmentation, slab):
     labels = np.unique(segmentation)
     get_nlabels(slab, labels)
 
-def get_nlabels(slab, labels, labels_meta=None):
-    """
-    Check one or more labels and return its numeric value.
 
-    Look at the get_nlabel function for more details.
-
-    :param slab:
-    :param labels:
-    :param labels_meta:
-    :return:
-    """
-
-    return_one = False
-    if type(labels) != list:
-        labels = [labels]
-        labels_meta = [labels_meta]
-        return_one = True
-
-    nlabels = []
-    for label, label_meta in zip(labels, labels_meta):
-        nlab = get_nlabel(slab, label, label_meta)
-        nlabels.append(nlab)
-
-    if return_one:
-        nlabels=nlabels[0]
-    return nlabels
-
-
-def get_nlabel(slab, label, label_meta=None):
-
-    """
-    Add label if it is necessery and return its numeric value.
-
-    If "new" keyword is used and no other information is provided, the max + 1 label is created.
-    If "new" keyword is used and additional numeric info is provided, the number is used also as a key.
-    :param label: string, number or "new"
-    :param label_meta: string, number or "new
-    :return:
-    """
-
-    if type(label) == str:
-        if label_meta is None:
-            if label not in slab.keys():
-                free_numeric_label = np.max(slab.values()) + 1
-                if label == "new":
-                    label = str(free_numeric_label)
-                slab[label] = free_numeric_label
-                return slab[label]
-            else:
-                return slab[label]
-        else:
-            if label == "new":
-                label = str(label_meta)
-            update_slab(slab, label_meta, label)
-            return label_meta
-    else:
-        if label_meta is None:
-            update_slab(slab, label, str(label))
-            return label
-        else:
-            if label_meta == "new":
-                label_meta = str(label)
-            update_slab(slab, label, label_meta)
-            return label
 
 def add_slab_label_carefully(slab, numeric_label, string_label):
     """ Add label to slab if it is not there yet.
