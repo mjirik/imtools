@@ -22,7 +22,7 @@ def select_labels(segmentation, labels, slab=None):
     """
     return ndimage with zeros and ones based on input labels
 
-    :param data: 3D ndimage
+    :param segmentation: 3D ndimage
     :param labels: labels to select
     :param slab: dictionary{string_label: numeric_label}. Allow to use
     string labels if it is defined
@@ -44,7 +44,7 @@ def select_labels(segmentation, labels, slab=None):
 
 def get_nlabels(slab, labels, labels_meta=None):
     """
-    Check one or more labels and return its numeric value.
+    Get one or more labels, create a new one if necessary and return its numeric value.
 
     Look at the get_nlabel function for more details.
 

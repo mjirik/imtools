@@ -23,6 +23,7 @@ import numpy
 import scipy
 import scipy.ndimage
 
+import image_manipulation
 
 def vesselSegmentation(data, segmentation=-1, threshold=-1,
                        voxelsize_mm=[1, 1, 1],
@@ -35,7 +36,9 @@ def vesselSegmentation(data, segmentation=-1, threshold=-1,
                        binaryOutput=True, returnUsedData=False,
                        qapp=None,
                        auto_method='',
-                       segmentation_for_visualization=None,
+                       organ_label=1,
+                       slab=None
+                       # segmentation_for_visualization=None,
                        ):
     """
 
@@ -71,6 +74,7 @@ def vesselSegmentation(data, segmentation=-1, threshold=-1,
         binaryOutput - zda ma byt vystup vracen binarne nebo ne (binarnim
             vystupem se rozumi: cokoliv jineho nez hodnota 0 je hodnota 1)
         returnUsedData - vrati pouzita data
+        :param organ_label: label of organ where is the target vessel
 
     Output:
         filtrovana data
@@ -121,7 +125,8 @@ vybrat prioritni objekty!')
 
     # Ziskani datove oblasti jater (bud pouze jater nebo i jejich okoli -
     # zalezi, jakym zpusobem bylo nalozeno s operaci dilatace dat).
-    preparedData = (data * (segmentation == 1))  # .astype(numpy.float)
+
+    preparedData = (data * (image_manipulation.select_labels(segmentation, organ_label, slab)))  # .astype(numpy.float)
     logger.debug('Typ vstupnich dat: ' + str(preparedData.dtype))
 
 #    if preparedData.dtype != numpy.uint8:
@@ -161,7 +166,7 @@ ok)')
 
 
         import sed3
-        pyed = sed3.sed3qt(preparedData, contours=segmentation_for_visualization, windowW=400, windowC=50)
+        pyed = sed3.sed3qt(preparedData, contours=segmentation, windowW=400, windowC=50)
         # pyed.show()
         pyed.exec_()
 
