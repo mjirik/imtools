@@ -1,12 +1,12 @@
 package:
   name: imtools
-  version: "0.1.58"
+  version: "0.1.59"
 
 source:
-  git_rev: 0.1.58
+  git_rev: 0.1.59
   git_url: .
-#  fn: imtools-0.1.58.tar.gz
-#  url: https://pypi.python.org/packages/source/i/imtools/imtools-0.1.58.tar.gz
+#  fn: imtools-0.1.59.tar.gz
+#  url: https://pypi.python.org/packages/source/i/imtools/imtools-0.1.59.tar.gz
 #  md5: 2c88dfda63b4b8dc2f849e4e0218f7fb
 #  patches:
    # List any patch files here
