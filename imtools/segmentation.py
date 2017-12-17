@@ -117,16 +117,17 @@ vybrat prioritni objekty!')
     # number stanovi doporucenou horni hranici parametru gauss. filtru.
     number = (numpy.round((2 * voxelV ** (1.0 / 3.0)), 2))
 
+    target_organ_segmentation = image_manipulation.select_labels(segmentation, organ_label, slab)
     # Operace dilatace (dilation) nad samotnymi jatry ("segmentation").
     if(dilationIterations > 0.0):
         segmentation = scipy.ndimage.binary_dilation(
-            input=segmentation, structure=dilationStructure,
+            input=target_organ_segmentation, structure=dilationStructure,
             iterations=dilationIterations)
 
     # Ziskani datove oblasti jater (bud pouze jater nebo i jejich okoli -
     # zalezi, jakym zpusobem bylo nalozeno s operaci dilatace dat).
 
-    preparedData = (data * (image_manipulation.select_labels(segmentation, organ_label, slab)))  # .astype(numpy.float)
+    preparedData = (data * (target_organ_segmentation))  # .astype(numpy.float)
     logger.debug('Typ vstupnich dat: ' + str(preparedData.dtype))
 
 #    if preparedData.dtype != numpy.uint8:
