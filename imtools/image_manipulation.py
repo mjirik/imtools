@@ -95,30 +95,43 @@ def get_nlabel(slab, label, label_meta=None):
         else:
             if label == "new":
                 label = str(label_meta)
-            add_slab_label_carefully(slab, label_meta, label)
+            update_slab(slab, label_meta, label)
             return label_meta
     else:
         if label_meta is None:
-            add_slab_label_carefully(slab, label, str(label))
+            update_slab(slab, label, str(label))
             return label
         else:
             if label_meta == "new":
                 label_meta = str(label)
-            add_slab_label_carefully(slab, label, label_meta)
+            update_slab(slab, label, label_meta)
             return label
 
-def add_slab_label_carefully(slab, numeric_label, string_label):
+def update_slab(slab, numeric_label, string_label):
     """ Add label to slab if it is not there yet.
 
     :param numeric_label:
     :param string_label:
     :return:
     """
+
     slab_tmp = {string_label: numeric_label}
-    slab_tmp.update(slab)
-    slab = slab_tmp
+    slab.update(slab_tmp)
+    # slab = slab_tmp
     logger.debug('self.slab')
     logger.debug(str(slab))
+
+def add_slab_label_carefully2(slab, numeric_label, string_label):
+    """ Add label to slab if it is not there yet.
+
+    :param numeric_label:
+    :param string_label:
+    :return:
+    """
+    # todo implement
+    # if numeric_label in
+    pass
+
 
 def add_missing_labels(segmentation, slab):
     labels = np.unique(segmentation)
@@ -177,16 +190,16 @@ def get_nlabel(slab, label, label_meta=None):
         else:
             if label == "new":
                 label = str(label_meta)
-            add_slab_label_carefully(slab, label_meta, label)
+            update_slab(slab, label_meta, label)
             return label_meta
     else:
         if label_meta is None:
-            add_slab_label_carefully(slab, label, str(label))
+            update_slab(slab, label, str(label))
             return label
         else:
             if label_meta == "new":
                 label_meta = str(label)
-            add_slab_label_carefully(slab, label, label_meta)
+            update_slab(slab, label, label_meta)
             return label
 
 def add_slab_label_carefully(slab, numeric_label, string_label):
