@@ -34,7 +34,8 @@ def vesselSegmentation(data, segmentation=-1, threshold=-1,
                        smartInitBinaryOperations=False, returnThreshold=False,
                        binaryOutput=True, returnUsedData=False,
                        qapp=None,
-                       auto_method=''
+                       auto_method='',
+                       segmentation_for_visualization=None,
                        ):
     """
 
@@ -160,7 +161,7 @@ ok)')
 
 
         import sed3
-        pyed = sed3.sed3qt(preparedData, windowW=400, windowC=50)
+        pyed = sed3.sed3qt(preparedData, contours=segmentation_for_visualization, windowW=400, windowC=50)
         # pyed.show()
         pyed.exec_()
 

@@ -139,6 +139,8 @@ def select_labels(segmentation, labels):
     :param labels: labels to select
     :return:
     """
+    if type(labels) != list:
+        labels = [labels]
     ds = np.zeros(segmentation.shape, np.bool)
     for i in range(0, len(labels)):
         ds = ds | (segmentation == labels[i])
