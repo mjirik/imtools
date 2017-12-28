@@ -32,8 +32,9 @@ def select_labels(segmentation, labels, slab=None):
     if slab is not None:
         labels = get_nlabels(slab, labels)
 
-    if type(labels) != list:
+    if type(labels) not in (list, np.ndarray):
         labels = [labels]
+
     ds = np.zeros(segmentation.shape, np.bool)
     for lab in labels:
         dadd = (segmentation == lab)
@@ -56,7 +57,7 @@ def get_nlabels(slab, labels, labels_meta=None):
     """
 
     return_one = False
-    if type(labels) != list:
+    if type(labels) not in (list, np.ndarray):
         labels = [labels]
         labels_meta = [labels_meta]
         return_one = True
