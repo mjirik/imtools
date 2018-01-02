@@ -54,7 +54,7 @@ def get_nlabels(slab, labels, labels_meta=None, return_mode="num", return_first=
     :param slab:
     :param labels:
     :param labels_meta:
-    :param return_mode: "num" or "str" or "both"
+    :param return_mode: "num" or "str" or "both". Both means (numlabel, strlabel).
     :param return_first: Return just first found label
     :return:
     """
@@ -85,7 +85,8 @@ def get_nlabel(slab, label, label_meta=None, return_mode="num"):
 
     If "new" keyword is used and no other information is provided, the max + 1 label is created.
     If "new" keyword is used and additional numeric info is provided, the number is used also as a key.
-    :param return_mode: Set requested label return type. "int", "num", "numeric" or "str" or "both"
+    :param return_mode: Set requested label return type. "int", "num", "numeric" or "str" or "both".
+    "both" means (numlabel, strlabel).
     :param label: string, number or "new"
     :param label_meta: string, number or "new
     :return:
