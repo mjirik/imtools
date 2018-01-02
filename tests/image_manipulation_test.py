@@ -169,5 +169,62 @@ class ImageManipulationTest(unittest.TestCase):
         # print data_out
         self.assertItemsEqual(expected_shape, data_out.shape)
 
+    def test_simple_get_nlabel(self):
+        slab={"liver": 1, "porta": 2}
+        val = imm.get_nlabel(slab, 2)
+        self.assertEqual(val, 2)
+        self.assertEqual(len(slab), 2)
+
+    def test_simple_string_get_nlabel(self):
+        slab={"liver": 1, "porta": 2}
+        val = imm.get_nlabel(slab, "porta")
+        self.assertEqual(val, 2)
+        self.assertEqual(len(slab), 2)
+
+    def test_simple_new_numeric_get_nlabel(self):
+        slab={"liver": 1, "porta": 2}
+        val = imm.get_nlabel(slab, 7)
+        self.assertNotEqual(val, 1)
+        self.assertNotEqual(val, 2)
+        self.assertEqual(val, 7)
+
+    def test_simple_new_string_get_nlabel(self):
+        slab={"liver": 1, "porta": 2}
+        val = imm.get_nlabel(slab, "cava")
+        self.assertNotEqual(val, 1)
+        self.assertNotEqual(val, 2)
+
+    def test_simple_string_get_nlabel_return_string(self):
+        slab={"liver": 1, "porta": 2}
+        val = imm.get_nlabel(slab, "porta", return_mode="str")
+        self.assertEqual(val, "porta")
+
+    def test_simple_numeric_get_nlabel_return_string(self):
+        slab={"liver": 1, "porta": 2}
+        val = imm.get_nlabel(slab, 2, return_mode="str")
+        self.assertEqual(val, "porta")
+
+
+    def test_get_nlabels_multiple(self):
+        slab={"liver": 1, "porta": 2}
+        val = imm.get_nlabels(slab, [2, "porta", "new", 7], return_mode="str")
+        self.assertEqual(val[0], "porta")
+        self.assertEqual(val[1], "porta")
+        self.assertEqual(val[2], "3")
+        self.assertEqual(val[3], "7")
+
+    def test_get_nlabels_single(self):
+        slab={"liver": 1, "porta": 2}
+
+        val = imm.get_nlabels(slab, "porta", return_mode="int")
+        self.assertEqual(val, 2)
+
+    def test_get_nlabels_single_both(self):
+        slab={"liver": 1, "porta": 2}
+
+        val = imm.get_nlabels(slab, "porta", return_mode="both")
+        self.assertEqual(val[0], 2)
+        self.assertEqual(val[1], "porta")
+
 if __name__ == "__main__":
     unittest.main()
