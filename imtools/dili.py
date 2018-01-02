@@ -223,6 +223,18 @@ def ndarray_to_list_in_structure(item):
     return item
 
 
+def dict_find_key(dd, value):
+    """ Find first suitable key in dict.
+
+    :param dd:
+    :param value:
+    :return:
+    """
+    key = next(key for key, val in dd.items() if val == value)
+    return key
+
+
+
 def ordered_dict_to_dict(config):
     """
     Use dict instead of ordered dict in structure.

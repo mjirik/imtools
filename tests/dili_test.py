@@ -48,6 +48,14 @@ class DictListTestCase(unittest.TestCase):
         output = dili.list_filter(lst, notstartswith="aa")
         self.assertTrue(["sss", "rew"] == output)
 
+    def test_dict_find_key(self):
+        slab={"liver": 1, "porta": 2}
+        val = dili.dict_find_key(slab, 2)
+        self.assertEqual(val, "porta")
 
+    # def test_dict_find_key_error(self):
+    #     slab={"liver": 1, "porta": 2}
+    #     val = dili.dict_find_key(slab, 3)
+    #     self.assertEqual(val, "porta")
 def main():
     unittest.main()
