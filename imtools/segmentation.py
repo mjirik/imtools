@@ -38,6 +38,7 @@ def vesselSegmentation(data, segmentation=-1, threshold=-1,
                        qapp=None,
                        auto_method='',
                        organ_label=1,
+                       forbidden_label=None,
                        slab=None
                        # segmentation_for_visualization=None,
                        ):
@@ -46,36 +47,37 @@ def vesselSegmentation(data, segmentation=-1, threshold=-1,
     Vessel segmentation z jater.
 
     Input:
-        data - CT (nebo MRI) 3D data
-        segmentation - zakladni oblast pro segmentaci, oznacena struktura se
-        stejnymi rozmery jako "data",
+        :param data: - CT (nebo MRI) 3D data
+        :param segmentation: - zakladni oblast pro segmentaci, oznacena struktura se
+        :param stejnymi: rozmery jako "data",
             kde je oznaceni (label) jako:
                 1 jatra,
                 -1 zajimava tkan (kosti, ...)
                 0 jinde
-        threshold - prah
-        voxelsize_mm - (vektor o hodnote 3) rozmery jednoho voxelu
-        inputSigma - pocatecni hodnota pro prahovani
-        dilationIterations - pocet operaci dilation nad zakladni oblasti pro
+        :param threshold: - prah
+        :param voxelsize_mm: - (vektor o hodnote 3) rozmery jednoho voxelu
+        :param inputSigma: - pocatecni hodnota pro prahovani
+        :param dilationIterations: - pocet operaci dilation nad zakladni oblasti pro
             segmentaci ("segmantation")
-        dilationStructure - struktura pro operaci dilation
-        nObj - oznacuje, kolik nejvetsich objektu se ma vyhledat - pokud je
+        :param dilationStructure: - struktura pro operaci dilation
+        :param nObj: - oznacuje, kolik nejvetsich objektu se ma vyhledat - pokud je
             rovno 0 (nule), vraci cela data
-        biggestObjects - moznost, zda se maji vracet nejvetsi objekty nebo ne
-        seeds - moznost zadat pocatecni body segmentace na vstupu. Je to matice
+        :param biggestObjects: - moznost, zda se maji vracet nejvetsi objekty nebo ne
+        :param seeds: - moznost zadat pocatecni body segmentace na vstupu. Je to matice
             o rozmerech jako data. Vsude nuly, tam kde je oznaceni jsou jednicky
-        interactivity - nastavi, zda ma nebo nema byt pouzit interaktivni mod
+        :param interactivity: - nastavi, zda ma nebo nema byt pouzit interaktivni mod
             upravy dat
-        binaryClosingIterations - vstupni binary closing operations
-        binaryOpeningIterations - vstupni binary opening operations
-        smartInitBinaryOperations - logicka hodnota pro smart volbu pocatecnich
+        :param binaryClosingIterations: - vstupni binary closing operations
+        :param binaryOpeningIterations: - vstupni binary opening operations
+        :param smartInitBinaryOperations: - logicka hodnota pro smart volbu pocatecnich
             hodnot binarnich operaci (bin. uzavreni a bin. otevreni)
-        returnThreshold - jako druhy parametr funkce vrati posledni hodnotu
+        :param returnThreshold: - jako druhy parametr funkce vrati posledni hodnotu
             prahu
-        binaryOutput - zda ma byt vystup vracen binarne nebo ne (binarnim
+        :param binaryOutput: - zda ma byt vystup vracen binarne nebo ne (binarnim
             vystupem se rozumi: cokoliv jineho nez hodnota 0 je hodnota 1)
-        returnUsedData - vrati pouzita data
+        :param returnUsedData: - vrati pouzita data
         :param organ_label: label of organ where is the target vessel
+        :param forbidden_label: int or list of ints. Labels of areas which are not used for segmentation.
 
     Output:
         filtrovana data
@@ -124,6 +126,13 @@ vybrat prioritni objekty!')
         target_organ_segmentation = scipy.ndimage.binary_dilation(
             input=target_organ_segmentation, structure=dilationStructure,
             iterations=dilationIterations)
+
+    # remove forbidden areas from segmentation
+    if forbidden_label is not None:
+        forbidden_organ_segmentation = image_manipulation.select_labels(
+            segmentation, forbidden_label, slab)
+        target_organ_segmentation[forbidden_organ_segmentation] = 0
+        del(forbidden_organ_segmentation)
 
     # Ziskani datove oblasti jater (bud pouze jater nebo i jejich okoli -
     # zalezi, jakym zpusobem bylo nalozeno s operaci dilatace dat).
