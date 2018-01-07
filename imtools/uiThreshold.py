@@ -571,7 +571,9 @@ class uiThreshold:
             logger.debug("type contour " + str(type(contour[i,:,:])))
             logger.debug("max contour " + str(np.max(contour[i,:,:])))
             logger.debug("min contour " + str(np.min(contour[i,:,:])))
-            ax.contour(contour[i, :, :] + 1)
+            contour_slice = contour[i, :, :]
+            if np.max(contour_slice) != np.min(contour_slice):
+                ax.contour(contour[i, :, :] + 1)
 
     def drawVisualization(self):
         """
