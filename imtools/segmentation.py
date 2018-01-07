@@ -158,7 +158,7 @@ ok)')
         logger.debug('Ukoncuji funkci!')
         return None
 
-    del(data)
+    # del(data)
     # del(segmentation)
 
     # Nastaveni rozmazani a prahovani dat.

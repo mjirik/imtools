@@ -565,6 +565,12 @@ class uiThreshold:
         ax.set_yticklabels([])
         if contour is not None:
             #ax.contour(contour[i, :, :])
+            logger.debug("type contour " + str(type(contour)))
+            logger.debug("max contour " + str(np.max(contour)))
+            logger.debug("min contour " + str(np.min(contour)))
+            logger.debug("type contour " + str(type(contour[i,:,:])))
+            logger.debug("max contour " + str(np.max(contour[i,:,:])))
+            logger.debug("min contour " + str(np.min(contour[i,:,:])))
             ax.contour(contour[i, :, :] + 1)
 
     def drawVisualization(self):
