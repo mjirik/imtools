@@ -41,12 +41,14 @@ class GMMCl():
 
         return out
 
+    # sklearn.mixture.GaussianMixture.sc
     def scores(self, x):
         x = np.asarray(x)
         score = {}
 
         for label in self.cls.keys():
-            sc = self.cls[label].score(x)
+            # sc = self.cls[label].score(x)
+            sc = self.cls[label].score_samples(x)
             score[label] = sc
         return score
 
