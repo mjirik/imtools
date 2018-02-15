@@ -51,7 +51,7 @@ class SelectLabelWidget(QtGui.QWidget):
             if self.segmentation is not None:
                 labels = np.unique(self.segmentation)
                 for label in labels:
-                    slab[label] = label
+                    slab[str(label)] = label
         self.slab = slab
 
     def update_slab_ui(self):
@@ -366,16 +366,20 @@ class ShowSegmentationWidget(QtGui.QWidget):
 
 
     def _action_save_all(self):
-        slab = self.slab
+        # slab = self.slab
         labels = self.slab_wg.action_check_slab_ui()
         self.action_ui_params()
         # imma.get_nlabel()
 
         for lab in labels:
             # labi = slab[lab]
+            strlabel = imma.get_nlabels(slab=self.slab_wg.slab, labels=lab, return_mode="str")
+            logger.debug(strlabel)
+            filename = self.vtk_file.format(strlabel)
+            logger.debug(filename)
             self.show_labels(
                 lab,
-                self.vtk_file.format(imma.get_nlabel(slab, lab, return_mode="str"))
+                filename
             )
 
 
@@ -383,8 +387,9 @@ class ShowSegmentationWidget(QtGui.QWidget):
         """ Fill used labels into filename """
         if labels is None:
             labels = self.slab_wg.action_check_slab_ui()
+        string_labels = imma.get_nlabels(slab=self.slab_wg.slab, labels=labels, return_mode="str")
         filename = self.vtk_file.format(
-            "-".join(imma.get_nlabel(slab=self.slab, label=labels, return_mode="str")))
+            "-".join(string_labels))
         return filename
 
     def actionShow(self):
@@ -396,7 +401,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
 
     def show_labels(self, labels, vtk_file):
         import show_segmentation
-        ds = show_segmentation.select_labels(self.segmentation, labels, slab=self.slab)
+        ds = show_segmentation.select_labels(self.segmentation, labels, slab=self.slab_wg.slab)
         if len(ds.nonzero()) == 0:
             logger.info("Nothing found for labels " + str(labels))
             return

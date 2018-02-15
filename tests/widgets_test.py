@@ -61,7 +61,7 @@ class MyTestCase(unittest.TestCase):
         import imtools.show_segmentation_qt as ssqt
         # app = QtGui.QApplication(sys.argv)
         app = QApplication(sys.argv)
-        sw = ssqt.ShowSegmentationWidget(None)
+        sw = ssqt.ShowSegmentationWidget(None, show_load_interface=True)
         sw.show()
         app.exec_()
 
@@ -114,6 +114,31 @@ class MyTestCase(unittest.TestCase):
         app.deleteLater()
         # app.quit()
         # app.exit()
+
+    @attr('interactive')
+    def test_show_donut(self):
+        """
+        creates VTK file from input data
+        :return:
+        """
+        datap = imtools.sample_data.donut()
+
+        segmentation = datap['segmentation']
+        voxelsize_mm = datap['voxelsize_mm']
+
+        import imtools.show_segmentation_qt as ssqt
+        import gc
+        app = QApplication(sys.argv)
+        # app.setGraphicsSystem("openvg")
+        sw = ssqt.ShowSegmentationWidget(None, show_load_button=True, show_load_interface=True)
+        sw.smoothing = False
+        sw.add_data(segmentation, voxelsize_mm=voxelsize_mm)
+        # QTest.mouseClick(sw.ui_buttons['Show volume'], Qt.LeftButton)
+        # sw.add_vtk_file("~/projects/imtools/mesh.vtk")
+        sw.show()
+        app.exec_()
+        # sw.close()
+        # sw.deleteLater()
 
     # @attr('interactive')
     def test_add_data_and_show(self):

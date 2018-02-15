@@ -209,8 +209,9 @@ def donut():
     import io3d
     datap = {
         'data3d': data3d,
-        'segmentation': segmentation,
-        'voxelsize_mm': voxelsize_mm
+        'segmentation': segmentation.astype(np.int8),
+        'voxelsize_mm': voxelsize_mm,
+        "slab": {"donut": 1, "stick": 2}
     }
     # io3d.write(datap, "donut.pklz")
     return datap
