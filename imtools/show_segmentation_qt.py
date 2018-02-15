@@ -379,12 +379,20 @@ class ShowSegmentationWidget(QtGui.QWidget):
             )
 
 
+    def get_filename_filled_with_checked_labels(self, labels=None):
+        """ Fill used labels into filename """
+        if labels is None:
+            labels = self.slab_wg.action_check_slab_ui()
+        filename = self.vtk_file.format(
+            "-".join(imma.get_nlabel(slab=self.slab, label=labels, return_mode="str")))
+        return filename
 
     def actionShow(self):
         logger.debug("actionShow")
         labels = self.slab_wg.action_check_slab_ui()
         self.action_ui_params()
-        self.show_labels(labels, self.vtk_file)
+        filename = self.get_filename_filled_with_checked_labels(labels)
+        self.show_labels(labels, filename)
 
     def show_labels(self, labels, vtk_file):
         import show_segmentation
