@@ -225,7 +225,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
             self._row += 1
             sopw = io3d.outputqt.SelectOutputPathWidget(path=self.vtk_file, parent=self)
             self.ui_buttons["output file"] = sopw
-            self.mainLayout.addWidget(sopw, self._row, 1)
+            self.mainLayout.addWidget(sopw, self._row, 1, 1, 3)
             sopw.show()
 
             # keyword = "vtk_file"
@@ -246,6 +246,11 @@ class ShowSegmentationWidget(QtGui.QWidget):
             self.ui_buttons[keyword].clicked.connect(self.actionShow)
             self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 1, 1, 3)
 
+            self._row += 1
+            keyword = "Save all"
+            self.ui_buttons[keyword] = QPushButton(keyword, self)
+            self.ui_buttons[keyword].clicked.connect(self._action_save_all)
+            self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 1, 1, 3)
 
             self._row += 1
             keyword = "Add extern file"
@@ -262,6 +267,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
         # vtk + pyqt
         self._viewer_height = self._row
         self._init_3d_viewer()
+
 
     def _init_3d_viewer(self):
         logger.debug("init 3d view")
@@ -358,13 +364,23 @@ class ShowSegmentationWidget(QtGui.QWidget):
         # print("degrad", self.degrad)
 
 
+    def _action_save_all(self):
+        slab = self.slab
+        self.action_io_params()
+        for lab in slab:
+            labi = slab[lab]
+            self.show_labels(lab, self.vtk_file.format(lab))
+
 
 
     def actionShow(self):
         logger.debug("actionShow")
-        import show_segmentation
         labels = self.slab_wg.action_check_slab_ui()
         self.action_ui_params()
+        self.show_labels(labels, self.vtk_file)
+
+    def show_labels(self, labels, vtk_file):
+        import show_segmentation
         ds = show_segmentation.select_labels(self.segmentation, labels)
 
         show_segmentation.showSegmentation(
@@ -372,7 +388,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
             ds,
             degrad=self.degrad,
             voxelsize_mm=self.voxelsize_mm,
-            vtk_file=self.vtk_file,
+            vtk_file=vtk_file,
             resize_mm=self.resize_mm,
             resize_voxel_number=self.resize_voxel_number,
             smoothing=self.smoothing,
@@ -380,7 +396,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
         )
 
         # self._run_viewer()
-        self.vtkv.AddFile(self.vtk_file)
+        self.vtkv.AddFile(vtk_file)
         self.vtkv.Start()
 
 
