@@ -23,6 +23,7 @@ import numpy as np
 import vtk
 from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 import io3d.outputqt
+import image_manipulation as imma
 
 class SelectLabelWidget(QtGui.QWidget):
     def __init__(self, *args, **kwargs):
@@ -247,7 +248,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
             self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 1, 1, 3)
 
             self._row += 1
-            keyword = "Save all"
+            keyword = "Save each"
             self.ui_buttons[keyword] = QPushButton(keyword, self)
             self.ui_buttons[keyword].clicked.connect(self._action_save_all)
             self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 1, 1, 3)
@@ -366,10 +367,16 @@ class ShowSegmentationWidget(QtGui.QWidget):
 
     def _action_save_all(self):
         slab = self.slab
-        self.action_io_params()
-        for lab in slab:
-            labi = slab[lab]
-            self.show_labels(lab, self.vtk_file.format(lab))
+        labels = self.slab_wg.action_check_slab_ui()
+        self.action_ui_params()
+        imma.get_nlabel()
+
+        for lab in labels:
+            # labi = slab[lab]
+            self.show_labels(
+                lab,
+                self.vtk_file.format(imma.get_nlabel(lab, slab=slab, return_mode="str"))
+            )
 
 
 
@@ -381,7 +388,10 @@ class ShowSegmentationWidget(QtGui.QWidget):
 
     def show_labels(self, labels, vtk_file):
         import show_segmentation
-        ds = show_segmentation.select_labels(self.segmentation, labels)
+        ds = show_segmentation.select_labels(self.segmentation, labels, slab=self.slab)
+        if len(ds.nonzero()) == 0:
+            logger.info("Nothing found for labels " + str(labels))
+            return
 
         show_segmentation.showSegmentation(
             # self.segmentation,
