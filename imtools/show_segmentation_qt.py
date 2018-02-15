@@ -22,6 +22,7 @@ import numpy as np
 
 import vtk
 from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+import io3d.outputqt
 
 class SelectLabelWidget(QtGui.QWidget):
     def __init__(self, *args, **kwargs):
@@ -105,7 +106,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
         self.init_parameters()
         # self.slab_wg =
         # self.init_slab()
-        self.initUI()
+        self._init_ui()
         if segmentation is not None:
             logger.debug("segmentation is not none")
             self.add_data(segmentation, *args, **kwargs)
@@ -151,7 +152,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
     def update_slab_ui(self):
         self.slab_wg.update_slab_ui()
 
-    def initUI(self):
+    def _init_ui(self):
 
         self.mainLayout = QGridLayout(self)
 
@@ -222,17 +223,22 @@ class ShowSegmentationWidget(QtGui.QWidget):
 
 
             self._row += 1
-            keyword = "vtk_file"
-            vtk_fileQLabel= QLabel("Output VTK file")
-            self.mainLayout.addWidget(vtk_fileQLabel, self._row, 1)
+            sopw = io3d.outputqt.SelectOutputPathWidget(path=self.vtk_file, parent=self)
+            self.ui_buttons["output file"] = sopw
+            self.mainLayout.addWidget(sopw, self._row, 1)
+            sopw.show()
 
-            self.ui_buttons[keyword] = QLineEdit()
-            self.ui_buttons[keyword].setText(str(self.vtk_file))
-            self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 2)
-            keyword = "vkt_file_button"
-            self.ui_buttons[keyword] = QPushButton("Set", self)
-            self.ui_buttons[keyword].clicked.connect(self.action_select_vtk_file)
-            self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 3)
+            # keyword = "vtk_file"
+            # vtk_fileQLabel= QLabel("Output VTK file")
+            # self.mainLayout.addWidget(vtk_fileQLabel, self._row, 1)
+            #
+            # self.ui_buttons[keyword] = QLineEdit()
+            # self.ui_buttons[keyword].setText(str(self.vtk_file))
+            # self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 2)
+            # keyword = "vkt_file_button"
+            # self.ui_buttons[keyword] = QPushButton("Set", self)
+            # self.ui_buttons[keyword].clicked.connect(self.action_select_vtk_file)
+            # self.mainLayout.addWidget(self.ui_buttons[keyword], self._row, 3)
 
             self._row += 1
             keyword = "Show volume"
@@ -347,7 +353,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
         self.resize_voxel_number = self._find_None(self.ui_buttons['resize_voxel_number'])
         self.degrad = self._find_None(self.ui_buttons['degrad'])
         self.smoothing = self.ui_buttons['smoothing'].isChecked()
-        self.vtk_file = str(self.ui_buttons["vtk_file"].text())
+        self.vtk_file = str(self.ui_buttons["output file"].get_path())
 
         # print("degrad", self.degrad)
 
