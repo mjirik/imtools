@@ -93,7 +93,7 @@ class SelectLabelWidget(QtGui.QWidget):
 
 
 class ShowSegmentationWidget(QtGui.QWidget):
-    def __init__(self, segmentation=None, *args, **kwargs):
+    def __init__(self, segmentation=None, vtk_file="mesh_{}.vtk", *args, **kwargs):
         super(ShowSegmentationWidget, self).__init__()
         self.ui_buttons = {}
 
@@ -107,6 +107,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
         self.init_parameters()
         # self.slab_wg =
         # self.init_slab()
+        self.vtk_file = vtk_file
         self._init_ui()
         if segmentation is not None:
             logger.debug("segmentation is not none")
@@ -128,7 +129,6 @@ class ShowSegmentationWidget(QtGui.QWidget):
         self.resize_voxel_number = 10000
         self.degrad = 1
         self.smoothing=True
-        self.vtk_file = "mesh.vtk"
 
     def add_data(self, segmentation, voxelsize_mm=[1,1,1], slab=None, **kwargs):
         # self.data3d = data3d
@@ -369,13 +369,13 @@ class ShowSegmentationWidget(QtGui.QWidget):
         slab = self.slab
         labels = self.slab_wg.action_check_slab_ui()
         self.action_ui_params()
-        imma.get_nlabel()
+        # imma.get_nlabel()
 
         for lab in labels:
             # labi = slab[lab]
             self.show_labels(
                 lab,
-                self.vtk_file.format(imma.get_nlabel(lab, slab=slab, return_mode="str"))
+                self.vtk_file.format(imma.get_nlabel(slab, lab, return_mode="str"))
             )
 
 
