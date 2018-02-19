@@ -402,7 +402,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
     def show_labels(self, labels, vtk_file):
         import show_segmentation
         ds = show_segmentation.select_labels(self.segmentation, labels, slab=self.slab_wg.slab)
-        if len(ds.nonzero()) == 0:
+        if ds.max() == False:
             logger.info("Nothing found for labels " + str(labels))
             return
 

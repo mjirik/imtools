@@ -140,6 +140,32 @@ class MyTestCase(unittest.TestCase):
         # sw.close()
         # sw.deleteLater()
 
+    @attr('interactive')
+    def test_show_donut_with_zerosize_label(self):
+        """
+        creates VTK file from input data
+        :return:
+        """
+        datap = imtools.sample_data.donut()
+
+        segmentation = datap['segmentation']
+        voxelsize_mm = datap['voxelsize_mm']
+
+        import imtools.show_segmentation_qt as ssqt
+        import gc
+        app = QApplication(sys.argv)
+        # app.setGraphicsSystem("openvg")
+        sw = ssqt.ShowSegmentationWidget(None, show_load_button=True, show_load_interface=True)
+        sw.smoothing = False
+        datap["slab"]["empty"]=17
+        sw.add_data(segmentation, voxelsize_mm=voxelsize_mm, slab=datap["slab"])
+        # QTest.mouseClick(sw.ui_buttons['Show volume'], Qt.LeftButton)
+        # sw.add_vtk_file("~/projects/imtools/mesh.vtk")
+        sw.show()
+        app.exec_()
+        # sw.close()
+        # sw.deleteLater()
+
     # @attr('interactive')
     def test_add_data_and_show(self):
         """
