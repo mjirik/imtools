@@ -88,6 +88,7 @@ class MyTestCase(unittest.TestCase):
         app.exec_()
 
     # @attr('interactive')
+    @unittest.skipIf(os.environ.get("TRAVIS", True), "Skip on Travis-CI")
     def test_show_segmentation_qt_widget_hidden_buttons(self):
         # = np.zeros([10, 10, 10])
         import imtools
