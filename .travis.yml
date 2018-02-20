@@ -37,9 +37,11 @@ install:
     - pip install .
     - conda list
 
-    - python -m imtools.sample_data biodur_sample gensei_slices -o sample_data
+#    - python -m imtools.sample_data biodur_sample gensei_slices -o sample_data
     - ls
-    - ls sample_data
+    - ls ~/data/medical/orig/
+    - python -m io3d.datasets -l gensei_slices -l biodur_sample
+#    - python -m io3d.datasets -l biodur_sample
 # command to run tests
 script: nosetests -c setup.cfg --with-coverage --cover-package=imtools -v
 after_success:
