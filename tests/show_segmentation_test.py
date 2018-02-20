@@ -41,6 +41,30 @@ class ShowSegmemtationCase(unittest.TestCase):
         self.assertTrue(op.exists("donut.vtk"))
         # self.assertEqual(True, False)
 
+    def test_donut(self):
+        datap = imtools.sample_data.donut()
+
+        segmentation = datap['segmentation']
+        voxelsize_mm = datap['voxelsize_mm']
+
+        import imtools.show_segmentation_qt as ssqt
+        # app.setGraphicsSystem("openvg")
+        vtk_files = ss.prepare_vtk_files(
+            segmentation,
+            degrad=1,
+            # degrad=self.degrad,
+            # voxelsize_mm=self.voxelsize_mm,
+            vtk_file="donut_{}.vtk",
+            # resize_mm=self.resize_mm,
+            # resize_voxel_number=self.resize_voxel_number,
+            # smoothing=self.smoothing,
+            # show=True
+        )
+        ss.create_pvsm_file(vtk_files, "donut.pvsm")
+
+        self.assertTrue(op.exists("donut_1.vtk"))
+        self.assertTrue(op.exists("donut_2.vtk"))
+        # self.assertEqual(True, False)
 
     @attr('long')
     @attr('interactive')
@@ -79,6 +103,10 @@ class ShowSegmemtationCase(unittest.TestCase):
         # ed.show()
 
         self.assertTrue(op.exists(output_file))
+
+    def test_create_pmvs(self):
+        vtk_files = ["file1.vtk", "file2.vtk"]
+        imtools.show_segmentation.create_pwsm_file(vtk_files)
 
 if __name__ == '__main__':
     unittest.main()

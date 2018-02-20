@@ -23,6 +23,7 @@ import numpy as np
 # from dicom2fem import seg2fem
 from dicom2fem.seg2fem import gen_mesh_from_voxels_mc, smooth_mesh
 from .image_manipulation import select_labels
+import image_manipulation as imma
 
 # import misc
 # import viewer
@@ -36,17 +37,56 @@ def _auto_segmentation(segmentation, label=None):
         segmentation = segmentation > mn
     return segmentation
 
-def showSegmentation(
+def prepare_vtk_files(
         segmentation=None,
         voxelsize_mm=np.ones([3, 1]),
         degrad=6,
-        label=None,
+        labels=None,
         smoothing=True,
         vtk_file=None,
-        qt_app=None,
-        show=True,
         resize_mm=None,
-        resize_voxel_number=None
+        resize_voxel_number=None,
+        slab=None
+):
+    if slab is None:
+        slab = create_slab_from_segmentation(segmentation)
+    if vtk_file is None:
+        vtk_file = "mesh_{}.vtk"
+    if labels is None:
+        labels = slab.values()
+
+    vtk_files = []
+    for lab in labels:
+        # labi = slab[lab]
+        strlabel = imma.get_nlabels(slab=slab, labels=lab, return_mode="str")
+        logger.debug(strlabel)
+        filename = vtk_file.format(strlabel)
+        logger.debug(filename)
+        fn = prepare_vtk_file(
+            segmentation=segmentation,
+            voxelsize_mm=voxelsize_mm,
+            vtk_file=filename,
+            degrad=degrad,
+            labels=lab,
+            slab=slab,
+            smoothing=smoothing,
+            resize_mm=resize_mm,
+            resize_voxel_number=resize_voxel_number,
+        )
+        if fn is not None:
+            vtk_files.append(filename)
+    return vtk_files
+
+def prepare_vtk_file(
+        segmentation=None,
+        voxelsize_mm=np.ones([3, 1]),
+        degrad=6,
+        labels=None,
+        smoothing=True,
+        vtk_file=None,
+        resize_mm=None,
+        resize_voxel_number=None,
+        slab=None
         ):
     """
 
@@ -67,6 +107,12 @@ def showSegmentation(
     v data['slab'] je popsáno, co která hodnota znamená
     """
 
+    import show_segmentation
+    if slab is not None and labels is not None:
+        segmentation = show_segmentation.select_labels(segmentation, labels, slab=slab)
+    if segmentation.max() == False:
+        logger.info("Nothing found for labels " + str(labels))
+        return
 
 
     if vtk_file is None:
@@ -108,6 +154,49 @@ def showSegmentation(
         # mesh_data = gen_mesh_from_voxels_mc(segmentation, voxelsize_mm * 1.0e-2)
         # mesh_data.coors +=
     mesh_data.write(vtk_file)
+    return vtk_file
+
+def create_slab_from_segmentation(segmentation, slab=None):
+
+    if slab is None:
+        slab = {}
+        if segmentation is not None:
+            labels = np.unique(segmentation)
+            for label in labels:
+                slab[str(label)] = label
+    return slab
+
+def showSegmentation(
+            segmentation=None,
+            voxelsize_mm=np.ones([3, 1]),
+            degrad=6,
+            labels=None,
+            smoothing=True,
+            vtk_file=None,
+            qt_app=None,
+            show=True,
+            resize_mm=None,
+            resize_voxel_number=None
+):
+    """
+
+    :param segmentation:
+    :param voxelsize_mm:
+    :param degrad:
+    :param label:
+    :param smoothing:
+    :param vtk_file:
+    :param qt_app:
+    :param show:
+    :param resize_mm: resize to defined size of voxel
+    :param resize_voxel_number: resize to defined voxel number (aproximatly)
+
+    :return:
+
+    Funkce vrací trojrozměrné porobné jako data['segmentation']
+    v data['slab'] je popsáno, co která hodnota znamená
+    """
+    vtk_file = prepare_vtk_file(segmentation, voxelsize_mm, degrad, labels, smoothing=smoothing,)
     if show:
         if qt_app is None:
             qt_app = QApplication(sys.argv)
@@ -131,6 +220,57 @@ def _stats(data):
     un = np.unique(data)
     for lab in un:
         print(lab, " : ", np.sum(data==lab))
+
+def prettify(elem):
+    # from xml.etree.ElementTree import Element, SubElement, Comment, tostring
+    from xml.etree import ElementTree
+    from xml.dom import minidom
+    """Return a pretty-printed XML string for the Element.
+    """
+    rough_string = ElementTree.tostring(elem, 'utf-8')
+    reparsed = minidom.parseString(rough_string)
+    return reparsed.toprettyxml(indent="  ")
+
+def create_pvsm_file(vtk_files, pvsm_file):
+    from xml.etree.ElementTree import Element, SubElement, Comment, tostring, ElementTree
+    import os.path as op
+
+    top = Element('ParaView')
+
+    comment = Comment('Generated for PyMOTW')
+    top.append(comment)
+
+    numberi = 4923
+    # vtk_file = "C:\Users\miros\lisa_data\83779720_2_liver.vtk"
+
+    sms = SubElement(top, "ServerManagerState", version="5.4.1")
+    file_list = SubElement(sms, "ProxyCollection", name="sources")
+    for vtk_file in vtk_files:
+        numberi +=1
+        dir, vtk_file_head = op.split(vtk_file)
+        number = str(numberi)
+        proxy1 = SubElement(sms, "Proxy", group="sources", type="LegacyVTKFileReader", id=number, servers="1")
+        property = SubElement(proxy1, "Property", name="FileNameInfo", id=number + ".FileNameInfo", number_of_elements="1")
+        element = SubElement(property, "Element", index="0", value=vtk_file)
+        property2 = SubElement(proxy1, "Property", name="FileNames", id=number + ".FileNames", number_of_elements="1")
+        pr2s1 = SubElement(property2, "Element", index="0", value=vtk_file)
+        pr2s2 = SubElement(property2, "Domain", name="files", id=number + ".FileNames.files")
+
+
+        fn1 = SubElement(file_list, "Item", id=number, name=vtk_file_head)
+    # child = SubElement(top, 'child')
+    # child.text = 'This child contains text.'
+    #
+    # child_with_tail = SubElement(top, 'child_with_tail')
+    # child_with_tail.text = 'This child has regular text.'
+    # child_with_tail.tail = 'And "tail" text.'
+
+    # child_with_entity_ref = SubElement(top, 'child_with_entity_ref')
+    # child_with_entity_ref.text = 'This & that'
+    xml_str = prettify(top)
+    print(xml_str)
+    print(xml_str)
+    ElementTree(top).write(op.expanduser(pvsm_file))
 
 
 

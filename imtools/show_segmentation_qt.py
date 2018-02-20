@@ -46,13 +46,9 @@ class SelectLabelWidget(QtGui.QWidget):
         self.segmentation = segmentation
         self.voxelsize_mm = voxelsize_mm
 
-        if slab is None:
-            slab = {}
-            if self.segmentation is not None:
-                labels = np.unique(self.segmentation)
-                for label in labels:
-                    slab[str(label)] = label
-        self.slab = slab
+        import show_segmentation
+        self.slab = show_segmentation.create_slab_from_segmentation(
+            self.segmentation, slab=slab)
 
     def update_slab_ui(self):
         _row = 1
@@ -371,16 +367,17 @@ class ShowSegmentationWidget(QtGui.QWidget):
         self.action_ui_params()
         # imma.get_nlabel()
 
-        for lab in labels:
-            # labi = slab[lab]
-            strlabel = imma.get_nlabels(slab=self.slab_wg.slab, labels=lab, return_mode="str")
-            logger.debug(strlabel)
-            filename = self.vtk_file.format(strlabel)
-            logger.debug(filename)
-            self.show_labels(
-                lab,
-                filename
-            )
+        # for lab in labels:
+        #     # labi = slab[lab]
+        #     strlabel = imma.get_nlabels(slab=self.slab_wg.slab, labels=lab, return_mode="str")
+        #     logger.debug(strlabel)
+        #     filename = self.vtk_file.format(strlabel)
+        #     logger.debug(filename)
+        self.show_labels(
+            labels,
+            self.vtk_file,
+            together_vtk_file=False
+        )
 
 
     def get_filename_filled_with_checked_labels(self, labels=None):
@@ -399,28 +396,38 @@ class ShowSegmentationWidget(QtGui.QWidget):
         filename = self.get_filename_filled_with_checked_labels(labels)
         self.show_labels(labels, filename)
 
-    def show_labels(self, labels, vtk_file):
+    def show_labels(self, labels, vtk_file, together_vtk_file=True):
         import show_segmentation
-        ds = show_segmentation.select_labels(self.segmentation, labels, slab=self.slab_wg.slab)
-        if ds.max() == False:
-            logger.info("Nothing found for labels " + str(labels))
-            return
+        # ds = show_segmentation.select_labels(self.segmentation, labels, slab=self.slab_wg.slab)
+        # if ds.max() == False:
+        #     logger.info("Nothing found for labels " + str(labels))
+        #     return
+        if together_vtk_file:
+            prepare_fcn = show_segmentation.prepare_vtk_file
+        else:
+            prepare_fcn = show_segmentation.prepare_vtk_files
 
-        show_segmentation.showSegmentation(
+        vtk_files = prepare_fcn(
             # self.segmentation,
-            ds,
+            self.segmentation,
             degrad=self.degrad,
             voxelsize_mm=self.voxelsize_mm,
             vtk_file=vtk_file,
+            labels=labels,
             resize_mm=self.resize_mm,
             resize_voxel_number=self.resize_voxel_number,
             smoothing=self.smoothing,
-            show=False
+            slab=self.slab_wg.slab
         )
 
         # self._run_viewer()
-        self.vtkv.AddFile(vtk_file)
-        self.vtkv.Start()
+        if together_vtk_file:
+            self.vtkv.AddFile(vtk_file)
+            self.vtkv.Start()
+        else:
+            for vtkf in vtk_files:
+                self.vtkv.AddFile(vtkf)
+                self.vtkv.Start()
 
 
 
