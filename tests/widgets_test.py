@@ -167,9 +167,10 @@ class MyTestCase(unittest.TestCase):
         # sw.deleteLater()
 
     # @attr('interactive')
+    @unittest.skipIf(os.environ.get("TRAVIS", True), "Skip on Travis-CI")
     def test_add_data_and_show(self):
         """
-        creates VTK file from input data
+        creates VTK file from input data and show and quit
         :return:
         """
         datap = imtools.sample_data.donut()
