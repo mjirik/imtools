@@ -64,6 +64,7 @@ class ShowSegmemtationCase(unittest.TestCase):
 
         self.assertTrue(op.exists("donut_1.vtk"))
         self.assertTrue(op.exists("donut_2.vtk"))
+        # self.assertTrue(op.exists("donut_1-2.pvsm"))
         # self.assertEqual(True, False)
 
     @attr('long')

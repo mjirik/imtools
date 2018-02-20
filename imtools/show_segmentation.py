@@ -6,6 +6,7 @@ Module is used for visualization of segmentation stored in pkl file.
 
 import sys
 import os.path
+import os.path as op
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/dicom2fem/src"))
@@ -46,14 +47,15 @@ def prepare_vtk_files(
         vtk_file=None,
         resize_mm=None,
         resize_voxel_number=None,
-        slab=None
+        slab=None,
+        pvsm_filename=None
 ):
     if slab is None:
         slab = create_slab_from_segmentation(segmentation)
     if vtk_file is None:
         vtk_file = "mesh_{}.vtk"
     if labels is None:
-        labels = slab.values()
+        labels = slab.keys()
 
     vtk_files = []
     for lab in labels:
@@ -75,6 +77,14 @@ def prepare_vtk_files(
         )
         if fn is not None:
             vtk_files.append(filename)
+
+    if pvsm_filename is None:
+        strlabels = imma.get_nlabels(slab=slab, labels=labels, return_mode="str")
+        labels_in_str = "-".join(strlabels)
+        pvsm_filename = vtk_file.format(labels_in_str)
+        pvsm_filename, ext = op.splitext(pvsm_filename)
+        pvsm_filename = pvsm_filename + ".pvsm"
+    create_pvsm_file(vtk_files, pvsm_filename=pvsm_filename)
     return vtk_files
 
 def prepare_vtk_file(
@@ -231,7 +241,7 @@ def prettify(elem):
     reparsed = minidom.parseString(rough_string)
     return reparsed.toprettyxml(indent="  ")
 
-def create_pvsm_file(vtk_files, pvsm_file):
+def create_pvsm_file(vtk_files, pvsm_filename, relative_paths=True):
     from xml.etree.ElementTree import Element, SubElement, Comment, tostring, ElementTree
     import os.path as op
 
@@ -245,9 +255,13 @@ def create_pvsm_file(vtk_files, pvsm_file):
 
     sms = SubElement(top, "ServerManagerState", version="5.4.1")
     file_list = SubElement(sms, "ProxyCollection", name="sources")
-    for vtk_file in vtk_files:
+    for vtk_file_orig in vtk_files:
         numberi +=1
-        dir, vtk_file_head = op.split(vtk_file)
+        dir, vtk_file_head = op.split(vtk_file_orig)
+        if relative_paths:
+            vtk_file = vtk_file_head
+        else:
+            vtk_file = vtk_file_orig
         number = str(numberi)
         proxy1 = SubElement(sms, "Proxy", group="sources", type="LegacyVTKFileReader", id=number, servers="1")
         property = SubElement(proxy1, "Property", name="FileNameInfo", id=number + ".FileNameInfo", number_of_elements="1")
@@ -256,21 +270,26 @@ def create_pvsm_file(vtk_files, pvsm_file):
         pr2s1 = SubElement(property2, "Element", index="0", value=vtk_file)
         pr2s2 = SubElement(property2, "Domain", name="files", id=number + ".FileNames.files")
 
+    #     < Property
+    #     name = "Opacity"
+    #     id = "8109.Opacity"
+    #     number_of_elements = "1" >
+    #     < Element
+    #     index = "0"
+    #     value = "0.28" / >
+    #     < Domain
+    #     name = "range"
+    #     id = "8109.Opacity.range" / >
+    # < / Property >
 
         fn1 = SubElement(file_list, "Item", id=number, name=vtk_file_head)
-    # child = SubElement(top, 'child')
-    # child.text = 'This child contains text.'
-    #
-    # child_with_tail = SubElement(top, 'child_with_tail')
-    # child_with_tail.text = 'This child has regular text.'
-    # child_with_tail.tail = 'And "tail" text.'
 
-    # child_with_entity_ref = SubElement(top, 'child_with_entity_ref')
-    # child_with_entity_ref.text = 'This & that'
     xml_str = prettify(top)
-    print(xml_str)
-    print(xml_str)
-    ElementTree(top).write(op.expanduser(pvsm_file))
+    # logger.debug(xml_str)
+    with open(op.expanduser(pvsm_filename), "w") as file:
+        file.write(xml_str)
+
+    # ElementTree(top).write()
 
 
 
