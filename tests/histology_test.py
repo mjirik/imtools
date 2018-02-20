@@ -58,8 +58,9 @@ class HistologyTest(unittest.TestCase):
     @attr("actual")
     def test_surface_density_gensei_data(self):
         import io3d
+        import io3d.datasets
         dr = io3d.datareader.DataReader()
-        datap = dr.Get3DData(join_sdp('gensei_slices/'),
+        datap = dr.Get3DData(io3d.datasets.join_path('gensei_slices/'),
                              dataplus_format=True)
         # total object volume fraction:           0.081000
         # total object volume [(mm)^3]:           81.000000

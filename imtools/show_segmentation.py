@@ -48,7 +48,7 @@ def prepare_vtk_files(
         resize_mm=None,
         resize_voxel_number=None,
         slab=None,
-        pvsm_filename=None
+        pvsm_file=None
 ):
     if slab is None:
         slab = create_slab_from_segmentation(segmentation)
@@ -78,13 +78,13 @@ def prepare_vtk_files(
         if fn is not None:
             vtk_files.append(filename)
 
-    if pvsm_filename is None:
+    if pvsm_file is None:
         strlabels = imma.get_nlabels(slab=slab, labels=labels, return_mode="str")
         labels_in_str = "-".join(strlabels)
-        pvsm_filename = vtk_file.format(labels_in_str)
-        pvsm_filename, ext = op.splitext(pvsm_filename)
-        pvsm_filename = pvsm_filename + ".pvsm"
-    create_pvsm_file(vtk_files, pvsm_filename=pvsm_filename)
+        pvsm_file = vtk_file.format(labels_in_str)
+        pvsm_file, ext = op.splitext(pvsm_file)
+        pvsm_file = pvsm_file + ".pvsm"
+    create_pvsm_file(vtk_files, pvsm_filename=pvsm_file)
     return vtk_files
 
 def prepare_vtk_file(

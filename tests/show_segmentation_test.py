@@ -107,7 +107,10 @@ class ShowSegmemtationCase(unittest.TestCase):
 
     def test_create_pmvs(self):
         vtk_files = ["file1.vtk", "file2.vtk"]
-        imtools.show_segmentation.create_pwsm_file(vtk_files)
+        pvsm_file = "test_delete.pvsm"
+        imtools.show_segmentation.create_pvsm_file(vtk_files, pvsm_file)
+        self.assertTrue(op.exists(pvsm_file))
+        os.remove(pvsm_file)
 
 if __name__ == '__main__':
     unittest.main()
