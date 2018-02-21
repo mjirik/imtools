@@ -2,7 +2,7 @@
 """
 Purpose:     (CZE-ZCU-FAV-KKY) Liver medical project
 
-Author:      Pavel Volkovinsky
+Author:      Pavel Volkovinsky, Miroslav Jirik
 Email:       volkovinsky.pavel@gmail.com
 
 Created:     2012/11/08
@@ -17,7 +17,7 @@ sys.path.append("../extern/")
 import logging as logger
 import traceback
 
-import numpy
+import numpy as np
 # import scipy.ndimage
 
 import thresholding_functions
@@ -95,19 +95,20 @@ class uiThreshold:
 
         Inicialitacni metoda.
         Input:
-            data - data pro prahovani, se kterymi se pracuje
-            voxel - velikost voxelu
-            threshold
-            interactivity - zapnuti / vypnuti gui
-            number - maximalni hodnota slideru pro gauss. filtrovani (max sigma)
-            inputSigma - pocatecni hodnota pro gauss. filtr
-            nObj - pocet nejvetsich objektu k vraceni
-            biggestObjects - oznacuje, zda se maji vracet nejvetsi objekty
-            binaryClosingIterations - iterace binary closing
-            binaryOpeningIterations - iterace binary opening
-            seeds - matice s kliknutim uzivatele- pokud se maji vracet
-                specifikce objekty
-            cmap - grey
+            :param data: data pro prahovani, se kterymi se pracuje
+            :param voxel: velikost voxelu
+            :param threshold:
+            :param interactivity: zapnuti / vypnuti gui
+            :param number: maximalni hodnota slideru pro gauss. filtrovani (max sigma)
+            :param inputSigma: pocatecni hodnota pro gauss. filtr
+            :param nObj: pocet nejvetsich objektu k vraceni
+            :param biggestObjects: oznacuje, zda se maji vracet nejvetsi objekty
+            :param binaryClosingIterations: iterace binary closing
+            :param binaryOpeningIterations: iterace binary opening
+            :param seeds: matice s kliknutim uzivatele- pokud se maji vracet
+                   specifikce objekty. It can be same shape like data, or it can be
+                   indexes f.e. from np.nonzero(seeds)
+            :param cmap: grey
             :param auto_method: 'otsu' use otsu threshold, other string use our liver automatic
 
         """
@@ -115,18 +116,15 @@ class uiThreshold:
         logger.debug('Spoustim prahovani dat...')
         self.on_close_fcn = None
 
-        self.inputDimension = numpy.ndim(data)
-        if(self.inputDimension != 3):
+        self.errorsOccured = False
+        self.inputDimension = np.ndim(data)
 
-            logger.debug(
+        if(self.inputDimension != 3):
+            logger.error(
                 'Vstup nema 3 dimenze! Ma jich ' + str(self.inputDimension)
                 + '.')
             self.errorsOccured = True
             return
-
-        else:
-
-            self.errorsOccured = False
 
         self.on_show_fcn = plt.show
         self.interactivity = interactivity
@@ -138,42 +136,59 @@ class uiThreshold:
         self.biggestObjects = biggestObjects
         self.ICBinaryClosingIterations = binaryClosingIterations
         self.ICBinaryOpeningIterations = binaryOpeningIterations
-        self.seeds = seeds
+        sh1 = data.shape
+        sh2 = np.asarray(seeds).shape
+
+        # if shapes of input data and seeds are the same
+        if np.array_equal(sh1, sh2):
+            self.seeds = np.nonzero(seeds)
+        else:
+            self.seeds = seeds
         self.useSeedsOfCompactObjects = useSeedsOfCompactObjects
         self.fillHoles = fillHoles
 
         self.threshold_upper = threshold_upper
 
         if (sys.version_info[0] < 3):
-
             import copy
             self.data = copy.copy(data)
             self.voxel = copy.copy(voxel)
 
         else:
-
             self.data = data.copy()
             self.voxel = voxel.copy()
 
         # Kalkulace objemove jednotky (voxel) (V = a*b*c)
-        voxel1 = self.voxel[0]
-        voxel2 = self.voxel[1]
-        voxel3 = self.voxel[2]
-        self.voxelV = voxel1 * voxel2 * voxel3
+        # voxel1 = self.voxel[0]
+        # voxel2 = self.voxel[1]
+        # voxel3 = self.voxel[2]
+        self.voxelV = np.prod(self.voxel, axis=None) #voxel1 * voxel2 * voxel3
+
 
         self.numpyAMaxKeepDims = False
 
-        self.arrSeed = None
+        # self.arrSeed = None
+        if seeds is None:
+            self.intensities_on_seeds = None
+        else:
+            self.intensities_on_seeds = thresholding_functions.get_intensities_on_seed_position(
+                self.data, self.seeds)
+
+        # Pokud existuji vhodne labely, vytvori se nova data k
+        # vraceni.
+        # Pokud ne, vrati se "None" typ.  { Deprecated: Pokud ne,
+        # vrati se cela nafiltrovana data, ktera do funkce prisla
+        # (nedojde k vraceni specifickych objektu).  }
 
         if self.threshold is None:
             try:
                 if auto_method is 'otsu':
                     logger.debug('using otsu threshold')
                     self.threshold = thresholding_functions.calculateAutomaticThresholdOtsu(
-                        self.data, self.arrSeed)
+                        self.data, self.intensities_on_seeds)
                 else:
                     self.threshold = thresholding_functions.calculateAutomaticThreshold(
-                        self.data, self.arrSeed)
+                        self.data, self.intensities_on_seeds)
             except:
                 logger.info(traceback.format_exc())
                 thres = (self.max0 + self.min0) / 2
@@ -189,31 +204,23 @@ class uiThreshold:
 
             # Maximalni a minimalni pouzita hodnota prahovani v datech (bud v
             # celych datech nebo vybranych seedu)
-            self.min0 = numpy.amin(numpy.amin(self.data, axis=0))
+            self.min0 = np.amin(np.amin(self.data, axis=0))
             if self.seeds == None:
 
-                self.max0 = numpy.amax(numpy.amax(self.data, axis=0))
+                self.max0 = np.amax(np.amax(self.data, axis=0))
                 self.max0 = self.max0 + \
                     abs(abs(self.min0) - abs(self.max0)) / 10
 
             else:
 
-                self.arrSeed = thresholding_functions.getSeeds(
-                    data, self.seeds)
-
-                # Pokud existuji vhodne labely, vytvori se nova data k
-                # vraceni.
-                # Pokud ne, vrati se "None" typ.  { Deprecated: Pokud ne,
-                # vrati se cela nafiltrovana data, ktera do funkce prisla
-                # (nedojde k vraceni specifickych objektu).  }
-                if len(self.arrSeed) > 0:
+                if len(self.intensities_on_seeds) > 0:
 
                     # Zbaveni se duplikatu.
-                    self.arrSeed = list(set(self.arrSeed))
+                    self.intensities_on_seeds = list(set(self.intensities_on_seeds))
                     logger.debug('Hodnoty seedu: ')
-                    logger.debug(self.arrSeed)
+                    logger.debug(self.intensities_on_seeds)
 
-                    self.max0 = max(self.arrSeed)
+                    self.max0 = max(self.intensities_on_seeds)
                     self.max0 = self.max0 + \
                         abs(abs(self.min0) - abs(self.max0)) / 10
 
@@ -221,15 +228,15 @@ class uiThreshold:
                     logger.debug('')
                     logger.debug(
                         'Minimalni doporucena hodnota prahu: ' +
-                        str(min(self.arrSeed)))
+                        str(min(self.intensities_on_seeds)))
                     logger.debug(
                         'Maximalni doporucena hodnota prahu: ' +
-                        str(max(self.arrSeed)))
+                        str(max(self.intensities_on_seeds)))
                     logger.debug('')
 
                 else:
 
-                    self.max0 = numpy.amax(numpy.amax(self.data, axis=0))
+                    self.max0 = np.amax(np.amax(self.data, axis=0))
                     self.max0 = self.max0 + \
                         abs(abs(self.min0) - abs(self.max0)) / 10
 
@@ -244,13 +251,13 @@ class uiThreshold:
 
             # Vykreslit obrazek
             self.ax1.imshow(
-                numpy.amax(self.data, axis=0, keepdims=self.numpyAMaxKeepDims),
+                np.amax(self.data, axis=0, keepdims=self.numpyAMaxKeepDims),
                 self.cmap)
             self.ax2.imshow(
-                numpy.amax(self.data, axis=1, keepdims=self.numpyAMaxKeepDims),
+                np.amax(self.data, axis=1, keepdims=self.numpyAMaxKeepDims),
                 self.cmap)
             self.ax3.imshow(
-                numpy.amax(self.data, axis=2, keepdims=self.numpyAMaxKeepDims),
+                np.amax(self.data, axis=2, keepdims=self.numpyAMaxKeepDims),
                 self.cmap)
 
             # Zalozeni mist pro slidery
@@ -390,29 +397,22 @@ class uiThreshold:
         self.firstRun = True
 
         if self.interactivity == False:
-
             self.updateImage(-1)
             garbage.collect()
-
         else:
-
             self.updateImage(-1)
             garbage.collect()
             self.on_show_fcn()
 
         del(self.data)
-
         garbage.collect()
-
         return self.imgFiltering
 
     def returnLastThreshold(self):
-
         return self.threshold
 
     def updateImage(self, val):
         """
-
         Hlavni update metoda.
         Cinny kod pro gaussovske filtrovani, prahovani, binarni uzavreni a
         otevreni a vraceni nejvetsich nebo oznacenych objektu.
@@ -433,18 +433,12 @@ class uiThreshold:
 
         # Zjisteni jakou sigmu pouzit
         if(self.firstRun == True and self.inputSigma >= 0):
-            sigma = numpy.round(self.inputSigma, 2)
+            sigma = np.round(self.inputSigma, 2)
         elif self.interactivity:
-            sigma = numpy.round(self.ssigma.val, 2)
+            sigma = np.round(self.ssigma.val, 2)
         else:
-            sigma = numpy.round(self.inputSigma, 2)
+            sigma = np.round(self.inputSigma, 2)
 
-        if sigma > 0:
-            sigmaNew = thresholding_functions.calculateSigma(self.voxel, sigma)
-            self.imgFiltering = thresholding_functions.gaussFilter(
-                self.imgFiltering, sigmaNew)
-
-            del(sigmaNew)
 
         # Prahovani (smin, smax)
 
@@ -453,9 +447,9 @@ class uiThreshold:
 
         if self.interactivity:
 
-            self.smin.val = (numpy.round(self.smin.val, 2))
+            self.smin.val = (np.round(self.smin.val, 2))
             self.smin.valtext.set_text('{}'.format(self.smin.val))
-            self.smax.val = (numpy.round(self.smax.val, 2))
+            self.smax.val = (np.round(self.smax.val, 2))
             self.smax.valtext.set_text('{}'.format(self.smax.val))
 
             min_threshold = self.smin.val
@@ -467,23 +461,14 @@ class uiThreshold:
             logger.debug("This line should be never runned")
 
             min_threshold = thresholding_functions.calculateAutomaticThreshold(
-                self.imgFiltering, self.arrSeed)
-
-        self.imgFiltering = thresholding_functions.thresholding(
-            self.imgFiltering,
-            min_threshold,
-            max_threshold,
-            use_min_threshold=True,
-            use_max_threshold=max_threshold is not None
-        )
-
+                self.imgFiltering, self.intensities_on_seeds)
         # Operace binarni otevreni a uzavreni.
 
         # Nastaveni hodnot slideru.
         if (self.interactivity == True):
 
-            closeNum = int(numpy.round(self.sclose.val, 0))
-            openNum = int(numpy.round(self.sopen.val, 0))
+            closeNum = int(np.round(self.sclose.val, 0))
+            openNum = int(np.round(self.sopen.val, 0))
             self.sclose.valtext.set_text('{}'.format(closeNum))
             self.sopen.valtext.set_text('{}'.format(openNum))
 
@@ -492,18 +477,7 @@ class uiThreshold:
             closeNum = self.ICBinaryClosingIterations
             openNum = self.ICBinaryOpeningIterations
 
-        self.imgFiltering = thresholding_functions.binaryClosingOpening(
-            self.imgFiltering, closeNum, openNum, True)
-
-# Fill holes
-        if self.fillHoles:
-
-            self.imgFiltering = thresholding_functions.fillHoles(
-                self.imgFiltering)
-
-        # Zjisteni nejvetsich objektu.
-        self.getBiggestObjects()
-
+        self.make_image_processing(sigma, min_threshold, max_threshold, closeNum, openNum)
         # Vykresleni dat
         if (self.interactivity == True):
             self.drawVisualization()
@@ -515,22 +489,53 @@ class uiThreshold:
 
         self.debugInfo()
 
+    def make_image_processing(self, sigma, min_threshold, max_threshold, closeNum, openNum ):
+
+        if sigma > 0:
+            sigmaNew = thresholding_functions.calculateSigma(self.voxel, sigma)
+            self.imgFiltering = thresholding_functions.gaussFilter(
+                self.imgFiltering, sigmaNew)
+
+            del(sigmaNew)
+
+        self.imgFiltering = thresholding_functions.thresholding(
+            self.imgFiltering,
+            min_threshold,
+            max_threshold,
+            use_min_threshold=True,
+            use_max_threshold=max_threshold is not None
+        )
+
+
+        self.imgFiltering = thresholding_functions.binaryClosingOpening(
+            self.imgFiltering, closeNum, openNum, True)
+
+        # Fill holes
+        if self.fillHoles:
+
+            self.imgFiltering = thresholding_functions.fillHoles(
+                self.imgFiltering)
+
+        # Zjisteni nejvetsich objektu.
+        self.getBiggestObjects()
+
+
     def debugInfo(self):
 
         logger.debug('======')
         logger.debug('!Debug')
         logger.debug('\tUpdate cycle:')
         logger.debug('\t\tThreshold min: ' +
-                     str(numpy.round(self.threshold, 2)))
+                     str(np.round(self.threshold, 2)))
         if (self.interactivity == True):
             logger.debug(
-                '\t\tThreshold max: ' + str(numpy.round(self.smax.val, 2)))
+                '\t\tThreshold max: ' + str(np.round(self.smax.val, 2)))
             logger.debug(
-                '\t\tBinary closing: ' + str(numpy.round(self.sclose.val, 0)))
+                '\t\tBinary closing: ' + str(np.round(self.sclose.val, 0)))
             logger.debug(
-                '\t\tBinary opening: ' + str(numpy.round(self.sopen.val, 0)))
+                '\t\tBinary opening: ' + str(np.round(self.sopen.val, 0)))
             logger.debug(
-                '\t\tSigma filter param: ' + str(numpy.round(self.ssigma.val,
+                '\t\tSigma filter param: ' + str(np.round(self.ssigma.val,
                                                              2)))
         logger.debug('======')
 
@@ -588,13 +593,13 @@ class uiThreshold:
             # print '(DEBUG) Typ dat: ' + str(type(self.data[0][0][0]))
 
             self.ax1.imshow(
-                numpy.amax(numpy.zeros(self.data.shape), axis=0,
+                np.amax(np.zeros(self.data.shape), axis=0,
                            keepdims=self.numpyAMaxKeepDims), self.cmap)
             self.ax2.imshow(
-                numpy.amax(numpy.zeros(self.data.shape), axis=1,
+                np.amax(np.zeros(self.data.shape), axis=1,
                            keepdims=self.numpyAMaxKeepDims), self.cmap)
             self.ax3.imshow(
-                numpy.amax(numpy.zeros(self.data.shape), axis=2,
+                np.amax(np.zeros(self.data.shape), axis=2,
                            keepdims=self.numpyAMaxKeepDims), self.cmap)
 
         else:
@@ -670,7 +675,7 @@ class uiThreshold:
         #
         #     self.smax.val += 1.0
         #
-        # self.smax.val = (numpy.round(self.smax.val, 2))
+        # self.smax.val = (np.round(self.smax.val, 2))
         # self.smax.valtext.set_text('{}'.format(self.smax.val))
         # self.fig.canvas.draw()
         # self.updateImage(0)
@@ -691,7 +696,7 @@ class uiThreshold:
         else:
             self.smin.val += value
 
-        self.smin.val = (numpy.round(self.smin.val, 2))
+        self.smin.val = (np.round(self.smin.val, 2))
         self.smin.valtext.set_text('{}'.format(self.smin.val))
         self.fig.canvas.draw()
         self.updateImage(0)
@@ -705,7 +710,7 @@ class uiThreshold:
         else:
             self.smax.val += value
 
-        self.smax.val = (numpy.round(self.smax.val, 2))
+        self.smax.val = (np.round(self.smax.val, 2))
         self.smax.valtext.set_text('{}'.format(self.smax.val))
         self.fig.canvas.draw()
         self.updateImage(0)
@@ -713,7 +718,7 @@ class uiThreshold:
     def buttonNextOpening(self, event):
 
         self.sopen.val += 1.0
-        self.sopen.val = (numpy.round(self.sopen.val, 2))
+        self.sopen.val = (np.round(self.sopen.val, 2))
         self.sopen.valtext.set_text('{}'.format(self.sopen.val))
         self.fig.canvas.draw()
         self.updateImage(0)
@@ -722,7 +727,7 @@ class uiThreshold:
 
         if(self.sopen.val >= 1.0):
             self.sopen.val -= 1.0
-            self.sopen.val = (numpy.round(self.sopen.val, 2))
+            self.sopen.val = (np.round(self.sopen.val, 2))
             self.sopen.valtext.set_text('{}'.format(self.sopen.val))
             self.fig.canvas.draw()
             self.updateImage(0)
@@ -730,7 +735,7 @@ class uiThreshold:
     def buttonNextClosing(self, event):
 
         self.sclose.val += 1.0
-        self.sclose.val = (numpy.round(self.sclose.val, 2))
+        self.sclose.val = (np.round(self.sclose.val, 2))
         self.sclose.valtext.set_text('{}'.format(self.sclose.val))
         self.fig.canvas.draw()
         self.updateImage(0)
@@ -739,7 +744,7 @@ class uiThreshold:
 
         if(self.sclose.val >= 1.0):
             self.sclose.val -= 1.0
-            self.sclose.val = (numpy.round(self.sclose.val, 2))
+            self.sclose.val = (np.round(self.sclose.val, 2))
             self.sclose.valtext.set_text('{}'.format(self.sclose.val))
             self.fig.canvas.draw()
             self.updateImage(0)

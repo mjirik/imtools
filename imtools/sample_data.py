@@ -272,6 +272,9 @@ def generate(size = 100, liver_intensity=100, noise_intensity=20, portal_vein_in
     2 * boundary + 1 : 2 * boundary + 4
     ] = 1
 
+    seeds_porta = np.zeros([size, size, size], dtype=np.uint8)
+    seeds_porta[:, boundary*2+2, boundary*2:boundary*2+2] = 1
+
     noise = (np.random.random(segmentation.shape) * noise_intensity).astype(np.int)
     data3d = np.zeros(segmentation.shape, dtype=np.int)
     data3d [segmentation == 1] = liver_intensity
@@ -285,7 +288,8 @@ def generate(size = 100, liver_intensity=100, noise_intensity=20, portal_vein_in
         'segmentation': segmentation,
         'voxelsize_mm': voxelsize_mm,
         'seeds': seeds,
-        'slab': slab
+        'slab': slab,
+        "seeds_porta": seeds_porta
     }
     return datap
 

@@ -63,23 +63,16 @@ def thresholding(data, min_threshold, max_threshold, use_min_threshold=True,
     Prahovani podle minimalniho a maximalniho prahu.
 
     """
-    # TODO remove this half-thresholding
-    # ted to spoleha na to, ze segmentovane je vsechno, co neni nula :-(
-    # return data
-    # out = numpy.zeros(data.shape)
-
+    tmp = numpy.ones(data.shape, dtype=numpy.bool)
     if use_min_threshold:
 
-        data = data * (data >= min_threshold)
+        tmp =(data >= min_threshold)
         # out += data >= min_threshold
-
     if use_max_threshold:
-
-        data = data * (data <= max_threshold)
+         tmp = tmp & (data <= max_threshold)
         # out += data <= max_threshold
 
-
-    return data
+    return tmp
     # return out.astype(numpy.int)
 
 
@@ -269,68 +262,16 @@ def calculateAutomaticThreshold(data, arrSeed=None):
     place = 0
     for index in range(init_index + pointsFrom + pointsSkip,
                        init_index + pointsFrom + pointsSkip + pointsTo):
-        # len(muj_histogram) - 5 - int(0.1 * len(muj_histogram)),
-        # len(muj_histogram) - 5
         x2.insert(place, bin_centers[index])
         y2.insert(place, muj_histogram[index])
-# print("[ " + str(x2[place]) + ", " + str(y2[place]) + " ]")
         place += 1
 
     slope2, intercept2, r_value2, p_value2, std_err2 = stats.linregress(x2, y2)
 
-    """
-
-        print("=============")
-        print("DEBUG vypisy:\n")
-
-        print("start = " + str(start))
-        print("pointsFrom = " + str(pointsFrom))
-        print("pointsTo = " + str(pointsTo))
-        print("pointsSkip = " + str(pointsSkip) + "\n")
-
-        print("max = " + str(last))
-        print("max index = " + str(init_index) + "\n")
-
-        print("slope1 = " + str(slope1))
-        print("intercept1 = " + str(intercept1))
-        print("r_value1 = " + str(r_value1))
-        print("p_value1 = " + str(p_value1))
-        print("std_err1 = " + str(std_err1))
-        print(str(slope1) + "x + " + str(intercept1) + "\n\n")
-
-        ## //
-
-        print("slope2 = " + str(slope2))
-        print("intercept2 = " + str(intercept2))
-        print("r_value2 = " + str(r_value2))
-        print("p_value2 = " + str(p_value2))
-        print("std_err2 = " + str(std_err2))
-        print(str(slope2) + "x + " + str(intercept2))
-
-        print("=============")
-
-        """
-
     threshold = (intercept2 - intercept1) / (slope1 - slope2)
     threshold = numpy.round(threshold, 2)
 
-    print('Zjisten threshold: ' + str(threshold))
-
-    # muj_histogram_graph = []
-    # bin_centers_graph = []
-    # place = 0
-    # for index in range(len(muj_histogram) / 2, len(muj_histogram)):
-    #     bin_centers_graph.insert(place, bin_centers[index])
-    #     muj_histogram_graph.insert(place, muj_histogram[index])
-    #     place += 1
-    #
-    #
-    # matpyplot.figure(figsize = (11, 4))
-    # matpyplot.plot(bin_centers_graph, muj_histogram_graph, lw = 2)
-    # #matpyplot.plot([1100*slope1], [1200*slope1], label='one', color='green')
-    # #matpyplot.plot([1100*slope2], [1200*slope2], label='two', color='blue')
-    # matpyplot.axvline(self.threshold, color = 'r', ls = '--', lw = 2)
-    # matpyplot.show()
+    logger.info('Threshold: ' + str(threshold))
 
     return threshold
 
@@ -364,12 +305,12 @@ def histogram(data, interactivity, histogram_points=1000, start=-1, end=-1,
     return bin_centers, hist
 
 
-def getSeeds(data, seeds):
+def get_intensities_on_seed_position(data, seeds_inds):
 
     # Zalozeni pole pro ulozeni seedu
     arrSeed = []
     # Zjisteni poctu seedu.
-    stop = seeds[0].size
+    stop = seeds_inds[0].size
     tmpSeed = 0
     dim = numpy.ndim(data)
 
@@ -377,10 +318,10 @@ def getSeeds(data, seeds):
         # Tady se ukladaji labely na mistech, ve kterych kliknul uzivatel.
         if dim == 3:
             # 3D data.
-            tmpSeed = data[seeds[0][index], seeds[1][index], seeds[2][index]]
+            tmpSeed = data[seeds_inds[0][index], seeds_inds[1][index], seeds_inds[2][index]]
         elif dim == 2:
             # 2D data.
-            tmpSeed = data[seeds[0][index], seeds[1][index]]
+            tmpSeed = data[seeds_inds[0][index], seeds_inds[1][index]]
 
         # Tady opet pocitam s tim, ze oznaceni nulou pripada cerne
         # oblasti (pozadi).
@@ -411,8 +352,11 @@ def getPriorityObjects(data, nObj=1, seeds=None, seeds_multi_index=None, debug=F
     # labels - oznacena data.
     # length - pocet rozdilnych oznaceni.
     if seeds is not None:
-        logger.warning("'seeds' parameter is obsolete. Use 'seeds_multi_index' instead of it.")
-        seeds_multi_index = seeds
+        # logger.warning("'seeds' parameter is obsolete. Use 'seeds_multi_index' instead of it.")
+        if numpy.array_equal(data.shape, numpy.asarray(seeds).shape):
+            seeds_multi_index = numpy.nonzero(seeds)
+        else:
+            seeds_multi_index = seeds
 
     dataLabels, length = scipy.ndimage.label(data)
 
