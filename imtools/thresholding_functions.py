@@ -362,8 +362,7 @@ def getPriorityObjects(data, nObj=1, seeds=None, seeds_multi_index=None, debug=F
 
     logger.info('Olabelovano oblasti: ' + str(length))
 
-    if debug:
-        logger.debug('data labels: ' + str(dataLabels))
+    logger.debug('data labels: ' + str(dataLabels))
 
     # Uzivatel si nevybral specificke objekty.
     if (seeds_multi_index == None):

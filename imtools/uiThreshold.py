@@ -136,6 +136,7 @@ class uiThreshold:
         self.biggestObjects = biggestObjects
         self.ICBinaryClosingIterations = binaryClosingIterations
         self.ICBinaryOpeningIterations = binaryOpeningIterations
+        self.auto_method=auto_method
         sh1 = data.shape
         sh2 = np.asarray(seeds).shape
 
@@ -152,27 +153,24 @@ class uiThreshold:
         if (sys.version_info[0] < 3):
             import copy
             self.data = copy.copy(data)
-            self.voxel = copy.copy(voxel)
+            self.voxelsize_mm = copy.copy(voxel)
 
         else:
             self.data = data.copy()
-            self.voxel = voxel.copy()
+            self.voxelsize_mm = voxel.copy()
 
         # Kalkulace objemove jednotky (voxel) (V = a*b*c)
         # voxel1 = self.voxel[0]
         # voxel2 = self.voxel[1]
         # voxel3 = self.voxel[2]
-        self.voxelV = np.prod(self.voxel, axis=None) #voxel1 * voxel2 * voxel3
+        self.voxelV = np.prod(self.voxelsize_mm, axis=None) #voxel1 * voxel2 * voxel3
 
+        if (self.biggestObjects == True or (self.seeds != None and self.useSeedsOfCompactObjects)):
+            self.get_priority_objects = True
+        else:
+            self.get_priority_objects = True
 
         self.numpyAMaxKeepDims = False
-
-        # self.arrSeed = None
-        if seeds is None:
-            self.intensities_on_seeds = None
-        else:
-            self.intensities_on_seeds = thresholding_functions.get_intensities_on_seed_position(
-                self.data, self.seeds)
 
         # Pokud existuji vhodne labely, vytvori se nova data k
         # vraceni.
@@ -180,65 +178,56 @@ class uiThreshold:
         # vrati se cela nafiltrovana data, ktera do funkce prisla
         # (nedojde k vraceni specifickych objektu).  }
 
-        if self.threshold is None:
-            try:
-                if auto_method is 'otsu':
-                    logger.debug('using otsu threshold')
-                    self.threshold = thresholding_functions.calculateAutomaticThresholdOtsu(
-                        self.data, self.intensities_on_seeds)
-                else:
-                    self.threshold = thresholding_functions.calculateAutomaticThreshold(
-                        self.data, self.intensities_on_seeds)
-            except:
-                logger.info(traceback.format_exc())
-                thres = (self.max0 + self.min0) / 2
 
         self.firstRun = True
-        if self.interactivity == True:
+        if self.interactivity:
+            self._init_ui(figure)
 
+    def _init_ui(self, figure):
             if figure is None:
-
                 self.fig = matpyplot.figure()
             else:
                 self.fig = figure
 
             # Maximalni a minimalni pouzita hodnota prahovani v datech (bud v
             # celych datech nebo vybranych seedu)
-            self.min0 = np.amin(np.amin(self.data, axis=0))
-            if self.seeds == None:
-
-                self.max0 = np.amax(np.amax(self.data, axis=0))
-                self.max0 = self.max0 + \
-                    abs(abs(self.min0) - abs(self.max0)) / 10
-
-            else:
-
-                if len(self.intensities_on_seeds) > 0:
-
-                    # Zbaveni se duplikatu.
-                    self.intensities_on_seeds = list(set(self.intensities_on_seeds))
-                    logger.debug('Hodnoty seedu: ')
-                    logger.debug(self.intensities_on_seeds)
-
-                    self.max0 = max(self.intensities_on_seeds)
-                    self.max0 = self.max0 + \
-                        abs(abs(self.min0) - abs(self.max0)) / 10
-
-                    # Prahy
-                    logger.debug('')
-                    logger.debug(
-                        'Minimalni doporucena hodnota prahu: ' +
-                        str(min(self.intensities_on_seeds)))
-                    logger.debug(
-                        'Maximalni doporucena hodnota prahu: ' +
-                        str(max(self.intensities_on_seeds)))
-                    logger.debug('')
-
-                else:
-
-                    self.max0 = np.amax(np.amax(self.data, axis=0))
-                    self.max0 = self.max0 + \
-                        abs(abs(self.min0) - abs(self.max0)) / 10
+            self.min0 = np.min(self.data)
+            self.max0 = np.max(self.data)
+            # self.min0 = np.amin(np.amin(self.data, axis=0))
+            # if self.seeds == None:
+            #
+            #     self.max0 = np.amax(np.amax(self.data, axis=0))
+            #     self.max0 = self.max0 + \
+            #         abs(abs(self.min0) - abs(self.max0)) / 10
+            #
+            # else:
+            #
+            #     if len(self.intensities_on_seeds) > 0:
+            #
+            #         # Zbaveni se duplikatu.
+            #         self.intensities_on_seeds = list(set(self.intensities_on_seeds))
+            #         logger.debug('Hodnoty seedu: ')
+            #         logger.debug(self.intensities_on_seeds)
+            #
+            #         self.max0 = max(self.intensities_on_seeds)
+            #         self.max0 = self.max0 + \
+            #             abs(abs(self.min0) - abs(self.max0)) / 10
+            #
+            #         # Prahy
+            #         logger.debug('')
+            #         logger.debug(
+            #             'Minimalni doporucena hodnota prahu: ' +
+            #             str(min(self.intensities_on_seeds)))
+            #         logger.debug(
+            #             'Maximalni doporucena hodnota prahu: ' +
+            #             str(max(self.intensities_on_seeds)))
+            #         logger.debug('')
+            #
+            #     else:
+            #
+            #         self.max0 = np.amax(np.amax(self.data, axis=0))
+            #         self.max0 = self.max0 + \
+            #             abs(abs(self.min0) - abs(self.max0)) / 10
 
             # Pridani subplotu do okna (do figure)
             self.ax1 = self.fig.add_subplot(222)
@@ -396,12 +385,9 @@ class uiThreshold:
 
         self.firstRun = True
 
-        if self.interactivity == False:
-            self.updateImage(-1)
-            garbage.collect()
-        else:
-            self.updateImage(-1)
-            garbage.collect()
+        self.updateImage(-1)
+        garbage.collect()
+        if self.interactivity:
             self.on_show_fcn()
 
         del(self.data)
@@ -419,13 +405,6 @@ class uiThreshold:
 
         """
 
-        if (sys.version_info[0] < 3):
-
-            import copy
-            self.imgFiltering = copy.copy(self.data)
-
-        else:
-            self.imgFiltering = self.data.copy()
         # import ipdb
         # ipdb.set_trace()
 
@@ -442,8 +421,8 @@ class uiThreshold:
 
         # Prahovani (smin, smax)
 
-        max_threshold = self.threshold_upper
-        min_threshold = self.threshold
+        # max_threshold = self.threshold_upper
+        # min_threshold = self.threshold
 
         if self.interactivity:
 
@@ -452,20 +431,8 @@ class uiThreshold:
             self.smax.val = (np.round(self.smax.val, 2))
             self.smax.valtext.set_text('{}'.format(self.smax.val))
 
-            min_threshold = self.smin.val
-            max_threshold = self.smax.val
-
-            self.threshold = min_threshold
-
-        if (self.threshold is None) and self.firstRun:
-            logger.debug("This line should be never runned")
-
-            min_threshold = thresholding_functions.calculateAutomaticThreshold(
-                self.imgFiltering, self.intensities_on_seeds)
-        # Operace binarni otevreni a uzavreni.
-
-        # Nastaveni hodnot slideru.
-        if (self.interactivity == True):
+            self.threshold = self.smin.val
+            self.threshold_upper = self.smax.val
 
             closeNum = int(np.round(self.sclose.val, 0))
             openNum = int(np.round(self.sopen.val, 0))
@@ -477,7 +444,21 @@ class uiThreshold:
             closeNum = self.ICBinaryClosingIterations
             openNum = self.ICBinaryOpeningIterations
 
-        self.make_image_processing(sigma, min_threshold, max_threshold, closeNum, openNum)
+        # make_image_processing(sigma, min_threshold, max_threshold, closeNum, openNum, auto_method=self.)
+        self.imgFiltering = make_image_processing(
+            data=self.data,
+            seeds=self.seeds,
+            sigma_mm=sigma,
+            min_threshold=self.threshold,
+            max_threshold=self.threshold_upper,
+            closeNum=closeNum,
+            openNum=openNum,
+            min_threshold_auto_method=self.auto_method,
+            fill_holes=self.fillHoles,
+            get_priority_objects=self.get_priority_objects,
+            nObj=self.nObj,
+            voxelsize_mm=self.voxelsize_mm
+        )
         # Vykresleni dat
         if (self.interactivity == True):
             self.drawVisualization()
@@ -489,36 +470,6 @@ class uiThreshold:
 
         self.debugInfo()
 
-    def make_image_processing(self, sigma, min_threshold, max_threshold, closeNum, openNum ):
-
-        if sigma > 0:
-            sigmaNew = thresholding_functions.calculateSigma(self.voxel, sigma)
-            self.imgFiltering = thresholding_functions.gaussFilter(
-                self.imgFiltering, sigmaNew)
-
-            del(sigmaNew)
-
-        self.imgFiltering = thresholding_functions.thresholding(
-            self.imgFiltering,
-            min_threshold,
-            max_threshold,
-            use_min_threshold=True,
-            use_max_threshold=max_threshold is not None
-        )
-
-
-        self.imgFiltering = thresholding_functions.binaryClosingOpening(
-            self.imgFiltering, closeNum, openNum, True)
-
-        # Fill holes
-        if self.fillHoles:
-
-            self.imgFiltering = thresholding_functions.fillHoles(
-                self.imgFiltering)
-
-        # Zjisteni nejvetsich objektu.
-        self.getBiggestObjects()
-
 
     def debugInfo(self):
 
@@ -526,10 +477,12 @@ class uiThreshold:
         logger.debug('!Debug')
         logger.debug('\tUpdate cycle:')
         logger.debug('\t\tThreshold min: ' +
-                     str(np.round(self.threshold, 2)))
+                     str(self.threshold))
+        logger.debug('\t\tThreshold max: ' +
+                     str(self.threshold_upper))
         if (self.interactivity == True):
             logger.debug(
-                '\t\tThreshold max: ' + str(np.round(self.smax.val, 2)))
+                '\t\tThreshold max: ' + str(self.smax.val))
             logger.debug(
                 '\t\tBinary closing: ' + str(np.round(self.sclose.val, 0)))
             logger.debug(
@@ -549,11 +502,7 @@ class uiThreshold:
 
         logger.debug('biggest objects ' + str(self.biggestObjects))
         logger.debug('self.seeds ' + str(self.seeds))
-        if (self.biggestObjects == True or
-                (self.seeds != None and self.useSeedsOfCompactObjects)):
 
-            self.imgFiltering = thresholding_functions.getPriorityObjects(
-                self.imgFiltering, self.nObj, self.seeds)
 
     def __drawSegmentedSlice(self, ax, contour, i):
         """
@@ -748,6 +697,73 @@ class uiThreshold:
             self.sclose.valtext.set_text('{}'.format(self.sclose.val))
             self.fig.canvas.draw()
             self.updateImage(0)
+
+def prepare_threshold_from_seeds(data, seeds, min_threshold_auto_method):
+
+    if seeds is not None:
+        intensities_on_seeds = thresholding_functions.get_intensities_on_seed_position(
+            data, seeds)
+    else:
+        intensities_on_seeds = None
+    if min_threshold_auto_method is 'otsu':
+        logger.debug('using otsu threshold')
+        min_threshold = thresholding_functions.calculateAutomaticThresholdOtsu(
+            data, intensities_on_seeds)
+    else:
+        min_threshold = thresholding_functions.calculateAutomaticThreshold(
+            data, intensities_on_seeds)
+    return min_threshold
+
+def make_image_processing(
+        data, voxelsize_mm, seeds=None,
+        sigma_mm=1, min_threshold=None, max_threshold=None, closeNum=0, openNum=0,
+        min_threshold_auto_method="", fill_holes=True, get_priority_objects=True, nObj=1
+):
+    if (sys.version_info[0] < 3):
+        import copy
+        imgFiltering = copy.copy(data)
+    else:
+        imgFiltering = data.copy()
+
+
+    if sigma_mm > 0:
+        sigmaNew = thresholding_functions.calculateSigma(voxelsize_mm, sigma_mm)
+        imgFiltering = thresholding_functions.gaussFilter(
+            imgFiltering, sigmaNew)
+
+        del(sigmaNew)
+
+    if min_threshold is None:
+        min_threshold = prepare_threshold_from_seeds(
+            data=imgFiltering,
+            seeds=seeds,
+            min_threshold_auto_method=min_threshold_auto_method
+        )
+
+    imgFiltering = thresholding_functions.thresholding(
+        imgFiltering,
+        min_threshold,
+        max_threshold,
+        use_min_threshold=True,
+        use_max_threshold=max_threshold is not None
+    )
+
+
+    imgFiltering = thresholding_functions.binaryClosingOpening(
+        imgFiltering, closeNum, openNum, True)
+
+    # Fill holes
+    if fill_holes:
+
+        imgFiltering = thresholding_functions.fillHoles(
+            imgFiltering)
+
+    # Zjisteni nejvetsich objektu.
+    if get_priority_objects:
+        imgFiltering = thresholding_functions.getPriorityObjects(
+            imgFiltering, nObj, seeds)
+
+    return imgFiltering
 
 def main():
     import numpy as np

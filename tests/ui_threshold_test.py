@@ -17,6 +17,7 @@ class MyTestCase(unittest.TestCase):
     def test_something(self):
         self.assertEqual(True, False)
 
+    # @unittest.skipIf(os.environ.get("TRAVIS", True), "Skip on Travis-CI")
     def test_threshold(self):
         datap = imtools.sample_data.generate()
         uit = imtools.uiThreshold.uiThreshold(datap['data3d'], datap['voxelsize_mm'], interactivity=False, threshold=100)
@@ -26,6 +27,20 @@ class MyTestCase(unittest.TestCase):
         datap = imtools.sample_data.generate()
         uit = imtools.uiThreshold.uiThreshold(datap['data3d'], datap['voxelsize_mm'], interactivity=False, seeds=datap["seeds_porta"])
         uit.run()
+
+    def test_threshold_image_processing(self):
+        datap = imtools.sample_data.generate()
+        imthr = imtools.uiThreshold.make_image_processing(
+            data=datap['data3d'], voxelsize_mm=datap['voxelsize_mm'], seeds=np.nonzero(datap["seeds_porta"]),
+            sigma_mm=1, min_threshold=None, max_threshold=None, closeNum=0, openNum=0, min_threshold_auto_method="", fill_holes=True,
+                          get_priority_objects=True, nObj=1 )
+
+        golden_true_porta = datap["segmentation"] == datap["slab"]["porta"]
+        found_porta = imthr > 0
+
+        err = np.sum(np.abs(golden_true_porta.astype(np.int8) - found_porta.astype(np.int8)))
+        err_percent = err / np.prod(datap["data3d"].shape)
+        self.assertLess(err_percent, 0.1)
 
     @attr('interactive')
     def test_ui_threshold(self):

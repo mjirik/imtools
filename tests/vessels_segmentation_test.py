@@ -106,11 +106,10 @@ class SegmentationTest(unittest.TestCase):
 
         self.assertLess(errorrate, 0.1)
 
-    # @unittest.skipIf(os.environ.get("TRAVIS", True), "Skip on Travis-CI")
+    @unittest.skipIf(os.environ.get("TRAVIS", True), "Skip on Travis-CI")
     def test_uiThreshold_qt(self):
         """
-        Function uses ui threshold for synthetic box object
-        segmentation without binary close
+        UI threshold segmentation without binary close
         """
         from imtools import uiThreshold
 
