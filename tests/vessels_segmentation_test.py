@@ -151,28 +151,19 @@ class SegmentationTest(unittest.TestCase):
         # pyed = sed3.sed3(outputTmp, contour=segm==slab['porta'])
         # pyed.show()
 
-        # @TODO opravit chybu v vesselSegmentation
         outputTmp = (outputTmp == 2)
         errim = np.abs(
             outputTmp.astype(np.int) - (segm == slab['porta']).astype(np.int)
         )
 
-        # ověření výsledku
-        # pyed = sed3.sed3(errim, contour=segm==slab['porta'])
-        # pyed.show()
         # evaluation
         sum_of_wrong_voxels = np.sum(errim)
         sum_of_voxels = np.prod(segm.shape)
 
-        # print "wrong ", sum_of_wrong_voxels
-        # print "voxels", sum_of_voxels
-
         errorrate = sum_of_wrong_voxels/sum_of_voxels
 
         # import pdb; pdb.set_trace()
-
         self.assertLess(errorrate, 0.1)
-        # new test uiThre
 
 
 if __name__ == "__main__":
