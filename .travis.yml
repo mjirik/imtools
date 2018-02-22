@@ -32,8 +32,8 @@ before_install:
 # command to install dependencies
 install:
     - conda install --yes -c SimpleITK -c luispedro -c mjirik -c menpo -c conda-forge --file requirements_conda.txt
-    - conda install -y cover
-    - pip install coveralls
+    - conda install -y -c conda-forge python-coveralls
+#    - pip install coveralls
     - pip install -r requirements.txt
 #    - pip install .
     - conda list
