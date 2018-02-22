@@ -34,9 +34,9 @@ class MyTestCase(unittest.TestCase):
         uit.run()
         plt.show()
 
-    def test_gui_constructor(self):
-        datap = imtools.sample_data.generate()
-        uit = imtools.uiThreshold.uiThreshold(datap['data3d'], datap['voxelsize_mm'], interactivity=True, threshold=100)
+    # def test_gui_constructor(self):
+    #     datap = imtools.sample_data.generate()
+    #     uit = imtools.uiThreshold.uiThreshold(datap['data3d'], datap['voxelsize_mm'], interactivity=True, threshold=100)
 
 
     @attr('interactive')
