@@ -4,6 +4,7 @@
 
 # import funkcí z jiného adresáře
 import os.path
+import sys
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 import unittest
@@ -105,12 +106,44 @@ class SegmentationTest(unittest.TestCase):
 
         self.assertLess(errorrate, 0.1)
 
-
     # @unittest.skipIf(os.environ.get("TRAVIS", True), "Skip on Travis-CI")
+    def test_uiThreshold_qt(self):
+        """
+        Function uses ui threshold for synthetic box object
+        segmentation without binary close
+        """
+        from imtools import uiThreshold
+
+        data3d, segm, voxelsize_mm, slab = self.synthetic_data()
+
+        data3d[100:150, 58:70, 50:55] += 50
+        app = QApplication(sys.argv)
+        # pyed = sed3.sed3(data3d)
+        # pyed.show()
+
+        uiT = uiThreshold.uiThresholdQt(
+
+            data3d,  # .astype(np.uint8),
+            # segmentation=(segm == slab['liver']),  # .astype(np.uint8),
+            # segmentation = oseg.orig_scale_segmentation,
+            voxel=voxelsize_mm,
+            threshold=180,
+            inputSigma=0.15,
+            nObj=1,
+            interactivity=False,
+            # interactivity=True,
+            biggestObjects=True,
+            # biggestObjects=False,
+            binaryClosingIterations=0,
+            binaryOpeningIterations=0)
+
+        # outputTmp = uiT.run()
+
+    @unittest.skipIf(os.environ.get("TRAVIS", True), "Skip on Travis-CI")
     def test_uiThreshold_binary_close_with_synthetic_data(self):
         """
         Function uses ui threshold for synthetic box object
-        segmentation.
+        segmentation with binary close
         """
         # TODO check the result better
         from imtools import uiThreshold
@@ -121,11 +154,6 @@ class SegmentationTest(unittest.TestCase):
         # @TODO je tam bug, prohlížeč neumí korektně pracovat s doubly
         import sys
         app = QApplication(sys.argv)
-        #        #pyed = QTSeedEditor(noise )
-        #        pyed = QTSeedEditor(data3d)
-        #        pyed.exec_()
-        #        #img3d = np.zeros([256,256,80], dtype=np.int16)
-
         # pyed = sed3.sed3(data3d)
         # pyed.show()
 
