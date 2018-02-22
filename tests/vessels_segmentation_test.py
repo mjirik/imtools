@@ -106,9 +106,10 @@ class SegmentationTest(unittest.TestCase):
         self.assertLess(errorrate, 0.1)
 
 
+    @unittest.skipIf(os.environ.get("TRAVIS", True), "Skip on Travis-CI")
     def test_uiThreshold_binary_close_with_synthetic_data(self):
         """
-        Function uses organ_segmentation  for synthetic box object
+        Function uses ui threshold for synthetic box object
         segmentation.
         """
         # TODO check the result better
