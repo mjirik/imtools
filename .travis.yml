@@ -44,7 +44,9 @@ install:
     - ls ~/data/medical/orig/
 #    - python -m io3d.datasets -l biodur_sample
 # command to run tests
-script: nosetests -c setup.cfg --with-coverage --cover-package=imtools -v
+script:
+    - nosetests -c setup.cfg
+    - nosetests -c setup.cfg --with-coverage --cover-package=imtools -v
 # use agg in matplotlib doesnt make difference with normal nosetests
 #script: python tests.py -c setup.cfg --with-coverage --cover-package=imtools -v
 after_success:
