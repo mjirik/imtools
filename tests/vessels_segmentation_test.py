@@ -106,7 +106,7 @@ class SegmentationTest(unittest.TestCase):
 
         self.assertLess(errorrate, 0.1)
 
-    @unittest.skipIf(os.environ.get("TRAVIS", True), "Skip on Travis-CI")
+    # @unittest.skipIf(os.environ.get("TRAVIS", True), "Skip on Travis-CI")
     def test_uiThreshold_qt(self):
         """
         UI threshold segmentation without binary close
