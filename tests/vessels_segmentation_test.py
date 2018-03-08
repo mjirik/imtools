@@ -15,7 +15,7 @@ import numpy as np
 from PyQt4.QtGui import QApplication
 import sed3
 
-from imtools import segmentation
+from imtools import segmentation as imsegmentation
 
 
 class SegmentationTest(unittest.TestCase):
@@ -31,6 +31,7 @@ class SegmentationTest(unittest.TestCase):
         voxelsize_mm = np.array([1.0, 1.0, 1.2])
 
         segm = np.zeros([256, 256, 80], dtype=np.int16)
+        vessel_seeds=np.zeros_like(segm, dtype=np.int8)
 
         # liver
         segm[70:180, 40:190, 30:60] = slab['liver']
@@ -39,21 +40,123 @@ class SegmentationTest(unittest.TestCase):
         segm[80:130, 100:110, 40:45] = slab['porta']
         segm[120:170, 130:135, 40:44] = slab['porta']
 
+        vessel_seeds[85:90, 105, 42] = 1
+
         data3d = np.zeros(segm.shape)
         data3d[segm == slab['liver']] = 156
         data3d[segm == slab['porta']] = 206
         noise = (np.random.normal(0, 30, segm.shape))  # .astype(np.int16)
         data3d = (data3d + noise).astype(np.int16)
-        return data3d, segm, voxelsize_mm, slab
 
-    @attr('interactive')
+
+        datap = {
+            "data3d": data3d,
+            "segmentation": segm,
+            "slab": slab,
+            "seeds": vessel_seeds,
+            "voxelsize_mm": voxelsize_mm
+        }
+        return datap
+
     def test_synthetic_data_segmentation(self):
         """
         Function uses organ_segmentation  for synthetic box object
         segmentation.
         """
+        datap = self.synthetic_data()
+        data3d = datap["data3d"]
+        segm = datap["segmentation"]
+        voxelsize_mm = datap["voxelsize_mm"]
+        slab = datap["slab"]
 
-        data3d, segm, voxelsize_mm, slab = self.synthetic_data()
+        outputTmp = imsegmentation.vesselSegmentation(
+            data3d,  # .astype(np.uint8),
+            segmentation=(segm == slab['liver']),  # .astype(np.uint8),
+            # segmentation = oseg.orig_scale_segmentation,
+            voxelsize_mm=voxelsize_mm,
+            threshold=180,
+            inputSigma=0.15,
+            dilationIterations=2,
+            nObj=1,
+            interactivity=False,
+            # interactivity=True,
+            biggestObjects=True,
+            binaryClosingIterations=5,
+            binaryOpeningIterations=1)
+
+        # @TODO opravit chybu v vesselSegmentation
+        outputTmp = (outputTmp == 2)
+        errim = np.abs(
+            outputTmp.astype(np.int) - (segm == slab['porta']).astype(np.int)
+        )
+
+        # ověření výsledku
+        # pyed = sed3.sed3(errim, contour=segm==slab['porta'])
+        # pyed.show()
+        # evaluation
+        sum_of_wrong_voxels = np.sum(errim)
+        sum_of_voxels = np.prod(segm.shape)
+        errorrate = sum_of_wrong_voxels/sum_of_voxels
+
+        self.assertLess(errorrate, 0.1)
+
+    def test_synthetic_data_segmentation_with_vessel_seed(self):
+        """
+        Function uses organ_segmentation  for synthetic box object
+        segmentation.
+        """
+
+        datap = self.synthetic_data()
+        data3d = datap["data3d"]
+        segm = datap["segmentation"]
+        voxelsize_mm = datap["voxelsize_mm"]
+        slab = datap["slab"]
+        vessel_seeds = datap["seeds"]
+
+        outputTmp = imsegmentation.vesselSegmentation(
+            data3d,  # .astype(np.uint8),
+            segmentation=(segm == slab['liver']),  # .astype(np.uint8),
+            # segmentation = oseg.orig_scale_segmentation,
+            voxelsize_mm=voxelsize_mm,
+            seeds=vessel_seeds,
+            # threshold=180,
+            inputSigma=0.15,
+            dilationIterations=2,
+            nObj=1,
+            interactivity=False,
+            # interactivity=True,
+            biggestObjects=True,
+            binaryClosingIterations=5,
+            binaryOpeningIterations=1)
+
+        # @TODO opravit chybu v vesselSegmentation
+        outputTmp = (outputTmp == 2)
+        errim = np.abs(
+            outputTmp.astype(np.int) - (segm == slab['porta']).astype(np.int)
+        )
+
+        # ověření výsledku
+        # pyed = sed3.sed3(errim, contour=segm==slab['porta'])
+        # pyed.show()
+        # evaluation
+        sum_of_wrong_voxels = np.sum(errim)
+        sum_of_voxels = np.prod(segm.shape)
+        errorrate = sum_of_wrong_voxels/sum_of_voxels
+
+        self.assertLess(errorrate, 0.1)
+
+    @attr('interactive')
+    def test_synthetic_data_segmentation_interactive_check(self):
+        """
+        Function uses organ_segmentation  for synthetic box object
+        segmentation.
+        """
+
+        datap = self.synthetic_data()
+        data3d = datap["data3d"]
+        segm = datap["segmentation"]
+        voxelsize_mm = datap["voxelsize_mm"]
+        slab = datap["slab"]
 # @TODO je tam bug, prohlížeč neumí korektně pracovat s doubly
         import sys
         app = QApplication(sys.argv)
@@ -65,7 +168,7 @@ class SegmentationTest(unittest.TestCase):
         # pyed = sed3.sed3(data3d)
         # pyed.show()
 
-        outputTmp = segmentation.vesselSegmentation(
+        outputTmp = imsegmentation.vesselSegmentation(
             data3d,  # .astype(np.uint8),
             segmentation=(segm == slab['liver']),  # .astype(np.uint8),
             # segmentation = oseg.orig_scale_segmentation,
@@ -113,7 +216,11 @@ class SegmentationTest(unittest.TestCase):
         """
         from imtools import uiThreshold
 
-        data3d, segm, voxelsize_mm, slab = self.synthetic_data()
+        datap = self.synthetic_data()
+        data3d = datap["data3d"]
+        # segm = datap["segmentation"]
+        voxelsize_mm = datap["voxelsize_mm"]
+        # slab = datap["slab"]
 
         data3d[100:150, 58:70, 50:55] += 50
         app = QApplication(sys.argv)
@@ -147,7 +254,11 @@ class SegmentationTest(unittest.TestCase):
         # TODO check the result better
         from imtools import uiThreshold
 
-        data3d, segm, voxelsize_mm, slab = self.synthetic_data()
+        datap = self.synthetic_data()
+        data3d = datap["data3d"]
+        segm = datap["segmentation"]
+        voxelsize_mm = datap["voxelsize_mm"]
+        slab = datap["slab"]
 
         data3d[100:150, 58:70, 50:55] += 50
         # @TODO je tam bug, prohlížeč neumí korektně pracovat s doubly

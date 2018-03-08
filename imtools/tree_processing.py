@@ -14,11 +14,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 import argparse
-import misc
 import datetime
 
-import skelet3d
-import skelet3d.tree
+# from . import misc
+# from . import skelet3d
+# from . import skelet3d.tree
 from skelet3d.tree import TreeGenerator
 logger.warning("Module is moved to package skelet3d.gt_vtk. This placeholder will be removed in future")
 

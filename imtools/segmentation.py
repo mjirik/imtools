@@ -23,7 +23,7 @@ import numpy
 import scipy
 import scipy.ndimage
 
-import image_manipulation
+from . import image_manipulation
 
 
 def vesselSegmentation(data, segmentation=-1, threshold=-1,
@@ -65,6 +65,8 @@ def vesselSegmentation(data, segmentation=-1, threshold=-1,
         :param biggestObjects: - moznost, zda se maji vracet nejvetsi objekty nebo ne
         :param seeds: - moznost zadat pocatecni body segmentace na vstupu. Je to matice
             o rozmerech jako data. Vsude nuly, tam kde je oznaceni jsou jednicky
+               It can be same shape like data, or it can be
+               indexes e.g. from np.nonzero(seeds)
         :param interactivity: - nastavi, zda ma nebo nema byt pouzit interaktivni mod
             upravy dat
         :param binaryClosingIterations: - vstupni binary closing operations
@@ -92,7 +94,7 @@ def vesselSegmentation(data, segmentation=-1, threshold=-1,
         logger.debug('Ukonceni funkce!')
         return None
 
-    if seeds == None:
+    if seeds is None:
         logger.debug('Funkce spustena bez prioritnich objektu!')
 
     if biggestObjects:

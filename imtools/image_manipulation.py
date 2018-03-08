@@ -17,7 +17,7 @@ import subprocess
 import scipy
 import scipy.ndimage
 
-import dili
+from . import dili
 
 def select_labels(segmentation, labels, slab=None):
     """

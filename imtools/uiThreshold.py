@@ -20,7 +20,6 @@ import traceback
 import numpy as np
 # import scipy.ndimage
 
-import thresholding_functions
 
 import matplotlib
 import matplotlib.pyplot as matpyplot
@@ -34,6 +33,8 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 
 import numpy as np
+
+from .import thresholding_functions
 
 class uiThresholdQt(QtGui.QDialog):
     def __init__(self, *pars, **params):
@@ -107,7 +108,7 @@ class uiThreshold:
             :param binaryOpeningIterations: iterace binary opening
             :param seeds: matice s kliknutim uzivatele- pokud se maji vracet
                    specifikce objekty. It can be same shape like data, or it can be
-                   indexes f.e. from np.nonzero(seeds)
+                   indexes e.g. from np.nonzero(seeds)
             :param cmap: grey
             :param auto_method: 'otsu' use otsu threshold, other string use our liver automatic
 
