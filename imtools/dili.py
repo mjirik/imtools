@@ -234,6 +234,22 @@ def dict_find_key(dd, value):
     return key
 
 
+def sort_list_of_dicts(lst_of_dct, keys, reverse=False, **sort_args):
+    """
+    Sort list of dicts by one or multiple keys.
+
+    :param lst_of_dct: input structure. List of dicts.
+    :param keys: one or more keys in list
+    :param reverse:
+    :param sort_args:
+    :return:
+    """
+
+    if type(keys) != list:
+        keys = [keys]
+    # dcmdir = lst_of_dct[:]
+    lst_of_dct.sort(key=lambda x: [x[key] for key in keys], reverse=reverse, **sort_args)
+    return lst_of_dct
 
 def ordered_dict_to_dict(config):
     """
