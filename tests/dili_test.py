@@ -69,10 +69,9 @@ class DictListTestCase(unittest.TestCase):
         return dct
 
     def test_sort_list_of_dicts(self):
-        import io3d.dcmreaddata as dcmr
         dct = self.sort_list_data()
 
-        dct = dcmr.sort_list_of_dicts(dct, keys=["age", "height"])
+        dct = dili.sort_list_of_dicts(dct, keys=["age", "height"])
         self.assertEqual(dct[0]["name"], "kamca")
         self.assertEqual(dct[1]["name"], "veru")
         self.assertEqual(dct[2]["name"], "mira")
@@ -80,7 +79,7 @@ class DictListTestCase(unittest.TestCase):
 
     def test_sort_list_of_dicts_single_key(self):
         dct = self.sort_list_data()
-        dct = dcmr.sort_list_of_dicts(dct, keys="height")
+        dct = dili.sort_list_of_dicts(dct, keys="height")
         self.assertEqual(dct[0]["name"], "kamca")
         # self.assertEqual(dct[1]["name"], "veru")
         # self.assertEqual(dct[2]["name"], "mira")
