@@ -12,7 +12,8 @@ import numpy as np
 import logging
 logger = logging.getLogger(__name__)
 
-from imtools.tree_processing import TreeGenerator
+# from imtools.tree_processing import TreeGenerator
+from fibrous.tb_volume import TBVolume
 import imtools.surface_measurement as sm
 
 
@@ -26,7 +27,10 @@ class HistologyTest(unittest.TestCase):
     @attr("LAR")
     def test_vessel_tree_lar(self):
         import imtools.gt_lar
-        tvg = TreeGenerator(imtools.gt_lar.GTLar)
+
+
+        from fibrous.tb_lar import TBLar
+        tvg = TBLar()
         yaml_path = os.path.join(path_to_script, "./hist_stats_test.yaml")
         tvg.importFromYaml(yaml_path)
         tvg.voxelsize_mm = [1, 1, 1]
@@ -35,15 +39,18 @@ class HistologyTest(unittest.TestCase):
         if self.interactiveTests:
             tvg.show()
 
-
     def test_import_new_vt_format(self):
+        from fibrous.tree import TreeBuilder
 
-        tvg = TreeGenerator()
+        # tvg = TreeBuilder()
+        tvg = TBVolume()
+
         yaml_path = os.path.join(path_to_script, "vt_biodur.yaml")
         tvg.importFromYaml(yaml_path)
-        tvg.voxelsize_mm = [1, 1, 1]
-        tvg.shape = [150, 150, 150]
-        data3d = tvg.generateTree()
+        tvg.set_area_sampling(voxelsize_mm=[1,1,1], shape=[150, 150, 150])
+        # tvg.voxelsize_mm = [1, 1, 1]
+        # tvg.shape = [150, 150, 150]
+        data3d = tvg.buildTree()
 
     def test_test_export_to_esofspy(self):
         """
@@ -148,12 +155,12 @@ class HistologyTest(unittest.TestCase):
         self.assertLess(2*Sv1, Sv2*1.1)
 
     def test_surface_measurement_find_edge(self):
-        tvg = TreeGenerator()
+        tvg = TBVolume()
         yaml_path = os.path.join(path_to_script, "./hist_stats_test.yaml")
         tvg.importFromYaml(yaml_path)
         tvg.voxelsize_mm = [1, 1, 1]
         tvg.shape = [100, 100, 100]
-        data3d = tvg.generateTree()
+        data3d = tvg.buildTree()
 
         # init histology Analyser
         # metadata = {'voxelsize_mm': tvg.voxelsize_mm}

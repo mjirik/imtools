@@ -19,6 +19,11 @@ sys.path.append(os.path.join(path_to_script, "./extern/sPickle"))
 
 from .image_manipulation import resize_to_mm, resize_to_shape
 
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 def suggest_filename(file_path, exists=None):
     """
     Append a string with number to its filename if the path exist.
@@ -64,9 +69,6 @@ def obj_from_file(filename='annotation.yaml', filetype='yaml'):
         f.close()
     elif filetype in ('pickle', 'pkl', 'pklz', 'picklezip'):
         fcontent = read_pkl_and_pklz(filename)
-        # import pickle
-        import cPickle as pickle
-        # import sPickle as pickle
         obj = pickle.loads(fcontent)
     else:
         logger.error('Unknown filetype ' + filetype)
@@ -125,25 +127,22 @@ def obj_to_file(obj, filename='annotation.yaml', filetype='yaml'):
         yaml.dump(obj, f)
         f.close
     elif filetype in ('pickle', 'pkl'):
-        f = open(filename, 'wb')
-        import cPickle as pickle
-        pickle.dump(obj, f)
-        f.close
+        with open(filename, 'wb') as f:
+            pickle.dump(obj, f)
+
     elif filetype in ('streamingpicklezip', 'spklz'):
         # this is not working :-(
         import gzip
-        import sPickle as pickle
+        import sPickle as spickle
         f = gzip.open(filename, 'wb', compresslevel=1)
         # f = open(filename, 'wb')
-        pickle.s_dump(obj, f)
+        spickle.s_dump(obj, f)
         f.close
     elif filetype in ('picklezip', 'pklz'):
         import gzip
-        import cPickle as pickle
-        f = gzip.open(filename, 'wb', compresslevel=1)
-        # f = open(filename, 'wb')
-        pickle.dump(obj, f)
-        f.close
+        with gzip.open(filename, 'wb', compresslevel=1) as f:
+            # f = open(filename, 'wb')
+            pickle.dump(obj, f)
     elif filetype in('mat'):
 
         import scipy.io as sio

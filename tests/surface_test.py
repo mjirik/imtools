@@ -14,9 +14,10 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 
 # from imtools import qmisc
 # from imtools import misc
-from imtools.tree_processing import TreeGenerator
+# from imtools.tree_processing import TreeGenerator
 
 
+from fibrous.tb_volume import TBVolume
 #
 
 class SurfaceTest(unittest.TestCase):
@@ -125,12 +126,12 @@ class SurfaceTest(unittest.TestCase):
 
     def test_surface_measurement_find_edge(self):
         import imtools.surface_measurement as sm
-        tvg = TreeGenerator()
+        tvg = TBVolume()
         yaml_path = os.path.join(path_to_script, "./hist_stats_test.yaml")
         tvg.importFromYaml(yaml_path)
         tvg.voxelsize_mm = [1, 1, 1]
         tvg.shape = [100, 100, 100]
-        data3d = tvg.generateTree()
+        data3d = tvg.buildTree()
 
         # init histology Analyser
         # metadata = {'voxelsize_mm': tvg.voxelsize_mm}

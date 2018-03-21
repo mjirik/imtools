@@ -142,10 +142,10 @@ class ImageManipulationTest(unittest.TestCase):
         data = np.random.rand(3, 4, 5)
         new_shape = [5, 6, 6]
         data_out = imm.resize_to_shape(data, new_shape)
-        # print data_out.shape
-        # print data
-        # print data_out
-        self.assertItemsEqual(new_shape, data_out.shape)
+        # self.assertCountEqual(new_shape, data_out.shape)
+        self.assertEqual(new_shape[0], data_out.shape[0])
+        self.assertEqual(new_shape[1], data_out.shape[1])
+        self.assertEqual(new_shape[2], data_out.shape[2])
 
     def test_fix_crinfo(self):
         crinfo = [[10, 15], [30, 40], [1, 50]]
@@ -164,10 +164,10 @@ class ImageManipulationTest(unittest.TestCase):
         new_voxelsize_mm = [1, 3, 2]
         expected_shape = [6, 4, 3]
         data_out = imm.resize_to_mm(data, voxelsize_mm, new_voxelsize_mm)
-        print(data_out.shape)
-        # print data
-        # print data_out
-        self.assertItemsEqual(expected_shape, data_out.shape)
+        self.assertEqual(expected_shape[0], data_out.shape[0])
+        self.assertEqual(expected_shape[1], data_out.shape[1])
+        self.assertEqual(expected_shape[2], data_out.shape[2])
+        # self.assertCountEqual(expected_shape, data_out.shape)
 
     def test_simple_get_nlabel(self):
         slab={"liver": 1, "porta": 2}

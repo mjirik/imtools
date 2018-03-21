@@ -96,7 +96,7 @@ def get_nlabel(slab, label, label_meta=None, return_mode="num"):
     if type(label) == str:
         if label_meta is None:
             if label not in slab.keys():
-                free_numeric_label = np.max(slab.values()) + 1
+                free_numeric_label = np.max(list(slab.values())) + 1
                 if label == "new":
                     label = str(free_numeric_label)
                 slab[label] = free_numeric_label
@@ -114,7 +114,7 @@ def get_nlabel(slab, label, label_meta=None, return_mode="num"):
     else:
         # it is numeric
         if label_meta is None:
-            if label not in slab.values():
+            if label not in list(slab.values()):
                 update_slab(slab, label, str(label))
                 strlabel = str(label)
             else:
@@ -416,13 +416,14 @@ def resize_to_shape(data, shape, zoom=None, mode='nearest', order=0):
         # Now we need reshape  seeds and segmentation to original size
 
         segm_orig_scale = skimage.transform.resize(
-            data, shape, order=0,
+            data, shape, order=order,
             preserve_range=True
         )
 
         segmentation = segm_orig_scale
         logger.debug('resize to orig with skimage')
-    except:
+    except Exception:
+        logger.warning("Resize by scipy will be removed in the future")
         import scipy
         import scipy.ndimage
         dtype = data.dtype
@@ -459,7 +460,7 @@ def resize_to_shape(data, shape, zoom=None, mode='nearest', order=0):
         del segm_orig_scale
     return segmentation
 
-def resize_to_mm(data3d, voxelsize_mm, new_voxelsize_mm, mode='nearest'):
+def resize_to_mm(data3d, voxelsize_mm, new_voxelsize_mm, mode='nearest', order=1):
     """
     Function can resize data3d or segmentation to specifed voxelsize_mm
     :new_voxelsize_mm: requested voxelsize. List of 3 numbers, also
@@ -479,10 +480,23 @@ def resize_to_mm(data3d, voxelsize_mm, new_voxelsize_mm, mode='nearest'):
         # vx_size = np.array(metadata['voxelsize_mm']) * 4
 
     zoom = voxelsize_mm / (1.0 * np.array(new_voxelsize_mm))
-    data3d_res = scipy.ndimage.zoom(
-        data3d,
-        zoom,
+    # data3d_res = scipy.ndimage.zoom(
+    #     data3d,
+    #     zoom,
+    #     mode=mode,
+    #     order=order
+    # ).astype(data3d.dtype)
+
+    # probably better implementation
+    new_shape = data3d.shape * zoom
+    import skimage
+    import skimage.transform
+    # Now we need reshape  seeds and segmentation to original size
+
+    data3d_res2 = skimage.transform.resize(
+        data3d, new_shape, order=order,
         mode=mode,
-        order=1
+        preserve_range=True
     ).astype(data3d.dtype)
-    return data3d_res
+
+    return data3d_res2
