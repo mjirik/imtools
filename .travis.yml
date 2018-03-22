@@ -1,11 +1,11 @@
 language: python
 # install new cmake
-addons:
-  apt:
-    packages:
-      - cmake
-    sources:
-      - kalakris-cmake
+#addons:
+#  apt:
+#    packages:
+#      - cmake
+#    sources:
+#      - kalakris-cmake
 
 env:
     - CONDA_PYTHON_VERSION=2.7
