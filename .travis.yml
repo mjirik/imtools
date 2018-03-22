@@ -1,10 +1,4 @@
 language: python
-python:
-  #  - "2.6"
-  - "2.7"
-  # - "3.2"
-  # - "3.3"
-  # - "3.4"
 # install new cmake
 addons:
   apt:
@@ -13,6 +7,9 @@ addons:
     sources:
       - kalakris-cmake
 
+env:
+    - CONDA_PYTHON_VERSION=2.7
+    - CONDA_PYTHON_VERSION=3.6
 virtualenv:
   system_site_packages: true
 before_script:
@@ -22,13 +19,28 @@ before_script:
     - sleep 3 # give xvfb sume time to start
 
 before_install:
-    - sudo apt-get install -qq $(< requirements_apt.txt)
-    - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
-    - chmod +x miniconda.sh
-    - ./miniconda.sh -b
-    - export PATH=/home/travis/miniconda2/bin:$PATH
-    - conda update --yes conda
+    - sudo apt-get update
+    - sudo apt-get install -qq cmake libinsighttoolkit3-dev libpng12-dev libgdcm2-dev
+
+    # We do this conditionally because it saves us some downloading if the
+    # version is the same.
+    - if [[ "$CONDA_PYTHON_VERSION" == "2.7" ]]; then
+        wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+      else
+        wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+      fi
+#    - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+#    - chmod +x miniconda.sh
+#    - ./miniconda.sh -b
+    - bash miniconda.sh -b -p $HOME/miniconda
+    - export PATH="$HOME/miniconda/bin:$PATH"
+    - hash -r
+    - conda config --set always_yes yes --set changeps1 no
+    - conda update -q conda
+    # Useful for debugging any issues with conda
+    - conda info -a
 #    - wget http://147.228.240.61/queetech/sample-extra-data/io3d_sample_data.zip && unzip io3d_sample_data.zip
+
 # command to install dependencies
 install:
     - conda install --yes -c SimpleITK -c luispedro -c mjirik -c menpo -c conda-forge --file requirements_conda.txt
