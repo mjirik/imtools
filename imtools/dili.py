@@ -121,7 +121,6 @@ def recursive_update(d, u):
     return d
 
 from collections import Mapping
-from itertools import chain
 from operator import add
 
 _FLAG_FIRST = object()
@@ -238,6 +237,8 @@ def sort_list_of_dicts(lst_of_dct, keys, reverse=False, **sort_args):
     """
     Sort list of dicts by one or multiple keys.
 
+    If the key is not available, sort these to the end.
+
     :param lst_of_dct: input structure. List of dicts.
     :param keys: one or more keys in list
     :param reverse:
@@ -248,7 +249,8 @@ def sort_list_of_dicts(lst_of_dct, keys, reverse=False, **sort_args):
     if type(keys) != list:
         keys = [keys]
     # dcmdir = lst_of_dct[:]
-    lst_of_dct.sort(key=lambda x: [x[key] for key in keys], reverse=reverse, **sort_args)
+    # lst_of_dct.sort(key=lambda x: [x[key] for key in keys], reverse=reverse, **sort_args)
+    lst_of_dct.sort(key=lambda x: [((False, x[key]) if key in x.keys() else (True, None)) for key in keys], reverse=reverse, **sort_args)
     return lst_of_dct
 
 def ordered_dict_to_dict(config):
