@@ -2,15 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import os.path
+
 # import sys
-import sys
 
 logger = logging.getLogger(__name__)
 
-
-path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "./extern/sPickle"))
+# path_to_script = os.path.dirname(os.path.abspath(__file__))
+# sys.path.append(os.path.join(path_to_script, "./extern/sPickle"))
 # import numpy as np
 
 # try:

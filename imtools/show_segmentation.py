@@ -4,9 +4,9 @@
 Module is used for visualization of segmentation stored in pkl file.
 """
 
-import sys
 import os.path
 import os.path as op
+import sys
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/dicom2fem/src"))
@@ -24,7 +24,7 @@ import numpy as np
 # from dicom2fem import seg2fem
 from dicom2fem.seg2fem import gen_mesh_from_voxels_mc, smooth_mesh
 from .image_manipulation import select_labels
-import image_manipulation as imma
+from . import image_manipulation as imma
 
 # import misc
 # import viewer
@@ -55,7 +55,7 @@ def prepare_vtk_files(
     if vtk_file is None:
         vtk_file = "mesh_{}.vtk"
     if labels is None:
-        labels = slab.keys()
+        labels = list(slab)
 
     vtk_files = []
     for lab in labels:
@@ -117,7 +117,7 @@ def prepare_vtk_file(
     v data['slab'] je popsáno, co která hodnota znamená
     """
 
-    import show_segmentation
+    from . import show_segmentation
     if slab is not None and labels is not None:
         segmentation = show_segmentation.select_labels(segmentation, labels, slab=slab)
     if segmentation.max() == False:
@@ -242,7 +242,7 @@ def prettify(elem):
     return reparsed.toprettyxml(indent="  ")
 
 def create_pvsm_file(vtk_files, pvsm_filename, relative_paths=True):
-    from xml.etree.ElementTree import Element, SubElement, Comment, tostring, ElementTree
+    from xml.etree.ElementTree import Element, SubElement, Comment
     import os.path as op
 
     top = Element('ParaView')

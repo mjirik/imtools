@@ -23,7 +23,7 @@ import numpy as np
 import vtk
 from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 import io3d.outputqt
-import image_manipulation as imma
+from . import image_manipulation as imma
 
 class SelectLabelWidget(QtGui.QWidget):
     def __init__(self, *args, **kwargs):
@@ -46,7 +46,7 @@ class SelectLabelWidget(QtGui.QWidget):
         self.segmentation = segmentation
         self.voxelsize_mm = voxelsize_mm
 
-        import show_segmentation
+        from . import show_segmentation
         self.slab = show_segmentation.create_slab_from_segmentation(
             self.segmentation, slab=slab)
 
@@ -397,7 +397,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
         self.show_labels(labels, filename)
 
     def show_labels(self, labels, vtk_file, together_vtk_file=True):
-        import show_segmentation
+        from . import show_segmentation
         # ds = show_segmentation.select_labels(self.segmentation, labels, slab=self.slab_wg.slab)
         # if ds.max() == False:
         #     logger.info("Nothing found for labels " + str(labels))
