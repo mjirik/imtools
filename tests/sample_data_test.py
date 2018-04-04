@@ -6,11 +6,11 @@ import os
 import os.path
 
 from nose.plugins.attrib import attr
+
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 import unittest
 
 import shutil
-import numpy as np
 
 import logging
 logger = logging.getLogger(__name__)
@@ -31,11 +31,6 @@ class SampleDataTest(unittest.TestCase):
         self.assertTrue(os.path.exists("./delete_head/matlab/examples/sample_data/DICOM/digest_article/brain_001.dcm"))
         shutil.rmtree("delete_head")
 
-
-        # import imtools.vesseltree_export as vt
-        # yaml_input = os.path.join(path_to_script, "vt_biodur.yaml")
-        # yaml_output = os.path.join(path_to_script, "delme_esofspy.txt")
-        # vt.vt2esofspy(yaml_input, yaml_output)
 
     @attr("slow")
     def sample_data_get_all_test(self):

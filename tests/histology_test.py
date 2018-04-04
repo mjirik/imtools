@@ -26,9 +26,6 @@ class HistologyTest(unittest.TestCase):
 
     @attr("LAR")
     def test_vessel_tree_lar(self):
-        import imtools.gt_lar
-
-
         from fibrous.tb_lar import TBLar
         tvg = TBLar()
         yaml_path = os.path.join(path_to_script, "./hist_stats_test.yaml")
@@ -40,12 +37,10 @@ class HistologyTest(unittest.TestCase):
             tvg.show()
 
     def test_import_new_vt_format(self):
-        from fibrous.tree import TreeBuilder
-
         # tvg = TreeBuilder()
         tvg = TBVolume()
 
-        yaml_path = os.path.join(path_to_script, "vt_biodur.yaml")
+        yaml_path = os.path.join(path_to_script, "vt_biodur_simple.yaml")
         tvg.importFromYaml(yaml_path)
         tvg.set_area_sampling(voxelsize_mm=[1,1,1], shape=[150, 150, 150])
         # tvg.voxelsize_mm = [1, 1, 1]
@@ -58,13 +53,12 @@ class HistologyTest(unittest.TestCase):
         """
 
         import imtools.vesseltree_export as vt
-        yaml_input = os.path.join(path_to_script, "vt_biodur.yaml")
+        yaml_input = os.path.join(path_to_script, "vt_biodur_simple.yaml")
         yaml_output = os.path.join(path_to_script, "delme_esofspy.txt")
         vt.vt2esofspy(yaml_input, yaml_output)
 
     @attr("actual")
     def test_surface_density_gensei_data(self):
-        import io3d
         import io3d.datasets
         dr = io3d.datareader.DataReader()
         datap = dr.Get3DData(io3d.datasets.join_path('gensei_slices/'),

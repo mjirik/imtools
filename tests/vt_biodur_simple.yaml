@@ -1,9 +1,6 @@
 general:
   Nv: 1.000023290719942
-  anotation: !!python/object/apply:sip._unpickle_type
-  - PyQt4.QtCore
-  - QString
-  - !!python/tuple [!!python/unicode '/home/mjirik/projects/lisa/sample_data/biodur_sample']
+  anotation: '/home/mjirik/projects/lisa/sample_data/biodur_sample'
   processed_by: Histology Analyser
   shape_px: [50, 139, 139]
   surface_density: 0.03680554836706175
@@ -11,7 +8,7 @@ general:
   used_volume_px: 966050.0
   vessel_volume_fraction: 0.0545375498162621
   volume_mm3: 966050.0
-  volume_px: 966050.0
+  volume_p: 966050.0
   voxel_size_mm: [1.0, 1.0, 1.0]
   voxel_volume_mm3: 1.0
   voxelsize_mm: [1.0, 1.0, 1.0]
@@ -6249,11 +6246,7 @@ graph:
         start: [42.0, 99.0, 120.0]
         vector: [-11.0, -10.0, 1.0]
       id: 73
-      lengthEstimation: !!python/object/apply:numpy.core.multiarray.scalar
-      - !!python/object/apply:numpy.dtype
-        args: [f8, 0, 1]
-        state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
-      - !!python/str ":M\x86$}2@"
+      lengthEstimation: 20.0
       lengthEstimationPixel: 22.291799782024935
       lengthEstimationPoly: 18.636240439594385
       lengthEstimationSpline: 18.488838598668032

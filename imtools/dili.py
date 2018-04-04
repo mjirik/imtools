@@ -250,7 +250,7 @@ def sort_list_of_dicts(lst_of_dct, keys, reverse=False, **sort_args):
         keys = [keys]
     # dcmdir = lst_of_dct[:]
     # lst_of_dct.sort(key=lambda x: [x[key] for key in keys], reverse=reverse, **sort_args)
-    lst_of_dct.sort(key=lambda x: [((False, x[key]) if key in x.keys() else (True, None)) for key in keys], reverse=reverse, **sort_args)
+    lst_of_dct.sort(key=lambda x: [((False, x[key]) if key in x else (True, 0)) for key in keys], reverse=reverse, **sort_args)
     return lst_of_dct
 
 def ordered_dict_to_dict(config):
