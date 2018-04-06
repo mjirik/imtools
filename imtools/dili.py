@@ -205,13 +205,15 @@ def df_drop_duplicates(df, ignore_key_pattern="time"):
     return df
 
 
-def ndarray_to_list_in_structure(item):
+def ndarray_to_list_in_structure(item, squeeze=True):
     """ Change ndarray in structure of lists and dicts into lists.
     """
     tp = type(item)
 
     if tp == np.ndarray:
-        item = item.squeeze().tolist()
+        if squeeze:
+            item = item.squeeze()
+        item = item.tolist()
     elif tp == list:
         for i in range(len(item)):
             item[i] = ndarray_to_list_in_structure(item[i])
