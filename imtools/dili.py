@@ -272,23 +272,24 @@ def ordered_dict_to_dict(config):
     return config
 
 
-def struct_to_yaml(cfg):
-    """
-    write complex struct with dicts and lists into yaml
-    :param cfg:
-    :return:
-    """
-    import yaml
-    # convert values to json
-    isconverted = {}
-    for key, value in cfg.iteritems():
-        if type(value) in (str, int, float, bool):
+# def struct_to_yaml(cfg):
+#     """
+#     write complex struct with dicts and lists into yaml
+#     :param cfg:
+#     :return:
+#     """
+#     import yaml
+#     # convert values to json
+#     isconverted = {}
+#     for key, value in cfg.iteritems():
+#         if type(value) in (str, int, float, bool):
+#
+#             isconverted[key] = False
+#             if type(value) is str:
+#                 pass
+#
+#         else:
+#             isconverted[key] = True
+#             cfg[key] = yaml.dump(value, default_flow_style=True)
+#     return cfg
 
-            isconverted[key] = False
-            if type(value) is str:
-                pass
-
-        else:
-            isconverted[key] = True
-            cfg[key] = yaml.dump(value, default_flow_style=True)
-    return cfg

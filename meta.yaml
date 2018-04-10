@@ -36,7 +36,7 @@ requirements:
     - scipy
     - scikit-image
     - opencv
-    - pyyaml
+#    - pyyaml # don't need
     - matplotlib
     - mock
     - nose

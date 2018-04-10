@@ -6,14 +6,10 @@ logger = logging.getLogger(__name__)
 
 import vtk
 import numpy as nm
-import yaml
 import argparse
-import sys
-import numpy as np
-import skelet3d
-import skelet3d.gt_vtk
-from skelet3d.gt_vtk import VTKTreeGenerator
+
 logger.warning("Module is moved to package skelet3d.gt_vtk. This placeholder will be removed in future")
+import io3d.misc
 
 
 # new interface
@@ -211,13 +207,17 @@ def vt_file_2_vtk_file(infile, outfile, text_label=None):
     :return:
 
     """
-    yaml_file = open(infile, 'r')
-    tree_raw_data = yaml.load(yaml_file)
+    tree_raw_data = io3d.misc.obj_from_file(infile)
+
+    # import yaml
+    # yaml_file = open(infile, 'r')
+    # tree_raw_data = yaml.load(yaml_file)
     vt2vtk_file(tree_raw_data, outfile, text_label)
 
 def vt_file2polyData(infile, text_label=None):
-    yaml_file = open(infile, 'r')
-    tree_raw_data = yaml.load(yaml_file)
+    tree_raw_data = io3d.misc.obj_from_file(infile)
+    # yaml_file = open(infile, 'r')
+    # tree_raw_data = yaml.load(yaml_file)
     return vt2polyData(tree_raw_data, text_label)
 
 def vt2polyData(vessel_tree, text_label=None):
