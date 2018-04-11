@@ -4,7 +4,6 @@
 # import funkcí z jiného adresáře
 import logging
 logger = logging.getLogger(__name__)
-import sys
 import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
@@ -13,8 +12,6 @@ import unittest
 
 
 import numpy as np
-import os
-
 
 from imtools import image_manipulation as imm
 import imtools.sample_data
@@ -204,6 +201,11 @@ class ImageManipulationTest(unittest.TestCase):
         val = imm.get_nlabel(slab, 2, return_mode="str")
         self.assertEqual(val, "porta")
 
+    def test_get_nlabels_single_label(self):
+        slab={"liver": 1, "kindey": 15, "none":0}
+        labels = 1
+        val = imm.get_nlabels(slab, labels)
+        self.assertEqual(val, 1)
 
     def test_get_nlabels_multiple(self):
         slab={"liver": 1, "porta": 2}
