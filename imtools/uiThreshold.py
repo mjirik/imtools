@@ -15,9 +15,7 @@ sys.path.append("../src/")
 sys.path.append("../extern/")
 
 import logging as logger
-import traceback
 
-import numpy as np
 # import scipy.ndimage
 
 
@@ -28,13 +26,13 @@ from matplotlib.widgets import Slider, Button  # , RadioButtons
 
 import gc as garbage
 
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 
 import numpy as np
 
-from .import thresholding_functions
+from . import thresholding_functions
 
 class uiThresholdQt(QtGui.QDialog):
     def __init__(self, *pars, **params):
