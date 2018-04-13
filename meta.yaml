@@ -42,19 +42,21 @@ requirements:
     - nose
     - vtk
     - dicom2fem
+    - io3d >=1.3.30
 
   run:
     - python
     - numpy
     - scipy
     - scikit-image
-    - pyyaml
+#    - pyyaml
     - matplotlib
     - vtk
     - skelet3d >=1.5.3
     - checksumdir
     - vtkviewer >=0.0.7
     - dicom2fem # because of seg2fem
+    - io3d >=1.3.30
 #    - opencv
 
 test:
