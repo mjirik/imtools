@@ -1,9 +1,10 @@
 # Fallowing command is used to upload to pipy
 #    bumpversion patch
 #    python setup.py register sdist upload
-from setuptools import setup, find_packages
 # Always prefer setuptools over distutils
 from os import path
+
+from setuptools import setup, find_packages
 
 here = path.abspath(path.dirname(__file__))
 setup(
@@ -55,7 +56,7 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/technical.html#install-requires-vs-requirements-files
-    install_requires=['numpy', 'scipy', "pyyaml", 'matplotlib'],
+    install_requires=['numpy', 'scipy', 'matplotlib'],
     # 'SimpleITK'],  # Removed becaouse of errors when pip is installing
     dependency_links=[],
 
