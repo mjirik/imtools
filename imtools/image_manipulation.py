@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 
-import sys
 import os.path
+import sys
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/sed3"))
@@ -13,7 +13,6 @@ import numpy as np
 import logging
 logger = logging.getLogger(__name__)
 
-import subprocess
 import scipy
 import scipy.ndimage
 
@@ -404,7 +403,7 @@ def resize_to_shape(data, shape, zoom=None, mode='nearest', order=0):
     """
     # @TODO remove old code in except part
 
-    if data.shape == shape:
+    if np.array_equal(data.shape, shape):
         return data
 
     try:
@@ -489,7 +488,6 @@ def resize_to_mm(data3d, voxelsize_mm, new_voxelsize_mm, mode='nearest', order=1
 
     # probably better implementation
     new_shape = data3d.shape * zoom
-    import skimage
     import skimage.transform
     # Now we need reshape  seeds and segmentation to original size
 
