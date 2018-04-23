@@ -1,15 +1,12 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import unittest
-from nose.plugins.attrib import attr
-
-import sys
 import os
 import os.path as op
-import numpy as np
-
 import unittest
+
+from nose.plugins.attrib import attr
+
 import imtools
 import imtools.sample_data
 import imtools.show_segmentation as ss
@@ -17,13 +14,12 @@ import imtools.show_segmentation as ss
 
 class ShowSegmemtationCase(unittest.TestCase):
     # @attr('interactive')
-    def test_donut(self):
+    def test_donut_in_one_function(self):
         datap = imtools.sample_data.donut()
 
         segmentation = datap['segmentation']
         voxelsize_mm = datap['voxelsize_mm']
 
-        import imtools.show_segmentation_qt as ssqt
         # app.setGraphicsSystem("openvg")
         sw = ss.showSegmentation(
             segmentation,
@@ -47,11 +43,13 @@ class ShowSegmemtationCase(unittest.TestCase):
         segmentation = datap['segmentation']
         voxelsize_mm = datap['voxelsize_mm']
 
-        import imtools.show_segmentation_qt as ssqt
         # app.setGraphicsSystem("openvg")
-        vtk_files = ss.prepare_vtk_files(
-            segmentation,
-            degrad=1,
+
+        svtk = ss.SegmentationToVTK(segmentation)
+        svtk.set_resize_parameters(degrad=1)
+        vtk_files = svtk.prepare_vtk_files(
+        # vtk_files = ss.prepare_vtk_files(
+            # vtk_files = ss.prepare_vtk_files(
             # degrad=self.degrad,
             # voxelsize_mm=self.voxelsize_mm,
             vtk_file="donut_{}.vtk",
@@ -83,7 +81,6 @@ class ShowSegmemtationCase(unittest.TestCase):
         segmentation = datap['segmentation']
         voxelsize_mm = datap['voxelsize_mm']
 
-        import imtools.show_segmentation_qt as ssqt
         # app.setGraphicsSystem("openvg")
         sw = ss.showSegmentation(
             # (segmentation==1).astype(np.int8),
