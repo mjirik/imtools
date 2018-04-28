@@ -121,37 +121,44 @@ def get_cylinder(upper, height, radius,
     return tr2.GetOutput()
 
 
-def gen_tree(tree_data):
-
-    points = vtk.vtkPoints()
-    polyData = vtk.vtkPolyData()
-    polyData.Allocate(1000, 1)
-    polyData.SetPoints(points)
-    poffset = 0
-
-    for br in tree_data:
-        cyl = get_cylinder(br['upperVertex'],
-                           br['length'],
-                           br['radius'],
-                           br['direction'],
-                           resolution=16)
-
-        for ii in xrange(cyl.GetNumberOfPoints()):
-            points.InsertPoint(poffset + ii, cyl.GetPoint(ii))
-
-        for ii in xrange(cyl.GetNumberOfCells()):
-            cell = cyl.GetCell(ii)
-            cellIds = cell.GetPointIds()
-            for jj in xrange(cellIds.GetNumberOfIds()):
-                oldId = cellIds.GetId(jj)
-                cellIds.SetId(jj, oldId + poffset)
-
-            polyData.InsertNextCell(cell.GetCellType(),
-                                    cell.GetPointIds())
-
-        poffset += cyl.GetNumberOfPoints()
-
-    return polyData
+from fibrous.tb_vtk import gen_tree_simple as gen_tree
+# def gen_tree(tree_data):
+#     """
+#     Deprecated function
+#     use fibrous.tb_vtk.gen_tree_old()
+#     :param tree_data:
+#     :return:
+#     """
+#
+#     points = vtk.vtkPoints()
+#     polyData = vtk.vtkPolyData()
+#     polyData.Allocate(1000, 1)
+#     polyData.SetPoints(points)
+#     poffset = 0
+#
+#     for br in tree_data:
+#         cyl = get_cylinder(br['upperVertex'],
+#                            br['length'],
+#                            br['radius'],
+#                            br['direction'],
+#                            resolution=16)
+#
+#         for ii in range(cyl.GetNumberOfPoints()):
+#             points.InsertPoint(poffset + ii, cyl.GetPoint(ii))
+#
+#         for ii in range(cyl.GetNumberOfCells()):
+#             cell = cyl.GetCell(ii)
+#             cellIds = cell.GetPointIds()
+#             for jj in range(cellIds.GetNumberOfIds()):
+#                 oldId = cellIds.GetId(jj)
+#                 cellIds.SetId(jj, oldId + poffset)
+#
+#             polyData.InsertNextCell(cell.GetCellType(),
+#                                     cell.GetPointIds())
+#
+#         poffset += cyl.GetNumberOfPoints()
+#
+#     return polyData
 
 
 def compatibility_processing(indata):
