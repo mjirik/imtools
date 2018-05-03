@@ -5,12 +5,58 @@ import logging
 logger = logging.getLogger(__name__)
 
 import vtk
-import numpy as nm
 import argparse
 
 logger.warning("Module is moved to package skelet3d.gt_vtk. This placeholder will be removed in future")
 import io3d.misc
 
+from fibrous.tb_vtk import gen_tree_simple as gen_tree
+from fibrous.tb_vtk import vt_file_2_vtk_file
+from fibrous.tb_vtk import fix_tree_structure, compatibility_processing
+
+
+def vt_file2polyData(infile, text_label=None):
+    tree_raw_data = io3d.misc.obj_from_file(infile)
+    # yaml_file = open(infile, 'r')
+    # tree_raw_data = yaml.load(yaml_file)
+    return vt2polyData(tree_raw_data, text_label)
+
+def vt2polyData(vessel_tree, text_label=None):
+    trees = fix_tree_structure(vessel_tree)
+
+    tkeys = trees.keys()
+    if text_label is None:
+        text_label = tkeys[0]
+
+    tree_data = compatibility_processing(trees[text_label])
+    polyData = gen_tree(tree_data)
+    return polyData
+
+def vt2vtk_file(vessel_tree, outfile, text_label=None, lc_all="C"):
+    """
+    vessel_tree structure
+    :param vessel_tree:  vt structure
+    :param outfile: filename with .vtk extension
+    :param text_label: text label like 'porta' or 'hepatic_veins'
+    :param lc_all: LC_ALL locale settings. Controls float numbers
+        format (dot or colon). If is set to "C" dot is used.
+        If None is used no processing is done
+    :return:
+    """
+
+    polyData = vt2polyData(vessel_tree, text_label=text_label)
+    if lc_all is not None:
+        import locale
+        locale.setlocale(locale.LC_ALL, 'C')
+    writer = vtk.vtkPolyDataWriter()
+    writer.SetFileName(outfile)
+    try:
+        writer.SetInputData(polyData)
+    except:
+        logger.warning("old vtk is used")
+        writer.SetInput(polyData)
+    writer.Write()
+    return polyData
 
 # new interface
 
@@ -57,71 +103,70 @@ import io3d.misc
 # old interface
 
 
-def get_cylinder(upper, height, radius,
-                 direction,
-                 resolution=10):
+# def get_cylinder(upper, height, radius,
+#                  direction,
+#                  resolution=10):
+#
+#     src = vtk.vtkCylinderSource()
+#     src.SetCenter((0, height/2, 0))
+#     src.SetHeight(height + radius/2.0)
+#     src.SetRadius(radius)
+#     src.SetResolution(resolution)
+#
+#     rot1 = vtk.vtkTransform()
+#     fi = nm.arccos(direction[1])
+#
+#     rot1.RotateWXYZ(-nm.rad2deg(fi), 0.0, 0.0, 1.0)
+#     u = nm.abs(nm.sin(fi))
+#     rot2 = vtk.vtkTransform()
+#     if u > 1.0e-6:
+#
+#         # sometimes d[0]/u little bit is over 1
+#         d0_over_u = direction[0] / u
+#         if d0_over_u > 1:
+#             psi = 0
+#         elif d0_over_u < -1:
+#             psi = 2 * nm.pi
+#         else:
+#             psi = nm.arccos(direction[0] / u)
+#
+#         logger.debug('d0 '+str(direction[0])+'  u '+str(u)+' psi '+str(psi))
+#         if direction[2] < 0:
+#             psi = 2 * nm.pi - psi
+#
+#         rot2.RotateWXYZ(-nm.rad2deg(psi), 0.0, 1.0, 0.0)
+#
+#     tl = vtk.vtkTransform()
+#     tl.Translate(upper)
+#
+#     tr1a = vtk.vtkTransformFilter()
+#     if "SetInputConnection" in dir(tr1a):
+#         tr1a.SetInputConnection(src.GetOutputPort())
+#     else:
+#         tr1a.SetInput(src.GetOutput())
+#     tr1a.SetTransform(rot1)
+#
+#     tr1b = vtk.vtkTransformFilter()
+#     if "SetInputConnection" in dir(tr1b):
+#         tr1b.SetInputConnection(tr1a.GetOutputPort())
+#     else:
+#         tr1b.SetInput(tr1a.GetOutput())
+#     # tr1b.SetInput(tr1a.GetOutput())
+#     tr1b.SetTransform(rot2)
+#
+#     tr2 = vtk.vtkTransformFilter()
+#     if "SetInputConnection" in dir(tr2):
+#         tr2.SetInputConnection(tr1b.GetOutputPort())
+#     else:
+#         tr2.SetInput(tr1b.GetOutput())
+#     # tr2.SetInput(tr1b.GetOutput())
+#     tr2.SetTransform(tl)
+#
+#     tr2.Update()
+#
+#     return tr2.GetOutput()
 
-    src = vtk.vtkCylinderSource()
-    src.SetCenter((0, height/2, 0))
-    src.SetHeight(height + radius/2.0)
-    src.SetRadius(radius)
-    src.SetResolution(resolution)
 
-    rot1 = vtk.vtkTransform()
-    fi = nm.arccos(direction[1])
-
-    rot1.RotateWXYZ(-nm.rad2deg(fi), 0.0, 0.0, 1.0)
-    u = nm.abs(nm.sin(fi))
-    rot2 = vtk.vtkTransform()
-    if u > 1.0e-6:
-
-        # sometimes d[0]/u little bit is over 1
-        d0_over_u = direction[0] / u
-        if d0_over_u > 1:
-            psi = 0
-        elif d0_over_u < -1:
-            psi = 2 * nm.pi
-        else:
-            psi = nm.arccos(direction[0] / u)
-
-        logger.debug('d0 '+str(direction[0])+'  u '+str(u)+' psi '+str(psi))
-        if direction[2] < 0:
-            psi = 2 * nm.pi - psi
-
-        rot2.RotateWXYZ(-nm.rad2deg(psi), 0.0, 1.0, 0.0)
-
-    tl = vtk.vtkTransform()
-    tl.Translate(upper)
-
-    tr1a = vtk.vtkTransformFilter()
-    if "SetInputConnection" in dir(tr1a):
-        tr1a.SetInputConnection(src.GetOutputPort())
-    else:
-        tr1a.SetInput(src.GetOutput())
-    tr1a.SetTransform(rot1)
-
-    tr1b = vtk.vtkTransformFilter()
-    if "SetInputConnection" in dir(tr1b):
-        tr1b.SetInputConnection(tr1a.GetOutputPort())
-    else:
-        tr1b.SetInput(tr1a.GetOutput())
-    # tr1b.SetInput(tr1a.GetOutput())
-    tr1b.SetTransform(rot2)
-
-    tr2 = vtk.vtkTransformFilter()
-    if "SetInputConnection" in dir(tr2):
-        tr2.SetInputConnection(tr1b.GetOutputPort())
-    else:
-        tr2.SetInput(tr1b.GetOutput())
-    # tr2.SetInput(tr1b.GetOutput())
-    tr2.SetTransform(tl)
-
-    tr2.Update()
-
-    return tr2.GetOutput()
-
-
-from fibrous.tb_vtk import gen_tree_simple as gen_tree
 # def gen_tree(tree_data):
 #     """
 #     Deprecated function
@@ -161,108 +206,66 @@ from fibrous.tb_vtk import gen_tree_simple as gen_tree
 #     return polyData
 
 
-def compatibility_processing(indata):
-    scale = 1e-3
-    scale = 1
+# def compatibility_processing(indata):
+#     scale = 1e-3
+#     scale = 1
+#
+#     outdata = []
+#     for key in indata:
+#         ii = indata[key]
+#         logger.debug(ii)
+#         br = {}
+#         try:
+#             # old version of yaml tree
+#             vA = ii['upperVertexXYZmm']
+#             vB = ii['lowerVertexXYZmm']
+#             radi = ii['radius']
+#             lengthEstimation = ii['length']
+#         except:
+#             # new version of yaml
+#             try:
+#                 vA = ii['nodeA_ZYX_mm']
+#                 vB = ii['nodeB_ZYX_mm']
+#                 radi = ii['radius_mm']
+#                 lengthEstimation = ii['lengthEstimation']
+#             except:
+#                 continue
+#
+#         br['upperVertex'] = nm.array(vA) * scale
+#         br['radius'] = radi * scale
+#         br['real_length'] = lengthEstimation * scale
+#
+#         vv = nm.array(vB) * scale - br['upperVertex']
+#         br['direction'] = vv / nm.linalg.norm(vv)
+#         br['length'] = nm.linalg.norm(vv)
+#         outdata.append(br)
+#
+#     return outdata
 
-    outdata = []
-    for key in indata:
-        ii = indata[key]
-        logger.debug(ii)
-        br = {}
-        try:
-            # old version of yaml tree
-            vA = ii['upperVertexXYZmm']
-            vB = ii['lowerVertexXYZmm']
-            radi = ii['radius']
-            lengthEstimation = ii['length']
-        except:
-            # new version of yaml
-            try:
-                vA = ii['nodeA_ZYX_mm']
-                vB = ii['nodeB_ZYX_mm']
-                radi = ii['radius_mm']
-                lengthEstimation = ii['lengthEstimation']
-            except:
-                continue
+# def fix_tree_structure(tree_raw_data):
+#     if 'graph' in tree_raw_data:
+#         trees = tree_raw_data['graph']
+#     else:
+#         trees = tree_raw_data['Graph']
+#     return trees
 
-        br['upperVertex'] = nm.array(vA) * scale
-        br['radius'] = radi * scale
-        br['real_length'] = lengthEstimation * scale
+# def vt_file_2_vtk_file(infile, outfile, text_label=None):
+#     """
+#     From vessel_tree.yaml to output.vtk
+#
+#     :param vessel_tree:  vt structure
+#     :param outfile: filename with .vtk extension
+#     :param text_label: text label like 'porta' or 'hepatic_veins'
+#     :return:
+#
+#     """
+#     tree_raw_data = io3d.misc.obj_from_file(infile)
+#
+#     # import yaml
+#     # yaml_file = open(infile, 'r')
+#     # tree_raw_data = yaml.load(yaml_file)
+#     vt2vtk_file(tree_raw_data, outfile, text_label)
 
-        vv = nm.array(vB) * scale - br['upperVertex']
-        br['direction'] = vv / nm.linalg.norm(vv)
-        br['length'] = nm.linalg.norm(vv)
-        outdata.append(br)
-
-    return outdata
-
-def fix_tree_structure(tree_raw_data):
-    if 'graph' in tree_raw_data:
-        trees = tree_raw_data['graph']
-    else:
-        trees = tree_raw_data['Graph']
-    return trees
-
-def vt_file_2_vtk_file(infile, outfile, text_label=None):
-    """
-    From vessel_tree.yaml to output.vtk
-
-    :param vessel_tree:  vt structure
-    :param outfile: filename with .vtk extension
-    :param text_label: text label like 'porta' or 'hepatic_veins'
-    :return:
-
-    """
-    tree_raw_data = io3d.misc.obj_from_file(infile)
-
-    # import yaml
-    # yaml_file = open(infile, 'r')
-    # tree_raw_data = yaml.load(yaml_file)
-    vt2vtk_file(tree_raw_data, outfile, text_label)
-
-def vt_file2polyData(infile, text_label=None):
-    tree_raw_data = io3d.misc.obj_from_file(infile)
-    # yaml_file = open(infile, 'r')
-    # tree_raw_data = yaml.load(yaml_file)
-    return vt2polyData(tree_raw_data, text_label)
-
-def vt2polyData(vessel_tree, text_label=None):
-    trees = fix_tree_structure(vessel_tree)
-
-    tkeys = trees.keys()
-    if text_label is None:
-        text_label = tkeys[0]
-
-    tree_data = compatibility_processing(trees[text_label])
-    polyData = gen_tree(tree_data)
-    return polyData
-
-def vt2vtk_file(vessel_tree, outfile, text_label=None, lc_all="C"):
-    """
-    vessel_tree structure
-    :param vessel_tree:  vt structure
-    :param outfile: filename with .vtk extension
-    :param text_label: text label like 'porta' or 'hepatic_veins'
-    :param lc_all: LC_ALL locale settings. Controls float numbers
-        format (dot or colon). If is set to "C" dot is used.
-        If None is used no processing is done
-    :return:
-    """
-
-    polyData = vt2polyData(vessel_tree, text_label=text_label)
-    if lc_all is not None:
-        import locale
-        locale.setlocale(locale.LC_ALL, 'C')
-    writer = vtk.vtkPolyDataWriter()
-    writer.SetFileName(outfile)
-    try:
-        writer.SetInputData(polyData)
-    except:
-        logger.warning("old vtk is used")
-        writer.SetInput(polyData)
-    writer.Write()
-    return polyData
 
 
 def main():
