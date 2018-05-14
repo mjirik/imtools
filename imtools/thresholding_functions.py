@@ -460,7 +460,7 @@ def getPriorityObjects(data, nObj=1, seeds=None, seeds_multi_index=None, debug=F
             returning = None
             for index in range(0, len(arrSeed)):
 
-                if returning == None:
+                if returning is None:
                     returning = data * (dataLabels == arrSeed[index])
                 else:
                     returning = returning + data * \
