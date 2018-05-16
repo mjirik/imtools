@@ -38,17 +38,17 @@ requirements:
     - matplotlib
     - mock
     - nose
-#    - vtk
-#    - skelet3d >=1.5.3
-#    - checksumdir
-#    - vtkviewer >=0.0.7
-#    - dicom2fem
-#    - io3d >=1.3.30
-#    - fibrous
-#    - sed3
+    - vtk
+    - skelet3d >=1.5.3
+    - checksumdir
+    - vtkviewer >=0.0.7
+    - dicom2fem
+    - io3d >=1.3.30
+    - fibrous
+    - sed3
     - ruamel.yaml
 #removed
-#    - opencv
+    - opencv
 
   run:
     - python
@@ -56,17 +56,17 @@ requirements:
     - scipy
     - scikit-image
     - matplotlib
-#    - vtk
-#    - skelet3d >=1.5.3
-#    - checksumdir
-#    - vtkviewer >=0.0.7
-#    - dicom2fem # because of seg2fem
-#    - io3d >=1.3.30
-#    - fibrous
-#    - sed3
+    - vtk
+    - skelet3d >=1.5.3
+    - checksumdir
+    - vtkviewer >=0.0.7
+    - dicom2fem # because of seg2fem
+    - io3d >=1.3.30
+    - fibrous
+    - sed3
     - ruamel.yaml
 # removed
-#    - opencv
+    - opencv
 
 test:
   # Python imports
