@@ -43,10 +43,11 @@ setup(
         # 'Programming Language :: Python :: 3.2',
         # 'Programming Language :: Python :: 3.3',
         # 'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.6',
     ],
 
     # What does your project relate to?
-    keywords='dicom 3D read write',
+    keywords='dicom, 3D, tools, image processing',
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
@@ -58,7 +59,7 @@ setup(
     # https://packaging.python.org/en/latest/technical.html#install-requires-vs-requirements-files
     install_requires=['numpy', 'scipy', 'matplotlib'],
     # 'SimpleITK'],  # Removed becaouse of errors when pip is installing
-    dependency_links=[],
+    # dependency_links=[],
 
     # If there are data files included in your packages that need to be
     # installed, specify them here.  If using Python 2.6 or less, then these
