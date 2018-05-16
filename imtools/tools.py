@@ -1,43 +1,40 @@
 __author__ = 'Ryba'
 
-from collections import namedtuple
-
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.patches import Ellipse
-import matplotlib.patches as matpat
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-import os
-import sys
 import glob
 import itertools
+import os
+import sys
+from collections import namedtuple
 
+import matplotlib.pyplot as plt
+import numpy as np
+import scipy.ndimage.filters as scindifil
+import scipy.ndimage.interpolation as scindiint
+import scipy.ndimage.measurements as scindimea
+import scipy.ndimage.morphology as scindimor
+import scipy.signal as scisig
+import scipy.stats as scista
+import skimage.color as skicol
 import skimage.exposure as skiexp
+import skimage.feature as skifea
+import skimage.filters as skifil
+import skimage.io as skiio
 import skimage.measure as skimea
 import skimage.morphology as skimor
-import skimage.transform as skitra
-import skimage.filters as skifil
 import skimage.restoration as skires
 import skimage.segmentation as skiseg
-import skimage.feature as skifea
-import skimage.io as skiio
-import skimage.color as skicol
+from matplotlib.patches import Ellipse
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 from skimage.segmentation import mark_boundaries
-
 from sklearn.cluster import MeanShift, estimate_bandwidth
 
-import scipy.stats as scista
-import scipy.ndimage.morphology as scindimor
-import scipy.ndimage.measurements as scindimea
-import scipy.ndimage.interpolation as scindiint
-import scipy.ndimage.filters as scindifil
-import scipy.signal as scisig
-import scipy.misc as scimis
+try:
+    import cPickle as pickle
+except e:
+    import pickle
 
-import cPickle as pickle
 import gzip
 
-import cv2
 
 import warnings
 
@@ -583,6 +580,7 @@ def morph_ND(data, method, selem=None, selem_rad=3, slicewise=True, sliceId=0):
 
 
 def resize3D(data, scale=None, shape=None, sliceId=2, method='cv2'):
+    import cv2
     if data.ndim == 2:
         if shape is not None:
             new_data = cv2.resize(data.astype(np.uint8), shape, 0, 0, interpolation=cv2.INTER_NEAREST)
