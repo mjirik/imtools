@@ -4,15 +4,12 @@
 Module is used for visualization of segmentation stored in pkl file.
 """
 
-import sys
-import os.path
-
 import logging
 logger = logging.getLogger(__name__)
 import scipy
 import numpy as np
 from . import ml
-from . import qmisc
+from . import image_manipulation as imma
 
 
 def externfv(data3d, voxelsize_mm):        # scale
@@ -79,10 +76,10 @@ class Trainer3D():
         self.cl.fit(self.data, self.target)
 
     def predict(self, data3d, voxelsize_mm):
-        data3dr = qmisc.resize_to_mm(data3d, voxelsize_mm, self.working_voxelsize_mm)
+        data3dr = imma.resize_to_mm(data3d, voxelsize_mm, self.working_voxelsize_mm)
         fv = self._fv(data3dr)
         pred = self.cl.predict(fv)
-        return qmisc.resize_to_shape(pred.reshape(data3dr.shape), data3d.shape)
+        return imma.resize_to_shape(pred.reshape(data3dr.shape), data3d.shape)
 
     def predict_w(self, data3d, voxelsize_mm, weight, label0=0, label1=1):
         """
@@ -98,12 +95,12 @@ class Trainer3D():
         return out
 
     def scores(self, data3d, voxelsize_mm):
-        data3dr = qmisc.resize_to_mm(data3d, voxelsize_mm, self.working_voxelsize_mm)
+        data3dr = imma.resize_to_mm(data3d, voxelsize_mm, self.working_voxelsize_mm)
         fv = self._fv(data3dr)
         scoreslin = self.cl.scores(fv)
         scores = {}
         for key in scoreslin:
-            scores[key] = qmisc.resize_to_shape(scoreslin[key].reshape(data3dr.shape), data3d.shape)
+            scores[key] = imma.resize_to_shape(scoreslin[key].reshape(data3dr.shape), data3d.shape)
 
         return scores
 
@@ -112,8 +109,8 @@ class Trainer3D():
         pass
 
     def add_train_data(self, data3d, segmentation, voxelsize_mm, nth=50):
-        data3dr = qmisc.resize_to_mm(data3d, voxelsize_mm, self.working_voxelsize_mm)
-        segmentationr = qmisc.resize_to_shape(segmentation, data3dr.shape)
+        data3dr = imma.resize_to_mm(data3d, voxelsize_mm, self.working_voxelsize_mm)
+        segmentationr = imma.resize_to_shape(segmentation, data3dr.shape)
 
         # print np.unique(segmentationr), data3dr.shape, segmentationr.shape
         self._add_to_training_data(data3dr, segmentationr, nth)

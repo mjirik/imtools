@@ -4,19 +4,12 @@
 Module is used for visualization of segmentation stored in pkl file.
 """
 
-import sys
-import os.path
-
 import logging
 logger = logging.getLogger(__name__)
-import scipy
-import numpy as np
 import glob
 import os.path as op
 import io3d
 
-from . import ml
-from . import qmisc
 
 def sliver_reader(filename_end_mask="*[0-9].mhd", sliver_reference_dir="~/data/medical/orig/sliver07/training/", read_orig=True, read_seg=False):
     """

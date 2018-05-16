@@ -55,9 +55,9 @@ class ImageManipulationTest(unittest.TestCase):
         datap = imtools.sample_data.generate()
         data3d = datap["data3d"]
         segmentation = datap["segmentation"]
-        crinfo_auto1 = imtools.qmisc.crinfo_from_specific_data(segmentation, [5])
-        crinfo_auto2 = imtools.qmisc.crinfo_from_specific_data(segmentation, 5)
-        crinfo_auto3 = imtools.qmisc.crinfo_from_specific_data(segmentation, [5,5, 5])
+        crinfo_auto1 = imtools.image_manipulation.crinfo_from_specific_data(segmentation, [5])
+        crinfo_auto2 = imtools.image_manipulation.crinfo_from_specific_data(segmentation, 5)
+        crinfo_auto3 = imtools.image_manipulation.crinfo_from_specific_data(segmentation, [5,5, 5])
 
         crinfo_expected = [[0, 99], [20, 99], [45, 99]]
 
