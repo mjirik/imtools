@@ -36,10 +36,9 @@ requirements:
     - scipy
     - scikit-image
 #    - opencv
-#    - pyyaml # don't need
     - matplotlib
-#    - mock
-#    - nose
+    - mock
+    - nose
     - vtk
     - skelet3d >=1.5.3
     - checksumdir
@@ -55,7 +54,7 @@ requirements:
     - numpy
     - scipy
     - scikit-image
-#    - pyyaml
+#    - opencv
     - matplotlib
     - vtk
     - skelet3d >=1.5.3
@@ -65,7 +64,6 @@ requirements:
     - io3d >=1.3.30
     - fibrous
     - sed3
-#    - opencv
     - ruamel.yaml
 
 test:
