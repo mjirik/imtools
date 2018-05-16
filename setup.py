@@ -58,7 +58,7 @@ setup(
     # requirements files see:
     # https://packaging.python.org/en/latest/technical.html#install-requires-vs-requirements-files
     # install_requires=['numpy', 'scipy', 'matplotlib'],
-    # removed due to problems with conda build
+    # removed due to problems with conda build - helped a lot
     install_requires=[],
 
     # 'SimpleITK'],  # Removed becaouse of errors when pip is installing
