@@ -71,6 +71,14 @@ imtools.uiThreshold module
     :undoc-members:
     :show-inheritance:
 
+imtools.image_manipulation module
+------------------------
+
+.. automodule:: imtools.image_manipulation
+        :members:
+        :undoc-members:
+        :show-inheritance:
+
 Module contents
 ---------------
 
