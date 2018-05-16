@@ -35,11 +35,11 @@ requirements:
     - numpy
     - scipy
     - scikit-image
-    - opencv
+#    - opencv
 #    - pyyaml # don't need
     - matplotlib
-    - mock
-    - nose
+#    - mock
+#    - nose
     - vtk
     - skelet3d >=1.5.3
     - checksumdir
