@@ -513,3 +513,49 @@ def select_objects_by_seeds(data, seeds):
     for label in selected_labels:
         output[data==label] = 1
     return output
+
+def rotate(data3d, phi_deg, theta_deg=None, phi_axes=(1, 2), theta_axes=(0, 1), **kwargs):
+    """
+    Rotate 3D data by use angle and its axes or two angles.
+
+    :param data3d: ndimage 3D
+    :param phi_deg: deg
+    :param phi_axes: deg
+    :param theta_deg: deg
+    :param theta_axes: deg
+    :param kwargs: See scipy.ndimage.interpolation.rotate for more options
+    :return:
+    """
+
+    data3d = scipy.ndimage.interpolation.rotate(data3d, phi_deg, phi_axes, **kwargs)
+    if theta_deg is not None:
+        data3d = scipy.ndimage.interpolation.rotate(data3d, theta_deg, theta_axes, **kwargs)
+    return data3d
+    # segmentation = scipy.ndimage.interpolation.rotate(segmentation, angle, axes)
+    # seeds = scipy.ndimage.interpolation.rotate(seeds, angle, axes)
+
+
+    return data3d
+
+
+def random_rotate_paramteres():
+    """
+    Rotate data3d, segmentation and seeds with random rotation
+    :return:
+    """
+    xi1 = np.random.rand()
+    xi2 = np.random.rand()
+
+    # theta = np.arccos(np.sqrt(1.0-xi1))
+    theta = np.arccos(1.0 - (xi1 * 1))
+    phi = xi2 * 2 * np.pi
+
+    # xs = np.sin(theta) * np.cos(phi)
+    # ys = np.sin(theta) * np.sin(phi)
+    # zs = np.cos(theta)
+
+    phi_deg = np.degrees(phi)
+    theta_deg = np.degrees(theta)
+
+    return phi_deg, theta_deg
+    # TODO independent on voxlelsize (2016-techtest-rotate3d.ipynb)

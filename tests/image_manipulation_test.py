@@ -271,6 +271,17 @@ class ImageManipulationTest(unittest.TestCase):
         self.assertEqual(len(unique), 2)
         self.assertGreater(np.count_nonzero(data), np.count_nonzero(selected))
 
+    def test_rotate(self):
+
+        datap = imtools.sample_data.generate()
+        data3d = datap["data3d"]
+        phi_deg, theta_deg = imtools.image_manipulation.random_rotate_paramteres()
+        data3d_rot = imtools.image_manipulation.rotate(data3d, phi_deg, theta_deg)
+        # import sed3
+        # ed = sed3.sed3(data3d_rot)
+        # ed.show()
+        # self.assertEqual(np.min(data3d), np.min(data3d_rot))
+        # self.assertEqual(np.max(data3d), np.max(data3d_rot))
 
 if __name__ == "__main__":
     unittest.main()
