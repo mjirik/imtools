@@ -144,6 +144,27 @@ class ImageManipulationTest(unittest.TestCase):
         self.assertEqual(new_shape[1], data_out.shape[1])
         self.assertEqual(new_shape[2], data_out.shape[2])
 
+    def test_resize_to_shape_no_new_unique_values(self):
+        data = np.zeros([10, 15, 12])
+        value1 = 1
+        value2 = 2
+        data[:5, :7, :6] = value1
+        data[-5:, :7, :6] = value2
+
+        expected_shape = [15, 15, 15]
+        resized = imm.resize_to_shape(data, expected_shape)
+        unique = np.unique(resized)
+
+        self.assertEqual(resized.shape[0], expected_shape[0])
+        self.assertEqual(resized.shape[1], expected_shape[1])
+        self.assertEqual(resized.shape[2], expected_shape[2])
+        self.assertEqual(resized[1, 1, 1], value1)
+        self.assertEqual(resized[-2, 1, 1], value2)
+        self.assertEqual(len(unique), 3)
+        self.assertEqual(unique[0], 0)
+        self.assertEqual(unique[1], 1)
+        self.assertEqual(unique[2], 2)
+
     def test_fix_crinfo(self):
         crinfo = [[10, 15], [30, 40], [1, 50]]
         cri_fixed = imm.fix_crinfo(crinfo)
