@@ -1,16 +1,19 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
 import unittest
+
+import matplotlib.pyplot as plt
+import numpy as np
+from PyQt4.QtGui import QApplication
 from nose.plugins.attrib import attr
+
 import imtools
 import imtools.sample_data
-import imtools.uiThreshold
 import imtools.thresholding_functions
-import matplotlib.pyplot as plt
-import sys
-from PyQt4.QtGui import QApplication, QDialog, QGridLayout, QPushButton
-import numpy as np
+import imtools.uiThreshold
+
 
 class MyTestCase(unittest.TestCase):
     @attr('interactive')
@@ -68,7 +71,7 @@ class MyTestCase(unittest.TestCase):
         nobj = 2
         datap = imtools.sample_data.generate()
         thresholded = datap["data3d"] > 80
-        selection = imtools.thresholding_functions.getPriorityObjects(thresholded, nObj=nobj, seeds_multi_index=None)
+        selection = imtools.thresholding_functions.get_priority_objects(thresholded, nObj=nobj, seeds_multi_index=None)
 
         lab = skimage.morphology.label(selection)
         output_nobj = np.unique(lab)

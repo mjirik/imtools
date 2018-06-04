@@ -333,19 +333,22 @@ def get_intensities_on_seed_position(data, seeds_inds):
     return arrSeed
 
 
-def getPriorityObjects(data, nObj=1, seeds=None, seeds_multi_index=None, debug=False):
+
+def getPriorityObjects(*args, **kwargs):
+    logger.warning("Function getPriorityObjects has been renamed. Use get_priority_objects().")
+    DeprecationWarning("Function getPriorityObjects has been renamed. Use get_priority_objects().")
+    return get_priority_objects(*args, **kwargs)
+
+def get_priority_objects(data, nObj=1, seeds=None, seeds_multi_index=None, debug=False):
     """
+    Get N biggest objects from the selection or the object with seed.
+    Similar function is in image_manipulation.select_objects_by_seeds(). Use it if possible.
 
-    Vraceni N nejvetsich objektu.
-        input:
-            data - data, ve kterych chceme zachovat pouze nejvetsi objekty
-            nObj - pocet nejvetsich objektu k vraceni
-            seeds - dvourozmerne pole s umistenim pixelu, ktere chce uzivatel
-                vratit (odpovidaji matici "data")
-
-        returns:
-            data s nejvetsimi objekty
-
+    :param data:  labeled ndarray
+    :param nObj:  number of objects
+    :param seeds: ndarray. Objects on non zero positions are returned
+    :param debug: bool.
+    :return: binar image with selected objects
     """
 
     # Oznaceni dat.

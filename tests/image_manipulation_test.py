@@ -249,5 +249,50 @@ class ImageManipulationTest(unittest.TestCase):
         self.assertEqual(val[0], 2)
         self.assertEqual(val[1], "porta")
 
+    def test_select_objects_by_seeds(self):
+        shape = [10, 15, 12]
+        data = np.zeros(shape)
+        value1 = 1
+        value2 = 2
+        data[:5, :7, :6] = value1
+        data[-5:, :7, :6] = value2
+
+        seeds = np.zeros(shape)
+        seeds[9,3:6, 3] = 1
+
+        selected = imm.select_objects_by_seeds(data, seeds)
+        unique = np.unique(selected)
+        #
+        self.assertEqual(selected.shape[0], shape[0])
+        self.assertEqual(selected.shape[1], shape[1])
+        self.assertEqual(selected.shape[2], shape[2])
+        self.assertEqual(selected[1, 1, 1], 1)
+        self.assertEqual(selected[-2, 1, 1], 0)
+        self.assertEqual(len(unique), 2)
+        self.assertGreater(np.count_nonzero(data), np.count_nonzero(selected))
+
+    def test_resize_to_shape_wiht_zoom_no_new_unique_values(self):
+
+        data = np.zeros([10, 15, 12])
+        value1 = 1
+        value2 = 2
+        data[:5, :7, :6] = value1
+        data[-5:, :7, :6] = value2
+
+        expected_shape = [15, 15, 15]
+        zoom = data.shape / np.array(expected_shape)
+        resized = imm.resize_to_shape_with_zoom(data, expected_shape, zoom=zoom)
+        unique = np.unique(resized)
+
+        self.assertEqual(resized.shape[0], expected_shape[0])
+        self.assertEqual(resized.shape[1], expected_shape[1])
+        self.assertEqual(resized.shape[2], expected_shape[2])
+        self.assertEqual(resized[1, 1, 1], value1)
+        self.assertEqual(resized[-2, 1, 1], value2)
+        self.assertEqual(len(unique), 3)
+        self.assertEqual(unique[0], 0)
+        self.assertEqual(unique[1], 1)
+        self.assertEqual(unique[2], 2)
+
 if __name__ == "__main__":
     unittest.main()

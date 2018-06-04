@@ -498,3 +498,18 @@ def resize_to_mm(data3d, voxelsize_mm, new_voxelsize_mm, mode='nearest', order=1
     ).astype(data3d.dtype)
 
     return data3d_res2
+
+def select_objects_by_seeds(data, seeds):
+    """
+    Get N biggest objects from the selection or the object with seed.
+
+    :param data:  labeled ndarray
+    :param seeds: ndarray. Objects on non zero positions are returned
+    :return:
+    """
+    labeled_data, length = scipy.ndimage.label(data)
+    selected_labels = labeled_data[seeds > 0]
+    output = np.zeros_like(data)
+    for label in selected_labels:
+        output[data==label] = 1
+    return output
