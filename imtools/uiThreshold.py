@@ -511,6 +511,7 @@ class uiThreshold:
         :param i:
         :return:
         """
+        i = int(i)
         ax.cla()
         ax.imshow(self.data[i, :, :], cmap=self.cmap)
 
