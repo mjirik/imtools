@@ -544,7 +544,7 @@ def resize_to_mm(data3d, voxelsize_mm, new_voxelsize_mm, mode='nearest', order=1
 
     return data3d_res2
 
-def select_objects_by_seeds(binar_data, seeds):
+def select_objects_by_seeds(binar_data, seeds, ignore_background_seeds=True, background_label=0):
     """
     Get N biggest objects from the selection or the object with seed.
 
@@ -561,7 +561,11 @@ def select_objects_by_seeds(binar_data, seeds):
     for label in selected_labels:
         selection = labeled_data == label
         # copy from input image to output. If there will be seeds in background, the 0 is copied
-        output[selection] = binar_data[selection]
+        if ignore_background_seeds and (binar_data[selection][0] == background_label):
+            pass
+        else:
+            # output[selection] = binar_data[selection]
+            output[selection] = 1
     # import sed3
     # ed =sed3.sed3(labeled_data, contour=output, seeds=seeds)
     # ed.show()
