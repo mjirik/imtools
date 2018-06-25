@@ -554,11 +554,12 @@ def select_objects_by_seeds(binar_data, seeds):
     """
     labeled_data, length = scipy.ndimage.label(binar_data)
     selected_labels = list(np.unique(labeled_data[seeds > 0]))
-    # pop the background label
-    selected_labels.pop(0)
     output = np.zeros_like(binar_data)
     for label in selected_labels:
         output[labeled_data == label] = 1
+    # import sed3
+    # ed =sed3.sed3(labeled_data, contour=output, seeds=seeds)
+    # ed.show()
     return output
 
 def rotate(data3d, phi_deg, theta_deg=None, phi_axes=(1, 2), theta_axes=(0, 1), **kwargs):
