@@ -552,11 +552,16 @@ def select_objects_by_seeds(binar_data, seeds):
     :param seeds: ndarray. Objects on non zero positions are returned
     :return:
     """
+
     labeled_data, length = scipy.ndimage.label(binar_data)
     selected_labels = list(np.unique(labeled_data[seeds > 0]))
+    # selected_labels.pop(0)
+    # pop the background label
     output = np.zeros_like(binar_data)
     for label in selected_labels:
-        output[labeled_data == label] = 1
+        selection = labeled_data == label
+        # copy from input image to output. If there will be seeds in background, the 0 is copied
+        output[selection] = binar_data[selection]
     # import sed3
     # ed =sed3.sed3(labeled_data, contour=output, seeds=seeds)
     # ed.show()
