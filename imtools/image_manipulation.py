@@ -544,19 +544,21 @@ def resize_to_mm(data3d, voxelsize_mm, new_voxelsize_mm, mode='nearest', order=1
 
     return data3d_res2
 
-def select_objects_by_seeds(data, seeds):
+def select_objects_by_seeds(binar_data, seeds):
     """
     Get N biggest objects from the selection or the object with seed.
 
-    :param data:  labeled ndarray
+    :param binar_data:  binar ndarray
     :param seeds: ndarray. Objects on non zero positions are returned
     :return:
     """
-    labeled_data, length = scipy.ndimage.label(data)
-    selected_labels = labeled_data[seeds > 0]
-    output = np.zeros_like(data)
+    labeled_data, length = scipy.ndimage.label(binar_data)
+    selected_labels = list(np.unique(labeled_data[seeds > 0]))
+    # pop the background label
+    selected_labels.pop(0)
+    output = np.zeros_like(binar_data)
     for label in selected_labels:
-        output[data==label] = 1
+        output[labeled_data == label] = 1
     return output
 
 def rotate(data3d, phi_deg, theta_deg=None, phi_axes=(1, 2), theta_axes=(0, 1), **kwargs):

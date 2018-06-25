@@ -254,9 +254,8 @@ class ImageManipulationTest(unittest.TestCase):
         shape = [10, 15, 12]
         data = np.zeros(shape)
         value1 = 1
-        value2 = 2
         data[:5, :7, :6] = value1
-        data[-5:, :7, :6] = value2
+        data[-5:, :7, :6] = value1
 
         seeds = np.zeros(shape)
         seeds[9,3:6, 3] = 1
