@@ -402,22 +402,28 @@ class ShowSegmentationWidget(QtGui.QWidget):
         # if ds.max() == False:
         #     logger.info("Nothing found for labels " + str(labels))
         #     return
-        if together_vtk_file:
-            prepare_fcn = show_segmentation.prepare_vtk_file
-        else:
-            prepare_fcn = show_segmentation.prepare_vtk_files
-
-        vtk_files = prepare_fcn(
-            # self.segmentation,
+        show_segmentation.SegmentationToVTK()
+        s2vtk = show_segmentation.SegmentationToVTK(
             self.segmentation,
+            self.voxelsize_mm,
+            slab=self.slab_wg.slab
+        )
+        s2vtk.set_resize_parameters(
             degrad=self.degrad,
-            voxelsize_mm=self.voxelsize_mm,
-            vtk_file=vtk_file,
             labels=labels,
             resize_mm=self.resize_mm,
             resize_voxel_number=self.resize_voxel_number,
+        )
+        if together_vtk_file:
+            prepare_fcn = s2vtk.prepare_vtk_file
+            # s2vtk.prepare_vtk_file()
+        else:
+            prepare_fcn = s2vtk.prepare_vtk_files
+
+        vtk_files = prepare_fcn(
+            # self.segmentation,
+            vtk_file=vtk_file,
             smoothing=self.smoothing,
-            slab=self.slab_wg.slab
         )
 
         # self._run_viewer()

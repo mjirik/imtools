@@ -575,7 +575,8 @@ class uiThreshold:
         self.ax3.set_yticklabels([])
         self.ax4.set_xticklabels([])
         self.ax4.set_yticklabels([])
-        self.__drawSegmentedSlice(self.ax4, self.imgFiltering, self.imgFiltering.shape[0]/2)
+        if self.imgFiltering is not None:
+            self.__drawSegmentedSlice(self.ax4, self.imgFiltering, int(self.imgFiltering.shape[0] / 2))
         # Prekresleni
         self.fig.canvas.draw()
 
