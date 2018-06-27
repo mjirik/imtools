@@ -53,11 +53,11 @@ class SelectLabelWidget(QtGui.QWidget):
     def update_slab_ui(self):
         _row = 1
         # remove old widgets
-        for key, val in self.ui_slab.iteritems():
+        for key, val in self.ui_slab.items():
             val.deleteLater()
         self.ui_slab = {}
         # _row_slab = 0
-        for label, value in self.slab.iteritems():
+        for label, value in self.slab.items():
             _row += 1
             # _row_slab += 1
             txt = str(label) + "(" + str(value) + "): "
@@ -81,7 +81,7 @@ class SelectLabelWidget(QtGui.QWidget):
 
     def action_check_slab_ui(self):
         labels = []
-        for key, val in self.ui_slab.iteritems():
+        for key, val in self.ui_slab.items():
             if val.isChecked():
                 labels.append(self.slab[key])
 
