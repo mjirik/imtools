@@ -724,6 +724,7 @@ def prepare_threshold_from_seeds(data, seeds, min_threshold_auto_method):
     else:
         min_threshold = thresholding_functions.calculateAutomaticThreshold(
             data, intensities_on_seeds)
+    logger.debug("min threshold prepared {}".format(intensities_on_seeds))
     return min_threshold
 
 def make_image_processing(
