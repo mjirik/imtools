@@ -61,6 +61,7 @@ class SelectLabelWidget(QtGui.QWidget):
             _row += 1
             # _row_slab += 1
             txt = str(label) + "(" + str(value) + "): "
+            nvoxels = 0
             if self.segmentation is not None:
                 nvoxels =  np.sum(self.segmentation==value)
                 if self.voxelsize_mm is not None:
@@ -69,7 +70,7 @@ class SelectLabelWidget(QtGui.QWidget):
                 txt += str(nvoxels)
             self.ui_slab[label] = QCheckBox(txt, self)
             self.mainLayout.addWidget(self.ui_slab[label], _row, 1, 1, 2)
-            if value != 0:
+            if value != 0 and nvoxels > 0:
                 self.ui_slab[label].setCheckState(QtCore.Qt.Checked)
                 # self.ui_buttons["Show"].clicked.connect(self.actionShow)
 
