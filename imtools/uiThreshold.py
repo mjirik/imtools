@@ -89,7 +89,8 @@ class uiThreshold:
                  useSeedsOfCompactObjects=True,
                  binaryClosingIterations=2, binaryOpeningIterations=0,
                  seeds=None, cmap=matplotlib.cm.Greys_r, fillHoles=True, 
-                 figure=None, auto_method='', threshold_upper=None):
+                 figure=None, auto_method='', threshold_upper=None,
+                 ):
         """
 
         Inicialitacni metoda.
@@ -130,6 +131,14 @@ class uiThreshold:
         self.cmap = cmap
         self.number = number
         self.inputSigma = inputSigma
+        if threshold is None:
+            threshold = prepare_threshold_from_seeds(
+                data=data,
+                seeds=seeds,
+                min_threshold_auto_method=auto_method
+            )
+        logger.debug("threshold after first evaluation{}".format(threshold))
+        import ipdb; ipdb.set_trace()
         self.threshold = threshold
         self.nObj = nObj
         self.biggestObjects = biggestObjects
@@ -271,7 +280,8 @@ class uiThreshold:
 
             self.smin = Slider(
                 self.axmin, 'Min. threshold   ' + str(self.min0),
-                self.min0, self.max0, valinit=self.threshold, dragging=True)
+                self.min0, self.max0, valinit=self.min0, dragging=True)
+                # self.min0, self.max0, valinit=self.threshold, dragging=True)
             self.smax = Slider(
                 self.axmax, 'Max. threshold   ' + str(self.min0),
                 self.min0, self.max0, valinit=self.max0, dragging=True)
@@ -444,7 +454,7 @@ class uiThreshold:
             openNum = self.ICBinaryOpeningIterations
 
         # make_image_processing(sigma, min_threshold, max_threshold, closeNum, openNum, auto_method=self.)
-        self.imgFiltering = make_image_processing(
+        self.imgFiltering, self.threshold = make_image_processing(
             data=self.data,
             seeds=self.seeds,
             sigma_mm=sigma,
@@ -706,6 +716,7 @@ def prepare_threshold_from_seeds(data, seeds, min_threshold_auto_method):
             data, seeds)
     else:
         intensities_on_seeds = None
+    logger.debug("intensities on seeds {}".format(intensities_on_seeds))
     if min_threshold_auto_method is 'otsu':
         logger.debug('using otsu threshold')
         min_threshold = thresholding_functions.calculateAutomaticThresholdOtsu(
@@ -764,7 +775,7 @@ def make_image_processing(
         imgFiltering = thresholding_functions.getPriorityObjects(
             imgFiltering, nObj, seeds)
 
-    return imgFiltering
+    return imgFiltering, min_threshold
 
 def main():
     import numpy as np

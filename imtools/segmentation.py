@@ -13,8 +13,7 @@
 import sys
 sys.path.append("../src/")
 sys.path.append("../extern/")
-import imtools
-from imtools import uiThreshold, thresholding_functions
+from imtools import uiThreshold
 # import uiThreshold
 # import thresholding_functions
 import logging
@@ -26,7 +25,7 @@ import scipy.ndimage
 from . import image_manipulation
 
 
-def vesselSegmentation(data, segmentation=-1, threshold=-1,
+def vesselSegmentation(data, segmentation=-1, threshold=None,
                        voxelsize_mm=[1, 1, 1],
                        inputSigma=-1, dilationIterations=0,
                        dilationStructure=None, nObj=10, biggestObjects=False,
@@ -171,7 +170,7 @@ ok)')
 
     # seeds = None
     if biggestObjects == False and\
-            seeds == None and interactivity == True and threshold == -1:
+            seeds == None and interactivity == True and threshold == None:
 
         logger.debug(
             ('Nyni si levym nebo pravym tlacitkem mysi (klepnutim nebo tazenim)\

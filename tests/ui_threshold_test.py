@@ -33,7 +33,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_threshold_image_processing(self):
         datap = imtools.sample_data.generate()
-        imthr = imtools.uiThreshold.make_image_processing(
+        imthr, updated_threshold = imtools.uiThreshold.make_image_processing(
             data=datap['data3d'], voxelsize_mm=datap['voxelsize_mm'], seeds=np.nonzero(datap["seeds_porta"]),
             sigma_mm=1, min_threshold=None, max_threshold=None, closeNum=0, openNum=0, min_threshold_auto_method="", fill_holes=True,
                           get_priority_objects=True, nObj=1 )
