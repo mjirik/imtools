@@ -504,14 +504,14 @@ def resize_to_shape(data, shape, zoom=None, mode='nearest', order=0):
         del segm_orig_scale
     return segmentation
 
-def resize_to_mm(data3d, voxelsize_mm, new_voxelsize_mm, mode='nearest', order=1):
+def resize_to_mm(data3d, voxelsize_mm, new_voxelsize_mm, mode='edge', order=1):
     """
     Function can resize data3d or segmentation to specifed voxelsize_mm
     :new_voxelsize_mm: requested voxelsize. List of 3 numbers, also
         can be a string 'orig', 'orig*2' and 'orig*4'.
 
     :voxelsize_mm: size of voxel
-    :mode: default is 'nearest'
+    :mode: default is 'edge'. Modes match the behaviour of numpy.pad
     """
 
     if new_voxelsize_mm is 'orig':

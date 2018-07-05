@@ -25,7 +25,7 @@ class ShowSegmemtationCase(unittest.TestCase):
             segmentation,
             degrad=1,
             # degrad=self.degrad,
-            # voxelsize_mm=self.voxelsize_mm,
+            voxelsize_mm=voxelsize_mm,
             vtk_file="donut.vtk",
             # resize_mm=self.resize_mm,
             # resize_voxel_number=self.resize_voxel_number,

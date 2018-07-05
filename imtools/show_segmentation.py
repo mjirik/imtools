@@ -51,12 +51,16 @@ class SegmentationToVTK():
         prepare_vtk_file
         """
         if voxelsize_mm is None:
-            voxelsize_mm = np.ones([3, 1])
+            voxelsize_mm = np.ones([3])
         self.segmentation = segmentation
         self.voxelsize_mm = voxelsize_mm
         if slab is None:
             slab = create_slab_from_segmentation(segmentation)
         self.slab = slab
+        self.resized_segmentation = None
+        self.resized_binar_segmentation = None
+        self.resize_mm_1d = 1
+        self.one_file_per_label = True
 
     def set_resize_parameters(
             self,
@@ -85,23 +89,23 @@ class SegmentationToVTK():
         # return voxelsize_mm, degrad
         self.degrad = degrad
         self.labels = labels
-        if self.slab is not None and labels is not None:
-            segmentation = select_labels(self.segmentation, labels, slab=self.slab)
-            # segmentation = show_segmentation.select_labels(self.segmentation, labels, slab=self.slab)
-        else:
-            segmentation = self.segmentation
-        if segmentation.max() == False:
-            logger.info("Nothing found for labels " + str(labels))
-            return
+        segmentation = self._select_labels(self.segmentation, labels)
 
         if resize_voxel_number is not None:
             nvoxels = np.sum(segmentation > 0)
             volume = nvoxels * np.prod(self.voxelsize_mm)
             voxel_volume = volume / float(resize_voxel_number)
             resize_mm = voxel_volume ** (1.0 / 3.0)
+        else:
+            resize_mm = np.mean(self.voxelsize_mm)
         # self.working_voxelsize_mm = voxelsize_mm
         # self.working_segmentation = segmentation
-        self.resize_mm = resize_mm
+        if np.sum(np.abs(self.resize_mm_1d - resize_mm)) != 0:
+            # resize parameter changed
+            self.resized_segmentation = None
+            self.resized_binar_segmentation = None
+
+        self.resize_mm_1d = resize_mm
 
     def set_labels(self, labels=None):
         """
@@ -114,60 +118,86 @@ class SegmentationToVTK():
         else:
             self.labels = labels
 
-    def _select_labels(self, labels=None):
-        logger.debug("select_labels() started with labels={}".format(labels))
-        if self.slab is not None and labels is not None:
-            segmentation = select_labels(self.segmentation, labels, slab=self.slab)
-        else:
-            segmentation = (self.segmentation > 0).astype(self.segmentation.dtype)
-        self.binar_segmentation = segmentation
+    def select_labels(self, labels=None):
+        """ Prepare binar segmentation based on input segmentation and labels.
 
-    def _resize_selected_labels(self):
-        """
-        self.select_labels sould be called first
+        :param labels:
         :return:
         """
-        orig_dtype = self.binar_segmentation.dtype
+        self._resize_if_required()
+        segmentation = self._select_labels(self.resized_segmentation, labels)
+        self.resized_binar_segmentation = segmentation
 
-        if orig_dtype == np.bool:
-            segmentation = self.binar_segmentation.astype(np.int8)
+    def _select_labels(self, segmentation, labels=None):
+        """ Get selection of labels from input segmentation
+
+        :param segmentation:
+        :param labels:
+        :return:
+        """
+
+        logger.debug("select_labels() started with labels={}".format(labels))
+        if self.slab is not None and labels is not None:
+            segmentation_out = select_labels(segmentation, labels, slab=self.slab)
         else:
-            segmentation = self.binar_segmentation
+            logger.warning("Nothing found for labels " + str(labels))
+            un = np.unique(segmentation)
+            if len(un) < 2:
+                logger.error("Just one label found in input segmenation")
+            segmentation_out = (segmentation > un[0]).astype(segmentation.dtype)
+        return segmentation_out
 
+    def _resize_if_required(self):
+        """
+        :return:
+        """
+        # orig_dtype = self.binar_segmentation.dtype
+        #
+        # if orig_dtype == np.bool:
+        #     segmentation = self.binar_segmentation.astype(np.int8)
+        # else:
+        #     segmentation = self.binar_segmentation
+        if self.resized_segmentation is None:
+            segmentation = self.segmentation
 
-        segmentation = segmentation[::self.degrad, ::self.degrad, ::self.degrad]
-        voxelsize_mm = self.voxelsize_mm * self.degrad
+            segmentation = segmentation[::self.degrad, ::self.degrad, ::self.degrad]
+            voxelsize_mm = self.voxelsize_mm * self.degrad
 
-        if self.resize_mm is not None:
-            logger.debug("resize begin")
-            new_voxelsize_mm = np.asarray([self.resize_mm, self.resize_mm, self.resize_mm])
-            import imtools
-            prev_shape = segmentation.shape
-            segmentation = imtools.image_manipulation.resize_to_mm(segmentation, voxelsize_mm=voxelsize_mm, new_voxelsize_mm=new_voxelsize_mm,order=0)
-            voxelsize_mm = new_voxelsize_mm
-            logger.debug("resize finished, old shape = {}, new shape = {}".format(str(prev_shape), str(segmentation.shape)))
-            logger.debug("segmentation min={}, max={}".format(np.min(segmentation), np.max(segmentation)))
-        self.resized_segmentation = segmentation
-        self.resized_voxelsize_mm = voxelsize_mm
+            if self.resize_mm_1d is not None:
+                logger.debug("resize begin")
+                new_voxelsize_mm = np.asarray([self.resize_mm_1d, self.resize_mm_1d, self.resize_mm_1d])
+                import imtools
+                prev_shape = segmentation.shape
+                segmentation = imtools.image_manipulation.resize_to_mm(segmentation, voxelsize_mm=voxelsize_mm,
+                                                                       new_voxelsize_mm=new_voxelsize_mm, order=0)
+                voxelsize_mm = new_voxelsize_mm
+                logger.debug("resize finished, old shape = {}, new shape = {}".format(str(prev_shape), str(segmentation.shape)))
+                logger.debug("segmentation min={}, max={}".format(np.min(segmentation), np.max(segmentation)))
+            self.resized_segmentation = segmentation
+            self.resized_voxelsize_mm = voxelsize_mm
 
     def set_output(
             self,
             filename=None,
             smoothing=True,
-            pvsm_file=None
+            pvsm_file=None,
+            one_file_per_label=True
     ):
 
         if filename is None:
             # vtk_file = "mesh_geom.vtk"
             filename = "mesh_{}.vtk"
-        self.vtk_file = os.path.expanduser(filename)
+        self.output_file_pattern = os.path.expanduser(filename)
         self.smoothing = smoothing
         self.pvsm_file = pvsm_file
+        self.one_file_per_label = one_file_per_label
 
 
+    # def make(self):
+    #     op.extsep
 
 
-    def prepare_stl_file(self):
+    def make_stl_file(self):
         pass
 
     def make_vtk_file(self):
@@ -202,14 +232,14 @@ class SegmentationToVTK():
         # vtk_file = os.path.expanduser(vtk_file)
         strlabel = imma.get_nlabels(slab=self.slab, labels=labels, return_mode="str")
         logger.debug(strlabel)
-        vtk_filename = self.vtk_file.format(strlabel)
+        vtk_filename = self.output_file_pattern.format(strlabel)
         logger.debug(vtk_filename)
 
-        self._select_labels(labels)
+        self.select_labels(labels)
         # import sed3
         # sed3.show_slices(self.binar_segmentation)
 
-        self._resize_selected_labels()
+        self._resize_if_required()
         # sed3.show_slices(self.resized_segmentation)
 
         # _stats(self.segmentation)
@@ -259,7 +289,7 @@ class SegmentationToVTK():
         if pvsm_file is None:
             strlabels = imma.get_nlabels(slab=self.slab, labels=self.labels, return_mode="str")
             labels_in_str = "-".join(strlabels)
-            pvsm_file = self.vtk_file.format(labels_in_str)
+            pvsm_file = self.output_file_pattern.format(labels_in_str)
             pvsm_file, ext = op.splitext(pvsm_file)
             pvsm_file = pvsm_file + ".pvsm"
         create_pvsm_file(vtk_files, pvsm_filename=pvsm_file)
@@ -277,7 +307,7 @@ def create_slab_from_segmentation(segmentation, slab=None):
 
 def showSegmentation(
             segmentation=None,
-            voxelsize_mm=np.ones([3, 1]),
+            voxelsize_mm=np.ones([3]),
             degrad=6,
             labels=None,
             smoothing=True,

@@ -583,11 +583,11 @@ def resize3D(data, scale=None, shape=None, sliceId=2, method='cv2'):
     import cv2
     if data.ndim == 2:
         if shape is not None:
-            new_data = cv2._resize_selected_labels(data.astype(np.uint8), shape, 0, 0, interpolation=cv2.INTER_NEAREST)
+            new_data = cv2._resize_if_required(data.astype(np.uint8), shape, 0, 0, interpolation=cv2.INTER_NEAREST)
         elif method == 'cv2':
             if data.dtype == np.bool:
                 data = data.astype(np.uint8)
-            new_data = cv2._resize_selected_labels(data, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
+            new_data = cv2._resize_if_required(data, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
         else:
             new_data = scindiint.zoom(data, scale)
 
@@ -601,7 +601,7 @@ def resize3D(data, scale=None, shape=None, sliceId=2, method='cv2'):
                 # new_data[:,:,i] = cv2.resize(data[:,:,i], None, fx=scale, fy=scale)
                 # new_data[:,:,i] = (255 * skitra.rescale(data[:,:,0], scale)).astype(np.int)
                 if method == 'cv2':
-                    new_data[:,:,i] = cv2._resize_selected_labels(data[:, :, i], (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
+                    new_data[:,:,i] = cv2._resize_if_required(data[:, :, i], (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
                 else:
                     new_data[:,:,i] = scindiint.zoom(data[:,:,i], scale)
         elif sliceId == 0:
@@ -611,7 +611,7 @@ def resize3D(data, scale=None, shape=None, sliceId=2, method='cv2'):
             if method == 'cv2':
                 if data.dtype == np.bool:
                     data = data.astype(np.uint8)
-                new_shape = cv2._resize_selected_labels(data[0, :, :], (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST).shape
+                new_shape = cv2._resize_if_required(data[0, :, :], (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST).shape
             else:
                 new_shape =  scindiint.zoom(data[0,:,:], scale).shape
             new_data = np.zeros(np.hstack((n_slices, new_shape)), dtype=np.int)
@@ -619,7 +619,7 @@ def resize3D(data, scale=None, shape=None, sliceId=2, method='cv2'):
                 # new_data[i,:,:] = cv2.resize(data[i,:,:], None, fx=scale, fy=scale)
                 # new_data[i,:,:] = (255 * skitra.rescale(data[i,:,:], scale)).astype(np.int)
                 if method == 'cv2':
-                    new_data[i,:,:] = cv2._resize_selected_labels(data[i, :, :], (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
+                    new_data[i,:,:] = cv2._resize_if_required(data[i, :, :], (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
                 else:
                     new_data[i,:,:] = scindiint.zoom(data[i,:,:], scale)
     return new_data
@@ -646,7 +646,7 @@ def resize_ND(data, scale=None, shape=None, slice_id=0, method='cv2'):
         swapped = False
 
     if scale is not None:
-        new_slice_shape = cv2._resize_selected_labels(data[0, ...], (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST).shape
+        new_slice_shape = cv2._resize_if_required(data[0, ...], (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST).shape
     else:
         new_slice_shape = shape[1:]
 
@@ -658,9 +658,9 @@ def resize_ND(data, scale=None, shape=None, slice_id=0, method='cv2'):
 
     for i, im in enumerate(data):
         if scale is not None:
-            new_data[i, ...] = cv2._resize_selected_labels(im, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
+            new_data[i, ...] = cv2._resize_if_required(im, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
         elif shape is not None:
-            new_data[i, ...] = cv2._resize_selected_labels(im, (shape[2], shape[1]), interpolation=cv2.INTER_NEAREST)
+            new_data[i, ...] = cv2._resize_if_required(im, (shape[2], shape[1]), interpolation=cv2.INTER_NEAREST)
 
     if expanded:
         new_data = new_data[0, ...]
@@ -1240,7 +1240,7 @@ def resize(image, width=None, height=None, inter=None):
         dim = (width, int(h * r))
 
     # resize the image
-    resized = cv2._resize_selected_labels(image, dim, interpolation=inter)
+    resized = cv2._resize_if_required(image, dim, interpolation=inter)
 
     # return the resized image
     return resized
@@ -1606,11 +1606,11 @@ def initialize_graycom(data_in, slice=None, distances=(1, ), scale=0.5, angles=(
     if scale != 1:
         blob = blob.astype(np.uint8)
         if blob.ndim == 2:
-            blob = cv2._resize_selected_labels(blob, data_in.shape[::-1])
+            blob = cv2._resize_if_required(blob, data_in.shape[::-1])
         else:
             tmp = np.zeros(data_in.shape)
             for i, im in enumerate(blob):
-                tmp[i, :, :] = cv2._resize_selected_labels(im, (data_in.shape[2], data_in.shape[1]))
+                tmp[i, :, :] = cv2._resize_if_required(im, (data_in.shape[2], data_in.shape[1]))
             blob = tmp
 
     # visualization
