@@ -47,18 +47,20 @@ class ShowSegmemtationCase(unittest.TestCase):
 
         svtk = ss.SegmentationToVTK(segmentation)
         svtk.set_resize_parameters(degrad=1)
-        vtk_files = svtk.prepare_vtk_files(
+        svtk.set_output(filename="donut_{}.vtk", pvsm_file="donut.pvms")
+        svtk.set_labels()
+        vtk_files = svtk.make_vtk_files(
         # vtk_files = ss.prepare_vtk_files(
             # vtk_files = ss.prepare_vtk_files(
             # degrad=self.degrad,
             # voxelsize_mm=self.voxelsize_mm,
-            vtk_file="donut_{}.vtk",
+            # vtk_file="donut_{}.vtk",
             # resize_mm=self.resize_mm,
             # resize_voxel_number=self.resize_voxel_number,
             # smoothing=self.smoothing,
             # show=True
         )
-        ss.create_pvsm_file(vtk_files, "donut.pvsm")
+        # ss.create_pvsm_file(vtk_files, "donut.pvsm")
 
         self.assertTrue(op.exists("donut_1.vtk"))
         self.assertTrue(op.exists("donut_2.vtk"))
@@ -66,11 +68,14 @@ class ShowSegmemtationCase(unittest.TestCase):
         # self.assertEqual(True, False)
 
     @attr('long')
-    @attr('interactive')
+    # @attr('interactive')
     def test_from_file(self):
         input_file = "~/lisa_data/jatra_5mm_new.pklz"
+        import io3d.datasets
+        input_file = io3d.datasets.join_path(r"3Dircadb1.1/MASKS_DICOM/liver")
         output_file = "jatra.vtk"
-
+        if op.exists(output_file):
+            os.remove(output_file)
 
         input_file = op.expanduser(input_file)
 
@@ -78,15 +83,15 @@ class ShowSegmemtationCase(unittest.TestCase):
         datap = io3d.datareader.read(input_file, dataplus_format=True)
 
 
-        segmentation = datap['segmentation']
+        segmentation = datap["data3d"]
         voxelsize_mm = datap['voxelsize_mm']
 
         # app.setGraphicsSystem("openvg")
         sw = ss.showSegmentation(
             # (segmentation==1).astype(np.int8),
-            segmentation==1,
+            segmentation=(segmentation > 0),
             degrad=1,
-            label=[1],
+            labels=[1],
             # degrad=self.degrad,
             voxelsize_mm=voxelsize_mm,
             vtk_file=output_file,
@@ -101,6 +106,8 @@ class ShowSegmemtationCase(unittest.TestCase):
         # ed.show()
 
         self.assertTrue(op.exists(output_file))
+        # clean
+        os.remove(output_file)
 
     def test_create_pmvs(self):
         vtk_files = ["file1.vtk", "file2.vtk"]

@@ -52,7 +52,7 @@ install:
 
 #    - python -m imtools.sample_data biodur_sample gensei_slices -o sample_data
     - ls
-    - python -m io3d.datasets -l gensei_slices  biodur_sample
+    - python -m io3d.datasets -l gensei_slices  biodur_sample 3Dircadb1.1
     - ls ~/data/medical/orig/
 #    - python -m io3d.datasets -l biodur_sample
 # command to run tests

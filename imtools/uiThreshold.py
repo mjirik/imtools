@@ -138,7 +138,7 @@ class uiThreshold:
                 min_threshold_auto_method=auto_method
             )
         logger.debug("threshold after first evaluation{}".format(threshold))
-        import ipdb; ipdb.set_trace()
+        # import ipdb; ipdb.set_trace()
         self.threshold = threshold
         self.nObj = nObj
         self.biggestObjects = biggestObjects

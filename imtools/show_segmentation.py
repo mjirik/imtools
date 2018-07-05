@@ -74,13 +74,20 @@ class SegmentationToVTK():
         :param resize_voxel_number:
         :return:
         """
-        from . import show_segmentation
+        # from . import show_segmentation
 
         logger.debug("set_resize_parameters(\ndegrad={}, \nlabels={}\nresize_mm={}\nresize_voxel_number={}".format(
             degrad, labels, resize_mm, resize_voxel_number
         ))
+        degrad = int(degrad)
+
+        # import ipdb; ipdb.set_trace()
+        # return voxelsize_mm, degrad
+        self.degrad = degrad
+        self.labels = labels
         if self.slab is not None and labels is not None:
-            segmentation = show_segmentation.select_labels(self.segmentation, labels, slab=self.slab)
+            segmentation = select_labels(self.segmentation, labels, slab=self.slab)
+            # segmentation = show_segmentation.select_labels(self.segmentation, labels, slab=self.slab)
         else:
             segmentation = self.segmentation
         if segmentation.max() == False:
@@ -92,25 +99,30 @@ class SegmentationToVTK():
             volume = nvoxels * np.prod(self.voxelsize_mm)
             voxel_volume = volume / float(resize_voxel_number)
             resize_mm = voxel_volume ** (1.0 / 3.0)
-        degrad = int(degrad)
-
-        # import ipdb; ipdb.set_trace()
-        # return voxelsize_mm, degrad
-        self.degrad = degrad
-        self.resize_mm = resize_mm
         # self.working_voxelsize_mm = voxelsize_mm
         # self.working_segmentation = segmentation
+        self.resize_mm = resize_mm
 
-    def select_labels(self, labels):
+    def set_labels(self, labels=None):
+        """
+
+        :param labels:
+        :return:
+        """
+        if labels is None:
+            self.labels = list(self.slab)
+        else:
+            self.labels = labels
+
+    def _select_labels(self, labels=None):
         logger.debug("select_labels() started with labels={}".format(labels))
-        from . import show_segmentation
         if self.slab is not None and labels is not None:
-            segmentation = show_segmentation.select_labels(self.segmentation, labels, slab=self.slab)
+            segmentation = select_labels(self.segmentation, labels, slab=self.slab)
         else:
             segmentation = (self.segmentation > 0).astype(self.segmentation.dtype)
         self.binar_segmentation = segmentation
 
-    def resize_selected_labels(self):
+    def _resize_selected_labels(self):
         """
         self.select_labels sould be called first
         :return:
@@ -138,11 +150,32 @@ class SegmentationToVTK():
         self.resized_segmentation = segmentation
         self.resized_voxelsize_mm = voxelsize_mm
 
-    def prepare_vtk_file(
+    def set_output(
             self,
-            labels=None,
+            filename=None,
             smoothing=True,
-            vtk_file=None,
+            pvsm_file=None
+    ):
+
+        if filename is None:
+            # vtk_file = "mesh_geom.vtk"
+            filename = "mesh_{}.vtk"
+        self.vtk_file = os.path.expanduser(filename)
+        self.smoothing = smoothing
+        self.pvsm_file = pvsm_file
+
+
+
+
+    def prepare_stl_file(self):
+        pass
+
+    def make_vtk_file(self):
+        self._prepare_vtk_file(labels=self.labels)  # , smoothing=self.smoothing, vtk_file=self.vtk_file)
+
+    def _prepare_vtk_file(
+            self,
+            labels,
             ):
         """
 
@@ -164,17 +197,19 @@ class SegmentationToVTK():
         """
 
 
-        if vtk_file is None:
-            vtk_file = "mesh_geom.vtk"
-        vtk_file = os.path.expanduser(vtk_file)
+        # if vtk_file is None:
+        #     vtk_file = "mesh_geom.vtk"
+        # vtk_file = os.path.expanduser(vtk_file)
+        strlabel = imma.get_nlabels(slab=self.slab, labels=labels, return_mode="str")
+        logger.debug(strlabel)
+        vtk_filename = self.vtk_file.format(strlabel)
+        logger.debug(vtk_filename)
 
-        if labels is None:
-            labels = list(self.slab)
-        self.select_labels(labels)
+        self._select_labels(labels)
         # import sed3
         # sed3.show_slices(self.binar_segmentation)
 
-        self.resize_selected_labels()
+        self._resize_selected_labels()
         # sed3.show_slices(self.resized_segmentation)
 
         # _stats(self.segmentation)
@@ -184,7 +219,7 @@ class SegmentationToVTK():
         # import pdb; pdb.set_trace()
         logger.debug("gen_mesh_from_voxels_mc() started")
         mesh_data = gen_mesh_from_voxels_mc(self.resized_segmentation, self.resized_voxelsize_mm)
-        if smoothing:
+        if self.smoothing:
             mesh_data.coors = smooth_mesh(mesh_data)
             # mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
 
@@ -193,46 +228,38 @@ class SegmentationToVTK():
             # mesh_data = gen_mesh_from_voxels_mc(segmentation, voxelsize_mm * 1.0e-2)
             # mesh_data.coors +=
         logger.debug("gen_mesh_from_voxels_mc() finished")
-        mesh_data.write(vtk_file)
-        return vtk_file
+        mesh_data.write(vtk_filename)
+        return vtk_filename
 
-    def prepare_vtk_files(
+    def make_vtk_files(
             self,
-            labels=None,
-            smoothing=True,
-            vtk_file=None,
+            # labels=None,
+            # smoothing=True,
+            # vtk_file=None,
             # resize_mm=None,
             # resize_voxel_number=None,
             # slab=None,
-            pvsm_file=None
+            # pvsm_file=None
     ):
-        if vtk_file is None:
-            vtk_file = "mesh_{}.vtk"
-        if labels is None:
-            labels = list(self.slab)
-
         vtk_files = []
-        for lab in labels:
+        for lab in self.labels:
             # labi = slab[lab]
-            strlabel = imma.get_nlabels(slab=self.slab, labels=lab, return_mode="str")
-            logger.debug(strlabel)
-            filename = vtk_file.format(strlabel)
-            logger.debug(filename)
-            fn = self.prepare_vtk_file(
-                vtk_file=filename,
+            fn = self._prepare_vtk_file(
+                # vtk_file=self.vtk_file,
                 labels=lab,
                 # slab=slab,
-                smoothing=smoothing,
+                # smoothing=self.smoothing,
                 # resize_mm=resize_mm,
                 # resize_voxel_number=resize_voxel_number,
             )
             if fn is not None:
-                vtk_files.append(filename)
+                vtk_files.append(fn)
 
+        pvsm_file = self.pvsm_file
         if pvsm_file is None:
-            strlabels = imma.get_nlabels(slab=self.slab, labels=labels, return_mode="str")
+            strlabels = imma.get_nlabels(slab=self.slab, labels=self.labels, return_mode="str")
             labels_in_str = "-".join(strlabels)
-            pvsm_file = vtk_file.format(labels_in_str)
+            pvsm_file = self.vtk_file.format(labels_in_str)
             pvsm_file, ext = op.splitext(pvsm_file)
             pvsm_file = pvsm_file + ".pvsm"
         create_pvsm_file(vtk_files, pvsm_filename=pvsm_file)
@@ -280,8 +307,10 @@ def showSegmentation(
     """
 
     s2vtk = SegmentationToVTK(segmentation, voxelsize_mm)
-    s2vtk.set_resize_parameters(degrad, resize_mm=resize_mm, resize_voxel_number=resize_voxel_number)
-    vtk_file = s2vtk.prepare_vtk_file(labels, smoothing=smoothing, vtk_file=vtk_file)
+    s2vtk.set_resize_parameters(degrad=degrad, resize_mm=resize_mm, resize_voxel_number=resize_voxel_number)
+    s2vtk.set_labels(labels)
+    s2vtk.set_output(filename=vtk_file, smoothing=smoothing)
+    vtk_file = s2vtk.make_vtk_file()
     # vtk_file = prepare_vtk_file(segmentation, voxelsize_mm, degrad, labels, smoothing=smoothing,)
     if show:
         if qt_app is None:
