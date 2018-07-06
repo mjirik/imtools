@@ -38,6 +38,12 @@ class ShowSegmemtationCase(unittest.TestCase):
         # self.assertEqual(True, False)
 
     def test_donut(self):
+        expected_output_fn1 = "donut_1.vtk"
+        expected_output_fn2 = "donut_2.vtk"
+        if op.exists(expected_output_fn1):
+            os.remove(expected_output_fn1)
+        if op.exists(expected_output_fn2):
+            os.remove(expected_output_fn2)
         datap = imtools.sample_data.donut()
 
         segmentation = datap['segmentation']
@@ -45,11 +51,11 @@ class ShowSegmemtationCase(unittest.TestCase):
 
         # app.setGraphicsSystem("openvg")
 
-        svtk = ss.SegmentationToVTK(segmentation)
+        svtk = ss.SegmentationToMesh(segmentation)
         svtk.set_resize_parameters(degrad=1)
-        svtk.set_output(filename="donut_{}.vtk", pvsm_file="donut.pvms")
+        svtk.set_output(filename="donut_{}.vtk", pvsm_file="donut.pvms", one_file_per_label=True)
         svtk.set_labels()
-        vtk_files = svtk.make_vtk_files(
+        vtk_files = svtk.make_mesh_files(
         # vtk_files = ss.prepare_vtk_files(
             # vtk_files = ss.prepare_vtk_files(
             # degrad=self.degrad,
@@ -62,10 +68,48 @@ class ShowSegmemtationCase(unittest.TestCase):
         )
         # ss.create_pvsm_file(vtk_files, "donut.pvsm")
 
-        self.assertTrue(op.exists("donut_1.vtk"))
-        self.assertTrue(op.exists("donut_2.vtk"))
+        self.assertTrue(op.exists(expected_output_fn1))
+        self.assertTrue(op.exists(expected_output_fn2))
         # self.assertTrue(op.exists("donut_1-2.pvsm"))
         # self.assertEqual(True, False)
+
+    def test_donut_stl(self):
+        expected_output_fn1 = "donut_1.stl.vtk"
+        expected_output_fn2 = "donut_2.stl.vtk"
+        expected_output_fn3 = "donut_1.stl"
+        expected_output_fn4 = "donut_2.stl"
+        if op.exists(expected_output_fn1):
+            os.remove(expected_output_fn1)
+        if op.exists(expected_output_fn2):
+            os.remove(expected_output_fn2)
+        if op.exists(expected_output_fn3):
+            os.remove(expected_output_fn3)
+        if op.exists(expected_output_fn4):
+            os.remove(expected_output_fn4)
+        datap = imtools.sample_data.donut()
+
+        segmentation = datap['segmentation']
+        voxelsize_mm = datap['voxelsize_mm']
+
+        # app.setGraphicsSystem("openvg")
+
+        svtk = ss.SegmentationToMesh(segmentation)
+        svtk.set_resize_parameters(degrad=1)
+        svtk.set_output(filename="donut_{}.stl", pvsm_file="donut.pvms", one_file_per_label=True)
+        svtk.set_labels()
+        vtk_files = svtk.make_mesh(
+        )
+
+        self.assertTrue(op.exists(expected_output_fn1))
+        self.assertTrue(op.exists(expected_output_fn2))
+        self.assertTrue(op.exists(expected_output_fn3))
+        self.assertTrue(op.exists(expected_output_fn4))
+        # self.assertTrue(op.exists("donut_1-2.pvsm"))
+        # self.assertEqual(True, False)
+        os.remove(expected_output_fn1)
+        os.remove(expected_output_fn2)
+        os.remove(expected_output_fn3)
+        os.remove(expected_output_fn4)
 
     @attr('long')
     # @attr('interactive')

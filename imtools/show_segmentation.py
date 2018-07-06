@@ -23,6 +23,7 @@ import numpy as np
 # import dicom2fem.seg2fem
 # from dicom2fem import seg2fem
 from dicom2fem.seg2fem import gen_mesh_from_voxels_mc, smooth_mesh
+from dicom2fem import vtk2stl
 from .image_manipulation import select_labels
 from . import image_manipulation as imma
 
@@ -39,7 +40,10 @@ def _auto_segmentation(segmentation, label=None):
     return segmentation
 
 
-class SegmentationToVTK():
+class SegmentationToMesh():
+    """
+
+    """
 
     def __init__(self,
                        segmentation=None,
@@ -193,47 +197,36 @@ class SegmentationToVTK():
         self.one_file_per_label = one_file_per_label
 
 
-    # def make(self):
-    #     op.extsep
+    def make_mesh(self):
+        if self.one_file_per_label:
+            self.make_mesh_files()
+        else:
+            self.make_mesh_file()
 
-
-    def make_stl_file(self):
-        pass
-
-    def make_vtk_file(self):
-        self._prepare_vtk_file(labels=self.labels)  # , smoothing=self.smoothing, vtk_file=self.vtk_file)
-
-    def _prepare_vtk_file(
+    def make_mesh_file(
             self,
-            labels,
+            labels=None,
             ):
-        """
+        """ Make one mesh (vtk or stl) file
 
-        :param segmentation:
-        :param voxelsize_mm:
-        :param degrad:
-        :param label:
-        :param smoothing:
-        :param vtk_file:
-        :param qt_app:
-        :param show:
-        :param resize_mm: resize to defined size of voxel
-        :param resize_voxel_number: resize to defined voxel number (aproximatly)
+        :param label: labels from prev use of set_labels are used if None
 
-        :return:
+        :return: filename of output file
 
         Funkce vrací trojrozměrné porobné jako data['segmentation']
         v data['slab'] je popsáno, co která hodnota znamená
         """
 
+        if labels is None:
+            labels=self.labels
 
-        # if vtk_file is None:
-        #     vtk_file = "mesh_geom.vtk"
-        # vtk_file = os.path.expanduser(vtk_file)
         strlabel = imma.get_nlabels(slab=self.slab, labels=labels, return_mode="str")
+        if strlabel is list:
+            # if one file with {} in pattern is created
+            strlabel = "-".join(strlabel)
         logger.debug(strlabel)
-        vtk_filename = self.output_file_pattern.format(strlabel)
-        logger.debug(vtk_filename)
+        mesh_filename = self.output_file_pattern.format(strlabel)
+        logger.debug(mesh_filename)
 
         self.select_labels(labels)
         # import sed3
@@ -258,10 +251,18 @@ class SegmentationToVTK():
             # mesh_data = gen_mesh_from_voxels_mc(segmentation, voxelsize_mm * 1.0e-2)
             # mesh_data.coors +=
         logger.debug("gen_mesh_from_voxels_mc() finished")
+        pth, ext = op.splitext(mesh_filename)
+        if ext == ".stl":
+            vtk_filename = mesh_filename + ".vtk"
+        else:
+            vtk_filename = mesh_filename
         mesh_data.write(vtk_filename)
-        return vtk_filename
 
-    def make_vtk_files(
+        if ext == ".stl":
+            vtk2stl.vtk2stl(vtk_filename, mesh_filename)
+        return mesh_filename
+
+    def make_mesh_files(
             self,
             # labels=None,
             # smoothing=True,
@@ -274,7 +275,7 @@ class SegmentationToVTK():
         vtk_files = []
         for lab in self.labels:
             # labi = slab[lab]
-            fn = self._prepare_vtk_file(
+            fn = self.make_mesh_file(
                 # vtk_file=self.vtk_file,
                 labels=lab,
                 # slab=slab,
@@ -336,11 +337,11 @@ def showSegmentation(
     v data['slab'] je popsáno, co která hodnota znamená
     """
 
-    s2vtk = SegmentationToVTK(segmentation, voxelsize_mm)
+    s2vtk = SegmentationToMesh(segmentation, voxelsize_mm)
     s2vtk.set_resize_parameters(degrad=degrad, resize_mm=resize_mm, resize_voxel_number=resize_voxel_number)
     s2vtk.set_labels(labels)
     s2vtk.set_output(filename=vtk_file, smoothing=smoothing)
-    vtk_file = s2vtk.make_vtk_file()
+    vtk_file = s2vtk.make_mesh_file()
     # vtk_file = prepare_vtk_file(segmentation, voxelsize_mm, degrad, labels, smoothing=smoothing,)
     if show:
         if qt_app is None:

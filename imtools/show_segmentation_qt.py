@@ -404,7 +404,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
         #     logger.info("Nothing found for labels " + str(labels))
         #     return
         # show_segmentation.SegmentationToVTK()
-        s2vtk = show_segmentation.SegmentationToVTK(
+        s2vtk = show_segmentation.SegmentationToMesh(
             self.segmentation,
             self.voxelsize_mm,
             slab=self.slab_wg.slab
@@ -417,14 +417,14 @@ class ShowSegmentationWidget(QtGui.QWidget):
         )
         if together_vtk_file:
 
-            vtk_files = s2vtk.make_vtk_file(
+            vtk_files = s2vtk.make_mesh_file(
                 # self.segmentation,
                 labels=labels,
                 vtk_file=vtk_file,
                 smoothing=self.smoothing,
             )
         else:
-            vtk_files = s2vtk.make_vtk_files(
+            vtk_files = s2vtk.make_mesh_files(
                 # self.segmentation,
                 labels=labels,
                 vtk_file=vtk_file,
