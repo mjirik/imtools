@@ -42,7 +42,8 @@ def _auto_segmentation(segmentation, label=None):
 
 class SegmentationToMesh():
     """
-
+    Make surface model from volumetric data.
+    Use set_*() functions and then run make_mesh()
     """
 
     def __init__(self,
