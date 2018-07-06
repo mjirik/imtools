@@ -415,21 +415,26 @@ class ShowSegmentationWidget(QtGui.QWidget):
             resize_mm=self.resize_mm,
             resize_voxel_number=self.resize_voxel_number,
         )
+        s2vtk.set_labels(labels)
         if together_vtk_file:
 
-            vtk_files = s2vtk.make_mesh_file(
-                # self.segmentation,
-                labels=labels,
-                vtk_file=vtk_file,
-                smoothing=self.smoothing,
-            )
+            s2vtk.set_output(filename=vtk_file, smoothing=self.smoothing, one_file_per_label=False)
+
+            # vtk_files = s2vtk.make_mesh_file(
+            #     # self.segmentation,
+            #     labels=labels,
+            #     vtk_file=vtk_file,
+            #     smoothing=self.smoothing,
+            # )
         else:
-            vtk_files = s2vtk.make_mesh_files(
-                # self.segmentation,
-                labels=labels,
-                vtk_file=vtk_file,
-                smoothing=self.smoothing,
-            )
+            s2vtk.set_output(filename=vtk_file, smoothing=self.smoothing, one_file_per_label=True)
+            # vtk_files = s2vtk.make_mesh_files(
+            #     # self.segmentation,
+            #     labels=labels,
+            #     vtk_file=vtk_file,
+            #     smoothing=self.smoothing,
+            # )
+        s2vtk.make_mesh()
 
 
         # self._run_viewer()
