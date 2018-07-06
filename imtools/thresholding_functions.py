@@ -305,8 +305,13 @@ def histogram(data, interactivity, histogram_points=1000, start=-1, end=-1,
     return bin_centers, hist
 
 
-def get_intensities_on_seed_position(data, seeds_inds):
+def get_intensities_on_seed_position(data, seeds):
 
+    from . import image_manipulation as imma
+    seeds_inds = imma.as_seeds_inds(seeds, data.shape)
+    import sed3
+    ed = sed3.sed3(data, seeds)
+    ed.show()
     # Zalozeni pole pro ulozeni seedu
     arrSeed = []
     # Zjisteni poctu seedu.

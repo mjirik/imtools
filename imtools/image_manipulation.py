@@ -616,3 +616,13 @@ def random_rotate_paramteres():
 
     return phi_deg, theta_deg
     # TODO independent on voxlelsize (2016-techtest-rotate3d.ipynb)
+
+
+def as_seeds_inds(seeds, datashape):
+    sh1 = datashape
+    sh2 = np.asarray(seeds).shape
+    if np.array_equal(sh1, sh2):
+        seeds_inds = np.nonzero(seeds)
+    else:
+        seeds_inds = seeds
+    return seeds_inds

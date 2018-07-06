@@ -33,6 +33,7 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as Navigatio
 import numpy as np
 
 from . import thresholding_functions
+from . import image_manipulation as imma
 
 class uiThresholdQt(QtGui.QDialog):
     def __init__(self, *pars, **params):
@@ -131,12 +132,10 @@ class uiThreshold:
         self.cmap = cmap
         self.number = number
         self.inputSigma = inputSigma
+        # if shapes of input data and seeds are the same
+        self.seeds = imma.as_seeds_inds(seeds, data.shape)
         if threshold is None:
-            threshold = prepare_threshold_from_seeds(
-                data=data,
-                seeds=seeds,
-                min_threshold_auto_method=auto_method
-            )
+            threshold = prepare_threshold_from_seeds(data=data, seeds=self.seeds, min_threshold_auto_method=auto_method)
         logger.debug("threshold after first evaluation{}".format(threshold))
         # import ipdb; ipdb.set_trace()
         self.threshold = threshold
@@ -145,14 +144,7 @@ class uiThreshold:
         self.ICBinaryClosingIterations = binaryClosingIterations
         self.ICBinaryOpeningIterations = binaryOpeningIterations
         self.auto_method=auto_method
-        sh1 = data.shape
-        sh2 = np.asarray(seeds).shape
 
-        # if shapes of input data and seeds are the same
-        if np.array_equal(sh1, sh2):
-            self.seeds = np.nonzero(seeds)
-        else:
-            self.seeds = seeds
         self.useSeedsOfCompactObjects = useSeedsOfCompactObjects
         self.fillHoles = fillHoles
 
@@ -454,20 +446,15 @@ class uiThreshold:
             openNum = self.ICBinaryOpeningIterations
 
         # make_image_processing(sigma, min_threshold, max_threshold, closeNum, openNum, auto_method=self.)
-        self.imgFiltering, self.threshold = make_image_processing(
-            data=self.data,
-            seeds=self.seeds,
-            sigma_mm=sigma,
-            min_threshold=self.threshold,
-            max_threshold=self.threshold_upper,
-            closeNum=closeNum,
-            openNum=openNum,
-            min_threshold_auto_method=self.auto_method,
-            fill_holes=self.fillHoles,
-            get_priority_objects=self.get_priority_objects,
-            nObj=self.nObj,
-            voxelsize_mm=self.voxelsize_mm
-        )
+        self.imgFiltering, self.threshold = make_image_processing(data=self.data, voxelsize_mm=self.voxelsize_mm,
+                                                                  seeds_inds=self.seeds, sigma_mm=sigma,
+                                                                  min_threshold=self.threshold,
+                                                                  max_threshold=self.threshold_upper, closeNum=closeNum,
+                                                                  openNum=openNum,
+                                                                  min_threshold_auto_method=self.auto_method,
+                                                                  fill_holes=self.fillHoles,
+                                                                  get_priority_objects=self.get_priority_objects,
+                                                                  nObj=self.nObj)
         # Vykresleni dat
         if (self.interactivity == True):
             self.drawVisualization()
@@ -712,8 +699,7 @@ class uiThreshold:
 def prepare_threshold_from_seeds(data, seeds, min_threshold_auto_method):
 
     if seeds is not None:
-        intensities_on_seeds = thresholding_functions.get_intensities_on_seed_position(
-            data, seeds)
+        intensities_on_seeds = thresholding_functions.get_intensities_on_seed_position(data, seeds)
     else:
         intensities_on_seeds = None
     logger.debug("intensities on seeds {}".format(intensities_on_seeds))
@@ -727,11 +713,9 @@ def prepare_threshold_from_seeds(data, seeds, min_threshold_auto_method):
     logger.debug("min threshold prepared {}".format(intensities_on_seeds))
     return min_threshold
 
-def make_image_processing(
-        data, voxelsize_mm, seeds=None,
-        sigma_mm=1, min_threshold=None, max_threshold=None, closeNum=0, openNum=0,
-        min_threshold_auto_method="", fill_holes=True, get_priority_objects=True, nObj=1
-):
+def make_image_processing(data, voxelsize_mm, seeds_inds=None, sigma_mm=1, min_threshold=None, max_threshold=None,
+                          closeNum=0, openNum=0, min_threshold_auto_method="", fill_holes=True,
+                          get_priority_objects=True, nObj=1):
     if (sys.version_info[0] < 3):
         import copy
         imgFiltering = copy.copy(data)
@@ -747,11 +731,8 @@ def make_image_processing(
         del(sigmaNew)
 
     if min_threshold is None:
-        min_threshold = prepare_threshold_from_seeds(
-            data=imgFiltering,
-            seeds=seeds,
-            min_threshold_auto_method=min_threshold_auto_method
-        )
+        min_threshold = prepare_threshold_from_seeds(data=imgFiltering, seeds=seeds_inds,
+                                                     min_threshold_auto_method=min_threshold_auto_method)
 
     imgFiltering = thresholding_functions.thresholding(
         imgFiltering,
@@ -774,7 +755,7 @@ def make_image_processing(
     # Zjisteni nejvetsich objektu.
     if get_priority_objects:
         imgFiltering = thresholding_functions.getPriorityObjects(
-            imgFiltering, nObj, seeds)
+            imgFiltering, nObj, seeds_inds)
 
     return imgFiltering, min_threshold
 

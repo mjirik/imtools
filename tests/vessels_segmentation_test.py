@@ -113,9 +113,14 @@ class SegmentationTest(unittest.TestCase):
         slab = datap["slab"]
         vessel_seeds = datap["seeds"]
 
+        # pyed = sed3.sed3(data3d, seeds=vessel_seeds)
+        # pyed.show()
+
         outputTmp = imsegmentation.vesselSegmentation(
             data3d,  # .astype(np.uint8),
-            segmentation=(segm == slab['liver']),  # .astype(np.uint8),
+            # segmentation=(segm == slab['liver']),  # .astype(np.uint8),
+            segmentation=segm,  # .astype(np.uint8),
+            organ_label=["liver", "porta"],
             # segmentation = oseg.orig_scale_segmentation,
             voxelsize_mm=voxelsize_mm,
             seeds=vessel_seeds,
@@ -136,8 +141,8 @@ class SegmentationTest(unittest.TestCase):
         )
 
         # ověření výsledku
-        # pyed = sed3.sed3(errim, contour=segm==slab['porta'])
-        # pyed.show()
+        pyed = sed3.sed3(errim, contour=segm==slab['porta'])
+        pyed.show()
         # evaluation
         sum_of_wrong_voxels = np.sum(errim)
         sum_of_voxels = np.prod(segm.shape)
