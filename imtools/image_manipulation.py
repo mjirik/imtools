@@ -40,6 +40,8 @@ def select_labels(segmentation, labels, slab=None):
         dadd = (segmentation == lab)
 
         ds = ds | dadd
+    if len(labels) == 0:
+        logger.warning("Labels not found in slab.")
 
     return ds
 

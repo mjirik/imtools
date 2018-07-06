@@ -69,20 +69,11 @@ class SegmentationTest(unittest.TestCase):
         voxelsize_mm = datap["voxelsize_mm"]
         slab = datap["slab"]
 
-        outputTmp = imsegmentation.vesselSegmentation(
-            data3d,  # .astype(np.uint8),
-            segmentation=(segm == slab['liver']),  # .astype(np.uint8),
-            # segmentation = oseg.orig_scale_segmentation,
-            voxelsize_mm=voxelsize_mm,
-            threshold=180,
-            inputSigma=0.15,
-            dilationIterations=2,
-            nObj=1,
-            interactivity=False,
-            # interactivity=True,
-            biggestObjects=True,
-            binaryClosingIterations=5,
-            binaryOpeningIterations=1)
+        outputTmp = imsegmentation.vesselSegmentation(data3d, segmentation=(segm == slab['liver']), threshold=180,
+                                                      voxelsize_mm=voxelsize_mm, inputSigma=0.15,
+                                                      aoi_dilation_iterations=2, nObj=1, biggestObjects=True,
+                                                      interactivity=False, binaryClosingIterations=5,
+                                                      binaryOpeningIterations=1)
 
         # @TODO opravit chybu v vesselSegmentation
         outputTmp = (outputTmp == 2)
@@ -116,23 +107,11 @@ class SegmentationTest(unittest.TestCase):
         # pyed = sed3.sed3(data3d, seeds=vessel_seeds)
         # pyed.show()
 
-        outputTmp = imsegmentation.vesselSegmentation(
-            data3d,  # .astype(np.uint8),
-            # segmentation=(segm == slab['liver']),  # .astype(np.uint8),
-            segmentation=segm,  # .astype(np.uint8),
-            organ_label=["liver", "porta"],
-            # segmentation = oseg.orig_scale_segmentation,
-            voxelsize_mm=voxelsize_mm,
-            seeds=vessel_seeds,
-            # threshold=180,
-            inputSigma=0.15,
-            dilationIterations=2,
-            nObj=1,
-            interactivity=False,
-            # interactivity=True,
-            biggestObjects=True,
-            binaryClosingIterations=5,
-            binaryOpeningIterations=1)
+        outputTmp = imsegmentation.vesselSegmentation(data3d, segmentation=segm, voxelsize_mm=voxelsize_mm,
+                                                      inputSigma=0.15, aoi_dilation_iterations=2, nObj=1,
+                                                      biggestObjects=True, seeds=vessel_seeds, interactivity=False,
+                                                      binaryClosingIterations=5, binaryOpeningIterations=1,
+                                                      aoi_label=["liver", "porta"], slab=slab)
 
         # @TODO opravit chybu v vesselSegmentation
         outputTmp = (outputTmp == 2)
@@ -173,20 +152,11 @@ class SegmentationTest(unittest.TestCase):
         # pyed = sed3.sed3(data3d)
         # pyed.show()
 
-        outputTmp = imsegmentation.vesselSegmentation(
-            data3d,  # .astype(np.uint8),
-            segmentation=(segm == slab['liver']),  # .astype(np.uint8),
-            # segmentation = oseg.orig_scale_segmentation,
-            voxelsize_mm=voxelsize_mm,
-            threshold=180,
-            inputSigma=0.15,
-            dilationIterations=2,
-            nObj=1,
-            interactivity=False,
-            # interactivity=True,
-            biggestObjects=True,
-            binaryClosingIterations=5,
-            binaryOpeningIterations=1)
+        outputTmp = imsegmentation.vesselSegmentation(data3d, segmentation=(segm == slab['liver']), threshold=180,
+                                                      voxelsize_mm=voxelsize_mm, inputSigma=0.15,
+                                                      aoi_dilation_iterations=2, nObj=1, biggestObjects=True,
+                                                      interactivity=False, binaryClosingIterations=5,
+                                                      binaryOpeningIterations=1)
 
 # ověření výsledku
         pyed = sed3.sed3(outputTmp, contour=segm==slab['porta'])

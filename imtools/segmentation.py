@@ -19,28 +19,19 @@ from imtools import uiThreshold
 import logging
 logger = logging.getLogger(__name__)
 import numpy
+import numpy as np
 import scipy
 import scipy.ndimage
 
 from . import image_manipulation
 
 
-def vesselSegmentation(data, segmentation=-1, threshold=None,
-                       voxelsize_mm=[1, 1, 1],
-                       inputSigma=-1, dilationIterations=0,
-                       dilationStructure=None, nObj=10, biggestObjects=False,
-                       useSeedsOfCompactObjects=False, seeds=None,
-                       interactivity=True, binaryClosingIterations=2,
-                       binaryOpeningIterations=0,
-                       smartInitBinaryOperations=False, returnThreshold=False,
-                       binaryOutput=True, returnUsedData=False,
-                       qapp=None,
-                       auto_method='',
-                       organ_label=1,
-                       forbidden_label=None,
-                       slab=None
-                       # segmentation_for_visualization=None,
-                       ):
+def vesselSegmentation(data, segmentation=-1, threshold=None, voxelsize_mm=[1, 1, 1], inputSigma=-1,
+                       aoi_dilation_iterations=0, aoi_dilation_structure=None, nObj=10, biggestObjects=False,
+                       useSeedsOfCompactObjects=False, seeds=None, interactivity=True, binaryClosingIterations=2,
+                       binaryOpeningIterations=0, smartInitBinaryOperations=False, returnThreshold=False,
+                       binaryOutput=True, returnUsedData=False, qapp=None, auto_method='', aoi_label=1,
+                       forbidden_label=None, slab=None):
     """
 
     Vessel segmentation z jater.
@@ -56,9 +47,9 @@ def vesselSegmentation(data, segmentation=-1, threshold=None,
         :param threshold: - prah
         :param voxelsize_mm: - (vektor o hodnote 3) rozmery jednoho voxelu
         :param inputSigma: - pocatecni hodnota pro prahovani
-        :param dilationIterations: - pocet operaci dilation nad zakladni oblasti pro
+        :param aoi_dilation_iterations: - pocet operaci dilation nad zakladni oblasti pro
             segmentaci ("segmantation")
-        :param dilationStructure: - struktura pro operaci dilation
+        :param aoi_dilation_structure: - struktura pro operaci dilation
         :param nObj: - oznacuje, kolik nejvetsich objektu se ma vyhledat - pokud je
             rovno 0 (nule), vraci cela data
         :param biggestObjects: - moznost, zda se maji vracet nejvetsi objekty nebo ne
@@ -77,7 +68,7 @@ def vesselSegmentation(data, segmentation=-1, threshold=None,
         :param binaryOutput: - zda ma byt vystup vracen binarne nebo ne (binarnim
             vystupem se rozumi: cokoliv jineho nez hodnota 0 je hodnota 1)
         :param returnUsedData: - vrati pouzita data
-        :param organ_label: label of organ where is the target vessel
+        :param aoi_label: label of organ where is the target vessel
         :param forbidden_label: int or list of ints. Labels of areas which are not used for segmentation.
 
     Output:
@@ -121,12 +112,15 @@ vybrat prioritni objekty!')
     # number stanovi doporucenou horni hranici parametru gauss. filtru.
     number = (numpy.round((2 * voxelV ** (1.0 / 3.0)), 2))
 
-    target_organ_segmentation = image_manipulation.select_labels(segmentation, organ_label, slab)
+    if aoi_label is None:
+        target_organ_segmentation = np.ones(segmentation.shape)
+    else:
+        target_organ_segmentation = image_manipulation.select_labels(segmentation, aoi_label, slab)
     # Operace dilatace (dilation) nad samotnymi jatry ("segmentation").
-    if(dilationIterations > 0.0):
+    if(aoi_dilation_iterations > 0.0):
         target_organ_segmentation = scipy.ndimage.binary_dilation(
-            input=target_organ_segmentation, structure=dilationStructure,
-            iterations=dilationIterations)
+            input=target_organ_segmentation, structure=aoi_dilation_structure,
+            iterations=aoi_dilation_iterations)
 
     # remove forbidden areas from segmentation
     if forbidden_label is not None:
@@ -149,6 +143,7 @@ vybrat prioritni objekty!')
             'ERROR: (debug message) Data nejsou takoveho typu, aby se daly \
 prevest na typ "numpy.float" => muze dojit k errorum')
         logger.debug('Ukoncuji funkci!')
+        raise ValueError("Cannot cast input data to numpy.float")
         return None
 
     if (preparedData == False).all():
@@ -157,6 +152,7 @@ prevest na typ "numpy.float" => muze dojit k errorum')
 all is true == data is all false == bad segmentation matrix (if data matrix is \
 ok)')
         logger.debug('Ukoncuji funkci!')
+        raise ValueError("Wrong input data. All is true == data is all false == bad segmentation matrix (if data matrix is ok)")
         return None
 
     # del(data)

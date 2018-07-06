@@ -1,14 +1,15 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
+import glob
+import logging
 import os
-import zipfile
 import subprocess
 import sys
-import glob
-# import traceback
+import zipfile
 
-import logging
 import numpy as np
+
+# import traceback
 
 logger = logging.getLogger(__name__)
 
@@ -160,6 +161,7 @@ def get(data_label=None, destination_dir="."):
                     "expected hash: '" + str(expected_hash) + "'\n" + \
                     "downloaded hash: '" + str(downloaded_hash) + "'\n")
 
+
 def checksum(path, hashfunc='md5'):
     """
     Return checksum given by path. Wildcards can be used in check sum. Function is strongly
@@ -187,6 +189,7 @@ def checksum(path, hashfunc='md5'):
     hash = checksumdir._reduce_hash(hashvalues, hashfunc=hash_func)
     return hash
 
+
 def donut():
     """
     Generate donut like shape with stick inside
@@ -206,7 +209,6 @@ def donut():
     data3d = segmentation * 100 + np.random.random(segmentation.shape) * 30
     voxelsize_mm=[3,2,1]
 
-    import io3d
     datap = {
         'data3d': data3d,
         'segmentation': segmentation.astype(np.int8),

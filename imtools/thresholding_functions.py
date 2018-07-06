@@ -309,9 +309,9 @@ def get_intensities_on_seed_position(data, seeds):
 
     from . import image_manipulation as imma
     seeds_inds = imma.as_seeds_inds(seeds, data.shape)
-    import sed3
-    ed = sed3.sed3(data, seeds)
-    ed.show()
+    # import sed3
+    # ed = sed3.sed3(data, seeds)
+    # ed.show()
     # Zalozeni pole pro ulozeni seedu
     arrSeed = []
     # Zjisteni poctu seedu.
