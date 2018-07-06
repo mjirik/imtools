@@ -141,8 +141,8 @@ class SegmentationTest(unittest.TestCase):
         )
 
         # ověření výsledku
-        pyed = sed3.sed3(errim, contour=segm==slab['porta'])
-        pyed.show()
+        # pyed = sed3.sed3(errim, contour=segm==slab['porta'])
+        # pyed.show()
         # evaluation
         sum_of_wrong_voxels = np.sum(errim)
         sum_of_voxels = np.prod(segm.shape)
