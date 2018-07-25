@@ -225,7 +225,7 @@ ok)')
             useSeedsOfCompactObjects=useSeedsOfCompactObjects,
             binaryClosingIterations=closing, binaryOpeningIterations=opening,
             seeds=seeds,
-            auto_method=auto_method,
+            threshold_auto_method=auto_method,
         )
 
         output = uiT.run()
@@ -237,7 +237,7 @@ ok)')
             useSeedsOfCompactObjects=useSeedsOfCompactObjects,
             binaryClosingIterations=closing, binaryOpeningIterations=opening,
             seeds=seeds,
-            auto_method=auto_method,
+            threshold_auto_method=auto_method,
         )
         output = uiT.run()
 

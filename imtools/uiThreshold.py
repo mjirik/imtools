@@ -86,11 +86,12 @@ class uiThreshold:
     """
 
     def __init__(self, data, voxel, threshold=None, interactivity=True,
-                 number=100.0, inputSigma=-1, nObj=10,  biggestObjects=True,
+                 number=100.0, inputSigma=-1, nObj=10, biggestObjects=True,
                  useSeedsOfCompactObjects=True,
                  binaryClosingIterations=2, binaryOpeningIterations=0,
-                 seeds=None, cmap=matplotlib.cm.Greys_r, fillHoles=True, 
-                 figure=None, auto_method='', threshold_upper=None,
+                 seeds=None, cmap=matplotlib.cm.Greys_r, fillHoles=True,
+                 figure=None, threshold_auto_method='', threshold_upper=None,
+                 debug=True
                  ):
         """
 
@@ -110,7 +111,7 @@ class uiThreshold:
                    specifikce objekty. It can be same shape like data, or it can be
                    indexes e.g. from np.nonzero(seeds)
             :param cmap: grey
-            :param auto_method: 'otsu' use otsu threshold, other string use our liver automatic
+            :param threshold_auto_method: 'otsu' use otsu threshold, other string use our liver automatic
 
         """
 
@@ -134,16 +135,20 @@ class uiThreshold:
         self.inputSigma = inputSigma
         # if shapes of input data and seeds are the same
         self.seeds = imma.as_seeds_inds(seeds, data.shape)
+
+        if debug:
+            logger.debug("threshold {}".format(threshold))
         if threshold is None:
-            threshold = prepare_threshold_from_seeds(data=data, seeds=self.seeds, min_threshold_auto_method=auto_method)
-        logger.debug("threshold after first evaluation{}".format(threshold))
+            threshold = prepare_threshold_from_seeds(data=data, seeds=self.seeds, min_threshold_auto_method=threshold_auto_method)
+        if debug:
+            logger.debug("threshold after first evaluation {}".format(threshold))
         # import ipdb; ipdb.set_trace()
         self.threshold = threshold
         self.nObj = nObj
         self.biggestObjects = biggestObjects
         self.ICBinaryClosingIterations = binaryClosingIterations
         self.ICBinaryOpeningIterations = binaryOpeningIterations
-        self.auto_method=auto_method
+        self.auto_method=threshold_auto_method
 
         self.useSeedsOfCompactObjects = useSeedsOfCompactObjects
         self.fillHoles = fillHoles
@@ -250,17 +255,18 @@ class uiThreshold:
                 self.cmap)
 
             # Zalozeni mist pro slidery
+            left_slider_position = 0.18
             self.axcolor = 'white'  # lightgoldenrodyellow
             self.axmin = self.fig.add_axes(
-                [0.20, 0.24, 0.55, 0.03], axisbg=self.axcolor)
+                [left_slider_position, 0.24, 0.55, 0.03], axisbg=self.axcolor)
             self.axmax = self.fig.add_axes(
-                [0.20, 0.20, 0.55, 0.03], axisbg=self.axcolor)
+                [left_slider_position, 0.20, 0.55, 0.03], axisbg=self.axcolor)
             self.axclosing = self.fig.add_axes(
-                [0.20, 0.16, 0.55, 0.03], axisbg=self.axcolor)
+                [left_slider_position, 0.16, 0.55, 0.03], axisbg=self.axcolor)
             self.axopening = self.fig.add_axes(
-                [0.20, 0.12, 0.55, 0.03], axisbg=self.axcolor)
+                [left_slider_position, 0.12, 0.55, 0.03], axisbg=self.axcolor)
             self.axsigma = self.fig.add_axes(
-                [0.20, 0.08, 0.55, 0.03], axisbg=self.axcolor)
+                [left_slider_position, 0.08, 0.55, 0.03], axisbg=self.axcolor)
 
             # Vlastni vytvoreni slideru
 
@@ -269,31 +275,33 @@ class uiThreshold:
             minSigma = 0.00
 
 
-
+            init_thr = self.min0
+            if self.threshold is not None:
+                init_thr = self.threshold
             self.smin = Slider(
-                self.axmin, 'Min. threshold   ' + str(self.min0),
-                self.min0, self.max0, valinit=self.min0, dragging=True)
+                self.axmin, 'Min. thr.' + str(self.min0),
+                self.min0, self.max0, valinit=init_thr, dragging=True, valfmt="%4g")
                 # self.min0, self.max0, valinit=self.threshold, dragging=True)
             self.smax = Slider(
-                self.axmax, 'Max. threshold   ' + str(self.min0),
+                self.axmax, 'Max. thr.' + str(self.min0),
                 self.min0, self.max0, valinit=self.max0, dragging=True)
 
-            if(self.ICBinaryClosingIterations >= 1):
+            if (self.ICBinaryClosingIterations >= 1):
                 self.sclose = Slider(
-                    self.axclosing, 'Binary closing', minBinaryClosing,
+                    self.axclosing, 'Bin. closing', minBinaryClosing,
                     100, valinit=self.ICBinaryClosingIterations, dragging=False)
             else:
                 self.sclose = Slider(
-                    self.axclosing, 'Binary closing', minBinaryClosing, 100,
+                    self.axclosing, 'Bin. closing', minBinaryClosing, 100,
                     valinit=0, dragging=False)
 
-            if(self.ICBinaryOpeningIterations >= 1):
+            if (self.ICBinaryOpeningIterations >= 1):
                 self.sopen = Slider(
-                    self.axopening, 'Binary opening', minBinaryOpening,
+                    self.axopening, 'Bin. opening', minBinaryOpening,
                     100, valinit=self.ICBinaryOpeningIterations, dragging=False)
             else:
                 self.sopen = Slider(
-                    self.axopening, 'Binary opening', minBinaryOpening, 100,
+                    self.axopening, 'Bin. opening', minBinaryOpening, 100,
                     valinit=0, dragging=False)
 
             self.ssigma = Slider(
@@ -308,34 +316,35 @@ class uiThreshold:
             self.ssigma.on_changed(self.updateImage)
 
             # Zalozeni mist pro tlacitka
+            letf_button_position = 0.80
             self.axbuttprev1_5 = self.fig.add_axes(
-                [0.82, 0.24, 0.03, 0.035], axisbg=self.axcolor)
+                [letf_button_position + 0.02, 0.24, 0.03, 0.035], axisbg=self.axcolor)
             self.axbuttprev1 = self.fig.add_axes(
-                [0.85, 0.24, 0.03, 0.035], axisbg=self.axcolor)
+                [letf_button_position + 0.05, 0.24, 0.03, 0.035], axisbg=self.axcolor)
             self.axbuttnext1 = self.fig.add_axes(
-                [0.88, 0.24, 0.03, 0.035], axisbg=self.axcolor)
+                [letf_button_position + 0.09, 0.24, 0.03, 0.035], axisbg=self.axcolor)
             self.axbuttnext1_5 = self.fig.add_axes(
-                [0.91, 0.24, 0.03, 0.035], axisbg=self.axcolor)
+                [letf_button_position + 0.12, 0.24, 0.03, 0.035], axisbg=self.axcolor)
             self.axbuttprev2_5 = self.fig.add_axes(
-                [0.82, 0.20, 0.03, 0.035], axisbg=self.axcolor)
+                [letf_button_position + 0.02, 0.20, 0.03, 0.035], axisbg=self.axcolor)
             self.axbuttprev2 = self.fig.add_axes(
-                [0.85, 0.20, 0.03, 0.035], axisbg=self.axcolor)
+                [letf_button_position + 0.05, 0.20, 0.03, 0.035], axisbg=self.axcolor)
             self.axbuttnext2 = self.fig.add_axes(
-                [0.88, 0.20, 0.03, 0.035], axisbg=self.axcolor)
+                [letf_button_position + 0.09, 0.20, 0.03, 0.035], axisbg=self.axcolor)
             self.axbuttnext2_5 = self.fig.add_axes(
-                [0.91, 0.20, 0.03, 0.035], axisbg=self.axcolor)
+                [letf_button_position + 0.12, 0.20, 0.03, 0.035], axisbg=self.axcolor)
             self.axbuttnextclosing = self.fig.add_axes(
-                [0.89, 0.16, 0.05, 0.035], axisbg=self.axcolor)
+                [letf_button_position + 0.09, 0.16, 0.05, 0.035], axisbg=self.axcolor)
             self.axbuttprevclosing = self.fig.add_axes(
-                [0.82, 0.16, 0.05, 0.035], axisbg=self.axcolor)
+                [letf_button_position + 0.02, 0.16, 0.05, 0.035], axisbg=self.axcolor)
             self.axbuttnextopening = self.fig.add_axes(
-                [0.89, 0.12, 0.05, 0.035], axisbg=self.axcolor)
+                [letf_button_position + 0.09, 0.12, 0.05, 0.035], axisbg=self.axcolor)
             self.axbuttprevopening = self.fig.add_axes(
-                [0.82, 0.12, 0.05, 0.035], axisbg=self.axcolor)
+                [letf_button_position + 0.02, 0.12, 0.05, 0.035], axisbg=self.axcolor)
             self.axbuttreset = self.fig.add_axes(
-                [0.82, 0.07, 0.08, 0.045], axisbg=self.axcolor)
+                [letf_button_position + 0.01, 0.07, 0.08, 0.045], axisbg=self.axcolor)
             self.axbuttcontinue = self.fig.add_axes(
-                [0.91, 0.07, 0.08, 0.045], axisbg=self.axcolor)
+                [letf_button_position + 0.09, 0.07, 0.08, 0.045], axisbg=self.axcolor)
 
             # Zalozeni tlacitek
             self.bnext1 = Button(self.axbuttnext1, '+1')
@@ -351,7 +360,7 @@ class uiThreshold:
             self.bnextopening = Button(self.axbuttnextopening, '+1.0')
             self.bprevopening = Button(self.axbuttprevopening, '-1.0')
             self.breset = Button(self.axbuttreset, 'Reset')
-            self.bcontinue = Button(self.axbuttcontinue, 'Next UI')
+            self.bcontinue = Button(self.axbuttcontinue, 'Done')
 
             # Funkce tlacitek pri jejich aktivaci
             self.bnext1.on_clicked(self.buttonMinNext)
