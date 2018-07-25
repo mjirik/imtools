@@ -713,51 +713,70 @@ def prepare_threshold_from_seeds(data, seeds, min_threshold_auto_method):
     logger.debug("min threshold prepared {}".format(intensities_on_seeds))
     return min_threshold
 
-def make_image_processing(data, voxelsize_mm, seeds_inds=None, sigma_mm=1, min_threshold=None, max_threshold=None,
-                          closeNum=0, openNum=0, min_threshold_auto_method="", fill_holes=True,
-                          get_priority_objects=True, nObj=1):
+def make_image_processing(
+        data, voxelsize_mm, seeds_inds=None, sigma_mm=1, min_threshold=None, max_threshold=None,
+        closeNum=0, openNum=0, min_threshold_auto_method="", fill_holes=True,
+        get_priority_objects=True, nObj=1, debug=True):
     if (sys.version_info[0] < 3):
         import copy
-        imgFiltering = copy.copy(data)
+        data_copy = copy.copy(data)
     else:
-        imgFiltering = data.copy()
+        data_copy = data.copy()
 
 
     if sigma_mm > 0:
         sigmaNew = thresholding_functions.calculateSigma(voxelsize_mm, sigma_mm)
-        imgFiltering = thresholding_functions.gaussFilter(
-            imgFiltering, sigmaNew)
+        data_copy = thresholding_functions.gaussFilter(
+            data_copy, sigmaNew)
 
         del(sigmaNew)
 
     if min_threshold is None:
-        min_threshold = prepare_threshold_from_seeds(data=imgFiltering, seeds=seeds_inds,
+        min_threshold = prepare_threshold_from_seeds(data=data_copy, seeds=seeds_inds,
                                                      min_threshold_auto_method=min_threshold_auto_method)
 
-    imgFiltering = thresholding_functions.thresholding(
-        imgFiltering,
+    data_thr = thresholding_functions.thresholding(
+        data_copy,
         min_threshold,
         max_threshold,
         use_min_threshold=True,
         use_max_threshold=max_threshold is not None
     )
+    if debug:
+        logger.debug("np min median max input data "
+                     + str(np.min(data_copy)) + " "
+                     + str(np.median(data_copy)) + " "
+                     + str(np.max(data_copy)) + " "
+                     )
 
+    if debug:
+        logger.debug("np unique sum binar "
+                     + str(np.unique(data_thr)) + " "
+                     + str(np.sum(data_thr)) + " "
+                     )
 
-    imgFiltering = thresholding_functions.binaryClosingOpening(
-        imgFiltering, closeNum, openNum, True)
+    data_thr = thresholding_functions.binaryClosingOpening(
+        data_thr, closeNum, openNum, True)
 
     # Fill holes
     if fill_holes:
 
-        imgFiltering = thresholding_functions.fillHoles(
-            imgFiltering)
+        data_thr = thresholding_functions.fillHoles(
+            data_thr)
 
     # Zjisteni nejvetsich objektu.
     if get_priority_objects:
-        imgFiltering = thresholding_functions.getPriorityObjects(
-            imgFiltering, nObj, seeds_inds)
+        data_thr = thresholding_functions.getPriorityObjects(
+            data_thr, nObj, seeds_inds)
 
-    return imgFiltering, min_threshold
+    if debug:
+        logger.debug("np unique sum binar hist end "
+                     + str(np.unique(data_thr)) + " "
+                     + str(np.sum(data_thr)) + " "
+                     # + str(np.histogram(data_thr, bins="auto")) + " "
+                     )
+
+    return data_thr, min_threshold
 
 def main():
     import numpy as np

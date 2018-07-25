@@ -26,12 +26,13 @@ import scipy.ndimage
 from . import image_manipulation
 
 
-def vesselSegmentation(data, segmentation=-1, threshold=None, voxelsize_mm=[1, 1, 1], inputSigma=-1,
-                       aoi_dilation_iterations=0, aoi_dilation_structure=None, nObj=10, biggestObjects=False,
-                       useSeedsOfCompactObjects=False, seeds=None, interactivity=True, binaryClosingIterations=2,
-                       binaryOpeningIterations=0, smartInitBinaryOperations=False, returnThreshold=False,
-                       binaryOutput=True, returnUsedData=False, qapp=None, auto_method='', aoi_label=1,
-                       forbidden_label=None, slab=None):
+def vesselSegmentation(
+        data, segmentation=-1, threshold=None, voxelsize_mm=[1, 1, 1], inputSigma=-1,
+        aoi_dilation_iterations=0, aoi_dilation_structure=None, nObj=10, biggestObjects=False,
+        useSeedsOfCompactObjects=False, seeds=None, interactivity=True, binaryClosingIterations=2,
+        binaryOpeningIterations=0, smartInitBinaryOperations=False, returnThreshold=False,
+        binaryOutput=True, returnUsedData=False, qapp=None, auto_method='', aoi_label=1,
+        forbidden_label=None, slab=None):
     """
 
     Vessel segmentation z jater.
