@@ -1,21 +1,23 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import unittest
-from nose.plugins.attrib import attr
-
-import sys
+import glob
 import os
-import PyQt4
-from PyQt4.QtGui import QApplication, QFileDialog, QWidget, QPushButton, QVBoxLayout
-from PyQt4.QtTest import QTest
+import os.path as op
+import sys
+import unittest
+
 from PyQt4.QtCore import Qt
+from PyQt4.QtGui import QApplication, QWidget, QPushButton, QVBoxLayout
+from PyQt4.QtTest import QTest
+from nose.plugins.attrib import attr
 
 import imtools.sample_data
 
+
 class MyTestCase(unittest.TestCase):
     def setUp(self):
-        from PyQt4.QtGui import QApplication, QFileDialog
+        pass
         # self.qapp = QApplication(sys.argv)
 
     @attr('interactive')
@@ -25,8 +27,7 @@ class MyTestCase(unittest.TestCase):
     @attr('interactive')
     def test_visualization(self):
 
-        import PyQt4
-        from PyQt4.QtGui import QApplication, QFileDialog
+        from PyQt4.QtGui import QApplication
         # from teigen.dictwidgetqt import DictWidget
         # from teigen.gui import TeigenWidget
         import imtools.show_segmentation_qt
@@ -40,8 +41,7 @@ class MyTestCase(unittest.TestCase):
     @attr('interactive')
     def test_showsegmentation_andclose(self):
 
-        import PyQt4
-        from PyQt4.QtGui import QApplication, QFileDialog
+        from PyQt4.QtGui import QApplication
         # from teigen.dictwidgetqt import DictWidget
         # from teigen.gui import TeigenWidget
         import imtools.show_segmentation_qt
@@ -77,7 +77,6 @@ class MyTestCase(unittest.TestCase):
     def test_show_qtwidget(self):
         # from teigen.dictwidgetqt import DictWidget
         # from teigen.generators.cylindersqt import CylindersWidget
-        import imtools.show_segmentation_qt as ssqt
         app = QApplication(sys.argv)
         qw = QWidget()
         button = QPushButton('Test')
@@ -91,8 +90,6 @@ class MyTestCase(unittest.TestCase):
     @unittest.skipIf(os.environ.get("TRAVIS", True), "Skip on Travis-CI")
     def test_show_segmentation_qt_widget_hidden_buttons(self):
         # = np.zeros([10, 10, 10])
-        import imtools
-        import imtools.sample_data
         # imtools.sam
         # imtools.sample_data.get_sample_data("sliver_training_001")
         # from teigen.dictwidgetqt import DictWidget
@@ -128,7 +125,6 @@ class MyTestCase(unittest.TestCase):
         voxelsize_mm = datap['voxelsize_mm']
 
         import imtools.show_segmentation_qt as ssqt
-        import gc
         app = QApplication(sys.argv)
         # app.setGraphicsSystem("openvg")
         sw = ssqt.ShowSegmentationWidget(None, show_load_button=True, show_load_interface=True)
@@ -153,7 +149,6 @@ class MyTestCase(unittest.TestCase):
         voxelsize_mm = datap['voxelsize_mm']
 
         import imtools.show_segmentation_qt as ssqt
-        import gc
         app = QApplication(sys.argv)
         # app.setGraphicsSystem("openvg")
         sw = ssqt.ShowSegmentationWidget(None, show_load_button=True, show_load_interface=True)
@@ -168,7 +163,7 @@ class MyTestCase(unittest.TestCase):
         # sw.deleteLater()
 
     # @attr('interactive')
-    @unittest.skipIf(os.environ.get("TRAVIS", True), "Skip on Travis-CI")
+    @unittest.skipIf(os.environ.get("TRAVIS", False), "Skip on Travis-CI")
     def test_add_data_and_show(self):
         """
         creates VTK file from input data and show and quit
@@ -180,7 +175,6 @@ class MyTestCase(unittest.TestCase):
         voxelsize_mm = datap['voxelsize_mm']
 
         import imtools.show_segmentation_qt as ssqt
-        import gc
         app = QApplication(sys.argv)
         # app.setGraphicsSystem("openvg")
         sw = ssqt.ShowSegmentationWidget(None, show_load_button=True)
@@ -191,6 +185,9 @@ class MyTestCase(unittest.TestCase):
         sw.show()
         # app.exec_(exec_)
         sw.close()
+        output_vtk_file = sw.vtk_file
+        output_vtk_file = sw.get_filename_filled_with_checked_labels("*")
+        # sw.
         sw.deleteLater()
 
         sw = None
@@ -204,6 +201,10 @@ class MyTestCase(unittest.TestCase):
         # app.quit()
         # self.qapp.exit()
         # app.exec_()
+
+        output_vtk_file_star = op.abspath(op.expanduser(output_vtk_file))
+        filelist = glob.glob(output_vtk_file_star)
+        self.assertGreater(len(filelist), 0)
 
 
 if __name__ == '__main__':

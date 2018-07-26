@@ -380,7 +380,6 @@ class ShowSegmentationWidget(QtGui.QWidget):
             together_vtk_file=False
         )
 
-
     def get_filename_filled_with_checked_labels(self, labels=None):
         """ Fill used labels into filename """
         if labels is None:
