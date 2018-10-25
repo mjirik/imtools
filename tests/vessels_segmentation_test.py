@@ -5,6 +5,9 @@
 # import funkcí z jiného adresáře
 import os.path
 import sys
+path_to_script = os.path.dirname(os.path.abspath(__file__))
+pth = os.path.join(path_to_script, "../../seededitorqt/")
+sys.path.insert(0, pth)
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 import unittest
@@ -155,7 +158,8 @@ class SegmentationTest(unittest.TestCase):
         outputTmp = imsegmentation.vesselSegmentation(data3d, segmentation=(segm == slab['liver']), threshold=180,
                                                       voxelsize_mm=voxelsize_mm, inputSigma=0.15,
                                                       aoi_dilation_iterations=2, nObj=1, biggestObjects=True,
-                                                      interactivity=False, binaryClosingIterations=5,
+                                                      interactivity=True,
+                                                      binaryClosingIterations=5,
                                                       binaryOpeningIterations=1)
 
 # ověření výsledku

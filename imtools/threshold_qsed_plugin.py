@@ -22,8 +22,70 @@ import seededitorqt.plugin
 
 class QtSEdThresholdPlugin(seededitorqt.plugin.QtSEdPlugin):
 
-    def __init__(self):
+
+    def __init__(self, threshold=None,
+                 filter_sigma=0.2, nObj=1, biggestObjects=True,
+                 useSeedsOfCompactObjects=True,
+                 binaryClosingIterations=2, binaryOpeningIterations=0,
+                 fillHoles=True,
+                 threshold_auto_method='', threshold_upper=None,
+                 ):
+        """
+
+        Inicialitacni metoda.
+        Input:
+            :param data: data pro prahovani, se kterymi se pracuje
+            :param voxel: velikost voxelu
+            :param threshold:
+            :param interactivity: zapnuti / vypnuti gui
+            :param number: maximalni hodnota slideru pro gauss. filtrovani (max sigma)
+            :param inputSigma: pocatecni hodnota pro gauss. filtr
+            :param nObj: pocet nejvetsich objektu k vraceni
+            :param biggestObjects: oznacuje, zda se maji vracet nejvetsi objekty
+            :param binaryClosingIterations: iterace binary closing
+            :param binaryOpeningIterations: iterace binary opening
+            :param seeds: matice s kliknutim uzivatele- pokud se maji vracet
+                   specifikce objekty. It can be same shape like data, or it can be
+                   indexes e.g. from np.nonzero(seeds)
+            :param cmap: grey
+            :param threshold_auto_method: 'otsu' use otsu threshold, other string use our liver automatic
+
+        """
         super(QtSEdThresholdPlugin, self).__init__()
+
+        logger.debug('Spoustim prahovani dat...')
+        self.on_close_fcn = None
+
+        self.errorsOccured = False
+        self.filter_sigma = filter_sigma
+        # if shapes of input data and seeds are the same
+
+        # import ipdb; ipdb.set_trace()
+        self.threshold = threshold
+        self.nObj = nObj
+        self.biggestObjects = biggestObjects
+        self.ICBinaryClosingIterations = binaryClosingIterations
+        self.ICBinaryOpeningIterations = binaryOpeningIterations
+        self.threshold_auto_method = threshold_auto_method
+
+        self.useSeedsOfCompactObjects = useSeedsOfCompactObjects
+        self.fillHoles = fillHoles
+
+        self.threshold_upper = threshold_upper
+
+
+        # Kalkulace objemove jednotky (voxel) (V = a*b*c)
+        # voxel1 = self.voxel[0]
+        # voxel2 = self.voxel[1]
+        # voxel3 = self.voxel[2]
+        self.voxelV = np.prod(self.voxelsize_mm, axis=None) #voxel1 * voxel2 * voxel3
+
+        if (self.biggestObjects == True or (self.seeds != None and self.useSeedsOfCompactObjects)):
+            self.get_priority_objects = True
+        else:
+            self.get_priority_objects = True
+
+
         self.initUI()
         self.updateUI()
 
@@ -64,6 +126,13 @@ class QtSEdThresholdPlugin(seededitorqt.plugin.QtSEdPlugin):
 
     def updateUI(self):
         if self.data3d is not None:
+            # if self.threshold is None and self.seeds is not None:
+            #     from imtools.uiThreshold import prepare_threshold_from_seeds
+            #     threshold = prepare_threshold_from_seeds(
+            #         data=self.data3d, seeds=self.seeds, min_threshold_auto_method=self.threshold_auto_method)
+            #     self.threshold = threshold
+            #     self.slider_lo_thr.setValue(int(self.threshold))
+            # logger.debug("threshold after first evaluation {}".format(threshold))
             self.slider_lo_thr.setRange(np.min(self.data3d), np.max(self.data3d))
             self.slider_hi_thr.setRange(np.min(self.data3d), np.max(self.data3d))
             self.slider_open.setRange(0, 10)
@@ -72,20 +141,31 @@ class QtSEdThresholdPlugin(seededitorqt.plugin.QtSEdPlugin):
 
     def run(self):
         self.runInit()
-        self.segmentation = self.data3d > self.slider_lo_thr.value()
-        self.auto_method = ""
-        self.fillHoles = True
-        self.nObj = 1
-        self.get_priority_objects = True
+        # self.segmentation = self.data3d > self.slider_lo_thr.value()
+        # self.auto_method = ""
+        # self.fillHoles = True
+        # self.nObj = 1
+        # self.get_priority_objects = True
+
+        # if (sys.version_info[0] < 3):
+        #     import copy
+        #     self.data = copy.copy(data)
+        #     self.voxelsize_mm = copy.copy(voxel)
+        #
+        # else:
+        #     self.data = data.copy()
+        #     self.voxelsize_mm = voxel.copy()
+        #
+
         from imtools.uiThreshold import make_image_processing
         self.imgFiltering, self.threshold = make_image_processing(data=self.data3d, voxelsize_mm=self.voxelsize_mm,
-                                                                  seeds_inds=self.seeds,
+                                                                  seeds=self.seeds,
                                                                   sigma_mm=self.slider_sigma_value,
                                                                   min_threshold=self.slider_lo_thr.value(),
                                                                   max_threshold=self.slider_hi_thr.value(),
                                                                   closeNum=self.slider_close.value(),
                                                                   openNum=self.slider_open.value(),
-                                                                  min_threshold_auto_method=self.auto_method,
+                                                                  min_threshold_auto_method=self.threshold_auto_method,
                                                                   fill_holes=self.fillHoles,
                                                                   get_priority_objects=self.get_priority_objects,
                                                                   nObj=self.nObj)

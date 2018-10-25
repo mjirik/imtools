@@ -134,6 +134,7 @@ class uiThreshold:
         self.number = number
         self.inputSigma = inputSigma
         # if shapes of input data and seeds are the same
+        self.seeds = seeds
         self.seeds = imma.as_seeds_inds(seeds, data.shape)
 
         if debug:
@@ -456,7 +457,7 @@ class uiThreshold:
 
         # make_image_processing(sigma, min_threshold, max_threshold, closeNum, openNum, auto_method=self.)
         self.imgFiltering, self.threshold = make_image_processing(data=self.data, voxelsize_mm=self.voxelsize_mm,
-                                                                  seeds_inds=self.seeds, sigma_mm=sigma,
+                                                                  seeds=self.seeds, sigma_mm=sigma,
                                                                   min_threshold=self.threshold,
                                                                   max_threshold=self.threshold_upper, closeNum=closeNum,
                                                                   openNum=openNum,
@@ -708,7 +709,7 @@ class uiThreshold:
 def prepare_threshold_from_seeds(data, seeds, min_threshold_auto_method):
 
     if seeds is not None:
-        intensities_on_seeds = thresholding_functions.get_intensities_on_seed_position(data, seeds)
+        intensities_on_seeds = thresholding_functions.get_intensities_on_seed_position(data, seeds==1)
     else:
         intensities_on_seeds = None
     logger.debug("intensities on seeds {}".format(intensities_on_seeds))
@@ -723,7 +724,7 @@ def prepare_threshold_from_seeds(data, seeds, min_threshold_auto_method):
     return min_threshold
 
 def make_image_processing(
-        data, voxelsize_mm, seeds_inds=None, sigma_mm=1, min_threshold=None, max_threshold=None,
+        data, voxelsize_mm, seeds=None, sigma_mm=1, min_threshold=None, max_threshold=None,
         closeNum=0, openNum=0, min_threshold_auto_method="", fill_holes=True,
         get_priority_objects=True, nObj=1, debug=True):
     if (sys.version_info[0] < 3):
@@ -741,7 +742,7 @@ def make_image_processing(
         del(sigmaNew)
 
     if min_threshold is None:
-        min_threshold = prepare_threshold_from_seeds(data=data_copy, seeds=seeds_inds,
+        min_threshold = prepare_threshold_from_seeds(data=data_copy, seeds=seeds,
                                                      min_threshold_auto_method=min_threshold_auto_method)
 
     data_thr = thresholding_functions.thresholding(
@@ -773,10 +774,11 @@ def make_image_processing(
         data_thr = thresholding_functions.fillHoles(
             data_thr)
 
+    data_thr[seeds==2] = 0
     # Zjisteni nejvetsich objektu.
     if get_priority_objects:
         data_thr = thresholding_functions.getPriorityObjects(
-            data_thr, nObj, seeds_inds)
+            data_thr, nObj, seeds==1)
 
     if debug:
         logger.debug("np unique sum binar hist end "

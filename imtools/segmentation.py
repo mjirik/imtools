@@ -32,7 +32,7 @@ def vesselSegmentation(
         useSeedsOfCompactObjects=False, seeds=None, interactivity=True, binaryClosingIterations=2,
         binaryOpeningIterations=0, smartInitBinaryOperations=False, returnThreshold=False,
         binaryOutput=True, returnUsedData=False, qapp=None, auto_method='', aoi_label=1,
-        forbidden_label=None, slab=None):
+        forbidden_label=None, slab=None, old_gui=False):
     """
 
     Vessel segmentation z jater.
@@ -167,7 +167,7 @@ ok)')
 
     # seeds = None
     if biggestObjects == False and\
-            seeds == None and interactivity == True and threshold == None:
+            seeds == None and interactivity == True and threshold == None and old_gui:
 
         logger.debug(
             ('Nyni si levym nebo pravym tlacitkem mysi (klepnutim nebo tazenim)\
@@ -218,17 +218,31 @@ ok)')
 
     # Samotne filtrovani
     if interactivity:
-        uiT = uiThreshold.uiThresholdQt(
-            preparedData, voxel=voxel, threshold=threshold,
-            interactivity=interactivity, number=number, inputSigma=inputSigma,
-            nObj=nObj, biggestObjects=biggestObjects,
-            useSeedsOfCompactObjects=useSeedsOfCompactObjects,
-            binaryClosingIterations=closing, binaryOpeningIterations=opening,
-            seeds=seeds,
-            threshold_auto_method=auto_method,
-        )
+        if old_gui:
+            uiT = uiThreshold.uiThresholdQt(
+                preparedData, voxel=voxel, threshold=threshold,
+                interactivity=interactivity, number=number, inputSigma=inputSigma,
+                nObj=nObj, biggestObjects=biggestObjects,
+                useSeedsOfCompactObjects=useSeedsOfCompactObjects,
+                binaryClosingIterations=closing, binaryOpeningIterations=opening,
+                seeds=seeds,
+                threshold_auto_method=auto_method,
+            )
 
-        output = uiT.run()
+            output = uiT.run()
+        else:
+            # TODO use all parameters
+            import seededitorqt
+
+            se = seededitorqt.QTSeedEditor(preparedData, voxelSize=voxel)
+            import imtools.threshold_qsed_plugin
+            wg0 = imtools.threshold_qsed_plugin.QtSEdThresholdPlugin(nObj=nObj)
+            se.addPlugin(wg0)
+            se.exec_()
+            output = se.getContours()
+
+
+
     else:
         uiT = uiThreshold.uiThreshold(
             preparedData, voxel=voxel, threshold=threshold,
