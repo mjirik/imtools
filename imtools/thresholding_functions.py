@@ -50,8 +50,11 @@ def gaussFilter(data, sigma):
     """
 
     # Filtrovani
+    # print("Gaussfilter 1 ", np.max(data), sigma, np.mean(data))
     scipy.ndimage.filters.gaussian_filter(
         data, sigma, order=0, output=data, mode='nearest')
+
+    # print("Gaussfilter 2 ", np.max(data), np.mean(data))
 
     return data
 
@@ -154,20 +157,24 @@ def calculateSigma(voxel, input):
     Spocita novou hodnotu sigma pro gaussovo filtr.
 
     """
+    import numpy as np
+    voxel = np.asarray(voxel)
+    sigma = input / voxel
+    return sigma
 
-    voxelV = voxel[0] * voxel[1] * voxel[2]
-
-    if (voxel[0] == voxel[1] == voxel[2]):
-
-        return ((5 / voxel[0]) * input) / voxelV
-
-    else:
-
-        sigmaX = (5.0 / voxel[0]) * input
-        sigmaY = (5.0 / voxel[1]) * input
-        sigmaZ = (5.0 / voxel[2]) * input
-
-        return numpy.asarray([sigmaX, sigmaY, sigmaZ]) / voxelV
+    # voxelV = voxel[0] * voxel[1] * voxel[2]
+    #
+    # if (voxel[0] == voxel[1] == voxel[2]):
+    #
+    #     return ((5 / voxel[0]) * input) / voxelV
+    #
+    # else:
+    #
+    #     sigmaX = (5.0 / voxel[0]) * input
+    #     sigmaY = (5.0 / voxel[1]) * input
+    #     sigmaZ = (5.0 / voxel[2]) * input
+    #
+    #     return numpy.asarray([sigmaX, sigmaY, sigmaZ]) / voxelV
 
 
 def calculateAutomaticThresholdOtsu(data, arrSeed=None):

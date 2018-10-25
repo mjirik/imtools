@@ -433,7 +433,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
             #     vtk_file=vtk_file,
             #     smoothing=self.smoothing,
             # )
-        s2vtk.make_mesh()
+        vtk_files = s2vtk.make_mesh()
 
 
         # self._run_viewer()

@@ -29,6 +29,7 @@ def select_labels(segmentation, labels, slab=None):
     :return:
     """
 
+    logger.debug("labels {}, slab {}".format(labels, slab))
     if slab is not None:
         labels = get_nlabels(slab, labels)
 
@@ -36,10 +37,12 @@ def select_labels(segmentation, labels, slab=None):
         labels = [labels]
 
     ds = np.zeros(segmentation.shape, np.bool)
+
     for lab in labels:
         dadd = (segmentation == lab)
 
         ds = ds | dadd
+        # logger.debug("in select labels: lab {} sum {}".format(lab, np.sum(ds)))
     if len(labels) == 0:
         logger.warning("Labels not found in slab.")
 

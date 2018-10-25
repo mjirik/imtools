@@ -131,6 +131,7 @@ class SegmentationToMesh():
         """
         self._resize_if_required()
         segmentation = self._select_labels(self.resized_segmentation, labels)
+        # logger.debug("select labels in show_segmentation {} sum {}".format(labels, np.sum(segmentation)))
         self.resized_binar_segmentation = segmentation
 
     def _select_labels(self, segmentation, labels=None):
@@ -157,12 +158,13 @@ class SegmentationToMesh():
         :return:
         """
         # orig_dtype = self.binar_segmentation.dtype
-        #
+
         # if orig_dtype == np.bool:
         #     segmentation = self.binar_segmentation.astype(np.int8)
         # else:
         #     segmentation = self.binar_segmentation
         if self.resized_segmentation is None:
+            # segmentation = self.binar_segmentation
             segmentation = self.segmentation
 
             segmentation = segmentation[::self.degrad, ::self.degrad, ::self.degrad]
@@ -177,7 +179,7 @@ class SegmentationToMesh():
                                                                        new_voxelsize_mm=new_voxelsize_mm, order=0)
                 voxelsize_mm = new_voxelsize_mm
                 logger.debug("resize finished, old shape = {}, new shape = {}".format(str(prev_shape), str(segmentation.shape)))
-                logger.debug("segmentation min={}, max={}".format(np.min(segmentation), np.max(segmentation)))
+                # logger.debug("segmentation min={}, max={}".format(np.min(segmentation), np.max(segmentation)))
             self.resized_segmentation = segmentation
             self.resized_voxelsize_mm = voxelsize_mm
 
@@ -200,9 +202,10 @@ class SegmentationToMesh():
 
     def make_mesh(self):
         if self.one_file_per_label:
-            self.make_mesh_files()
+            fns = self.make_mesh_files()
         else:
-            self.make_mesh_file()
+            fns = self.make_mesh_file()
+        return fns
 
     def make_mesh_file(
             self,
@@ -229,12 +232,12 @@ class SegmentationToMesh():
         mesh_filename = self.output_file_pattern.format(strlabel)
         logger.debug(mesh_filename)
 
+        self._resize_if_required()
+        # sed3.show_slices(self.resized_segmentation)
+
         self.select_labels(labels)
         # import sed3
         # sed3.show_slices(self.binar_segmentation)
-
-        self._resize_if_required()
-        # sed3.show_slices(self.resized_segmentation)
 
         # _stats(self.segmentation)
         # _stats(self.binar_segmentation)
@@ -242,7 +245,7 @@ class SegmentationToMesh():
 
         # import pdb; pdb.set_trace()
         logger.debug("gen_mesh_from_voxels_mc() started")
-        mesh_data = gen_mesh_from_voxels_mc(self.resized_segmentation, self.resized_voxelsize_mm)
+        mesh_data = gen_mesh_from_voxels_mc(self.resized_binar_segmentation, self.resized_voxelsize_mm)
         if self.smoothing:
             mesh_data.coors = smooth_mesh(mesh_data)
             # mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
