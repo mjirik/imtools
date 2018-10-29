@@ -14,7 +14,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 import argparse
-from PyQt4.QtGui import QGridLayout, QLabel, QPushButton, QLineEdit, QCheckBox, QFileDialog, QWidget, QVBoxLayout
+from PyQt4.QtGui import QGridLayout, QLabel, QPushButton, QLineEdit, QCheckBox, QFileDialog
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 import sys
@@ -25,82 +25,7 @@ from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 import io3d.outputqt
 from . import image_manipulation as imma
 
-class SelectLabelWidget(QtGui.QWidget):
-    def __init__(self, *args, **kwargs):
-        super(SelectLabelWidget, self).__init__()
-        self.ui_slab = {}
-
-        self.mainLayout = QGridLayout(self)
-        widget = QWidget()
-        widget.setLayout(self.mainLayout)
-
-        scroll = QtGui.QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setFixedHeight(400)
-        scroll.setWidget(widget)
-
-        self.superMainScrollLayout = QVBoxLayout(self)
-        self.superMainScrollLayout.addWidget(scroll)
-        self.setLayout(self.superMainScrollLayout)
-
-        # scroll.setLayout(self.mainLayout)
-
-        self.init_slab(*args, **kwargs)
-        self.update_slab_ui()
-
-    def init_slab(self, slab=None, segmentation=None, voxelsize_mm=None):
-        """
-        Create widget with segmentation labels information used to select labels.
-
-        :param slab: dict with label name and its id
-        :param segmentation: 3D label ndarray
-        :param voxelsize_mm: size of voxel in mm
-        :return:
-        """
-        self.segmentation = segmentation
-        self.voxelsize_mm = voxelsize_mm
-
-        from . import show_segmentation
-        self.slab = show_segmentation.create_slab_from_segmentation(
-            self.segmentation, slab=slab)
-
-    def update_slab_ui(self):
-        _row = 1
-        # remove old widgets
-        for key, val in self.ui_slab.items():
-            val.deleteLater()
-        self.ui_slab = {}
-        # _row_slab = 0
-        for label, value in self.slab.items():
-            _row += 1
-            # _row_slab += 1
-            txt = str(label) + "(" + str(value) + "): "
-            nvoxels = 0
-            if self.segmentation is not None:
-                nvoxels = np.sum(self.segmentation==value)
-                if self.voxelsize_mm is not None:
-                    vx_vol = np.prod(self.voxelsize_mm)
-                    txt += str(nvoxels * vx_vol) + " [mm^3], "
-                txt += str(nvoxels)
-            self.ui_slab[label] = QCheckBox(txt, self)
-            self.mainLayout.addWidget(self.ui_slab[label], _row, 1, 1, 2)
-            if value != 0 and nvoxels > 0:
-                self.ui_slab[label].setCheckState(QtCore.Qt.Checked)
-                # self.ui_buttons["Show"].clicked.connect(self.actionShow)
-
-        return _row
-
-
-
-        pass
-
-    def action_check_slab_ui(self):
-        labels = []
-        for key, val in self.ui_slab.items():
-            if val.isChecked():
-                labels.append(self.slab[key])
-
-        return labels
+from .select_label_qt import SelectLabelWidget
 
 
 class ShowSegmentationWidget(QtGui.QWidget):
@@ -184,7 +109,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
         # self.mainLayout.addWidget(self.slab_widget, self._row, 1)
 
             self._row += 1
-            self.slab_wg = SelectLabelWidget()
+            self.slab_wg = SelectLabelWidget(show_ok_button=False)
             self.slab_wg.init_slab()
             self.slab_wg.update_slab_ui()
             self.mainLayout.addWidget(self.slab_wg, self._row, 1, 1, 3)
