@@ -14,7 +14,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 import argparse
-from PyQt4.QtGui import QGridLayout, QLabel, QPushButton, QLineEdit, QCheckBox, QFileDialog
+from PyQt4.QtGui import QGridLayout, QLabel, QPushButton, QLineEdit, QCheckBox, QFileDialog, QWidget, QVBoxLayout
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 import sys
@@ -31,6 +31,20 @@ class SelectLabelWidget(QtGui.QWidget):
         self.ui_slab = {}
 
         self.mainLayout = QGridLayout(self)
+        widget = QWidget()
+        widget.setLayout(self.mainLayout)
+
+        scroll = QtGui.QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFixedHeight(400)
+        scroll.setWidget(widget)
+
+        self.superMainScrollLayout = QVBoxLayout(self)
+        self.superMainScrollLayout.addWidget(scroll)
+        self.setLayout(self.superMainScrollLayout)
+
+        # scroll.setLayout(self.mainLayout)
+
         self.init_slab(*args, **kwargs)
         self.update_slab_ui()
 
@@ -63,7 +77,7 @@ class SelectLabelWidget(QtGui.QWidget):
             txt = str(label) + "(" + str(value) + "): "
             nvoxels = 0
             if self.segmentation is not None:
-                nvoxels =  np.sum(self.segmentation==value)
+                nvoxels = np.sum(self.segmentation==value)
                 if self.voxelsize_mm is not None:
                     vx_vol = np.prod(self.voxelsize_mm)
                     txt += str(nvoxels * vx_vol) + " [mm^3], "
