@@ -33,7 +33,7 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as Navigatio
 import numpy as np
 
 from . import thresholding_functions
-from . import image_manipulation as imma
+
 
 class uiThresholdQt(QtGui.QDialog):
     def __init__(self, *pars, **params):
@@ -135,7 +135,7 @@ class uiThreshold:
         self.inputSigma = inputSigma
         # if shapes of input data and seeds are the same
         self.seeds = seeds
-        self.seeds = imma.as_seeds_inds(seeds, data.shape)
+        # self.seeds_inds = imma.as_seeds_inds(seeds, data.shape)
 
         if debug:
             logger.debug("threshold {}".format(threshold))
@@ -171,10 +171,11 @@ class uiThreshold:
         # voxel3 = self.voxel[2]
         self.voxelV = np.prod(self.voxelsize_mm, axis=None) #voxel1 * voxel2 * voxel3
 
-        if (self.biggestObjects == True or (self.seeds != None and self.useSeedsOfCompactObjects)):
+        if self.biggestObjects or (self.seeds is not None and self.useSeedsOfCompactObjects):
             self.get_priority_objects = True
         else:
-            self.get_priority_objects = True
+            # self.get_priority_objects = True
+            self.get_priority_objects = False
 
         self.numpyAMaxKeepDims = False
 
@@ -777,8 +778,9 @@ def make_image_processing(
     data_thr[seeds==2] = 0
     # Zjisteni nejvetsich objektu.
     if get_priority_objects:
-        data_thr = thresholding_functions.getPriorityObjects(
-            data_thr, nObj, seeds==1)
+        data_thr = thresholding_functions.get_priority_objects(
+            data_thr, nObj, seeds == 1
+        )
 
     if debug:
         logger.debug("np unique sum binar hist end "

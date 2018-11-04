@@ -167,39 +167,40 @@ ok)')
 
     # seeds = None
     if biggestObjects == False and\
-            seeds == None and interactivity == True and threshold == None and old_gui:
+            seeds is None and interactivity == True and threshold is None:
+        if old_gui:
 
-        logger.debug(
-            ('Nyni si levym nebo pravym tlacitkem mysi (klepnutim nebo tazenim)\
- oznacte specificke oblasti k vraceni.'))
+            logger.debug(
+                ('Nyni si levym nebo pravym tlacitkem mysi (klepnutim nebo tazenim)\
+     oznacte specificke oblasti k vraceni.'))
 
 
-        import sed3
-        pyed = sed3.sed3qt(preparedData, contour=segmentation, windowW=400, windowC=50)
-        # pyed.show()
-        pyed.exec_()
+            import sed3
+            pyed = sed3.sed3qt(preparedData, contour=segmentation, windowW=400, windowC=50)
+            # pyed.show()
+            pyed.exec_()
 
-        # from PyQt4.QtCore import pyqtRemoveInputHook
-        # pyqtRemoveInputHook()
-        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+            # from PyQt4.QtCore import pyqtRemoveInputHook
+            # pyqtRemoveInputHook()
+            # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
-        
-        seeds = pyed.seeds
 
-        # Zkontrolovat, jestli uzivatel neco vybral - nejaky item musi byt
-        # ruzny od nuly.
-        if (seeds != 0).any() == False:
+            seeds = pyed.seeds
 
-            seeds = None
-            logger.debug('Zadne seedy nezvoleny => nejsou prioritni objekty.')
+            # Zkontrolovat, jestli uzivatel neco vybral - nejaky item musi byt
+            # ruzny od nuly.
+            if (seeds != 0).any() == False:
 
-        else:
+                seeds = None
+                logger.debug('Zadne seedy nezvoleny => nejsou prioritni objekty.')
 
-            # seeds * (seeds != 0) ## seeds je n-tice poli indexu nenulovych
-            # prvku => item krychle je == krychle[ seeds[0][x], seeds[1][x],
-            # seeds[2][x] ]
-            seeds = seeds.nonzero()
-            logger.debug('Seedu bez nul: ' + str(len(seeds[0])))
+            else:
+
+                # seeds * (seeds != 0) ## seeds je n-tice poli indexu nenulovych
+                # prvku => item krychle je == krychle[ seeds[0][x], seeds[1][x],
+                # seeds[2][x] ]
+                seeds = seeds.nonzero()
+                logger.debug('Seedu bez nul: ' + str(len(seeds[0])))
 
     closing = binaryClosingIterations
     opening = binaryOpeningIterations

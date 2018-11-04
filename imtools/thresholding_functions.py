@@ -351,6 +351,7 @@ def getPriorityObjects(*args, **kwargs):
     DeprecationWarning("Function getPriorityObjects has been renamed. Use get_priority_objects().")
     return get_priority_objects(*args, **kwargs)
 
+
 def get_priority_objects(data, nObj=1, seeds=None, seeds_multi_index=None, debug=False):
     """
     Get N biggest objects from the selection or the object with seed.
@@ -371,7 +372,9 @@ def get_priority_objects(data, nObj=1, seeds=None, seeds_multi_index=None, debug
         if numpy.array_equal(data.shape, numpy.asarray(seeds).shape):
             seeds_multi_index = numpy.nonzero(seeds)
         else:
-            seeds_multi_index = seeds
+            if seeds_multi_index is None:
+                logger.debug("Seeds looks to be seeds_multi_index.")
+                seeds_multi_index = seeds
 
     dataLabels, length = scipy.ndimage.label(data)
 
