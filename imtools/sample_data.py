@@ -108,6 +108,7 @@ def get_sample_data(data_label=None, destination_dir="."):
     """
     get(data_label=data_label, destination_dir=destination_dir)
 
+
 def get(data_label=None, destination_dir="."):
     """
     Download sample data by data label. Labels can be listed by sample_data.data_urls.keys()

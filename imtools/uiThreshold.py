@@ -171,11 +171,12 @@ class uiThreshold:
         # voxel3 = self.voxel[2]
         self.voxelV = np.prod(self.voxelsize_mm, axis=None) #voxel1 * voxel2 * voxel3
 
+        # TODO remove this nonsense
         if self.biggestObjects or (self.seeds is not None and self.useSeedsOfCompactObjects):
             self.get_priority_objects = True
         else:
-            # self.get_priority_objects = True
-            self.get_priority_objects = False
+            self.get_priority_objects = True
+            # self.get_priority_objects = False
 
         self.numpyAMaxKeepDims = False
 
@@ -710,7 +711,7 @@ class uiThreshold:
 def prepare_threshold_from_seeds(data, seeds, min_threshold_auto_method):
 
     if seeds is not None:
-        intensities_on_seeds = thresholding_functions.get_intensities_on_seed_position(data, seeds==1)
+        intensities_on_seeds = thresholding_functions.get_intensities_on_seed_position(data, seeds == 1)
     else:
         intensities_on_seeds = None
     logger.debug("intensities on seeds {}".format(intensities_on_seeds))
@@ -723,6 +724,7 @@ def prepare_threshold_from_seeds(data, seeds, min_threshold_auto_method):
             data, intensities_on_seeds)
     logger.debug("min threshold prepared {}".format(intensities_on_seeds))
     return min_threshold
+
 
 def make_image_processing(
         data, voxelsize_mm, seeds=None, sigma_mm=1, min_threshold=None, max_threshold=None,
@@ -778,8 +780,12 @@ def make_image_processing(
     data_thr[seeds==2] = 0
     # Zjisteni nejvetsich objektu.
     if get_priority_objects:
+        if seeds is not None:
+            selected_seeds = seeds == 1
+        else:
+            selected_seeds = seeds
         data_thr = thresholding_functions.get_priority_objects(
-            data_thr, nObj, seeds == 1
+            data_thr, nObj, selected_seeds
         )
 
     if debug:

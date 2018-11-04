@@ -43,7 +43,23 @@ class SeedEditorQtTest(unittest.TestCase):
         se = seededitorqt.QTSeedEditor(data)
         wg0 = seededitorqt.plugin.SampleThresholdPlugin()
         se.addPlugin(wg0)
-        se.exec_()
+        # se.exec_()
+        # self.assertTrue(False)
+
+    @attr('interactive')
+    def test_addplugin_interactive(self):
+        """
+        just run editor to see what is new
+        Returns:
+
+        """
+        app = QApplication(sys.argv)
+        data = (np.random.rand(30,31,32) * 100).astype(np.int)
+        data[15:40, 13:20, 10:18] += 50
+        se = seededitorqt.QTSeedEditor(data)
+        wg0 = seededitorqt.plugin.SampleThresholdPlugin()
+        se.addPlugin(wg0)
+        # se.exec_()
         # self.assertTrue(False)
 
     @attr('interactive')

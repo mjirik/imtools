@@ -383,7 +383,7 @@ def get_priority_objects(data, nObj=1, seeds=None, seeds_multi_index=None, debug
     logger.debug('data labels: ' + str(dataLabels))
 
     # Uzivatel si nevybral specificke objekty.
-    if (seeds_multi_index == None):
+    if (seeds_multi_index is None):
 
         logger.info('Vraceni bez seedu')
         logger.debug('Objekty: ' + str(nObj))
