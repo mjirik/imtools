@@ -55,7 +55,7 @@ class MyTestCase(unittest.TestCase):
         sw.show()
         app.exec_()
 
-
+    @attr('interactive')
     def test_pyqtgraph(self):
         """
         creates VTK file from input data
