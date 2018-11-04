@@ -797,6 +797,7 @@ def make_image_processing(
 
     return data_thr, min_threshold
 
+
 def main():
     import numpy as np
     data = np.random.randint(0, 30, [15, 16, 18])
