@@ -777,7 +777,9 @@ def make_image_processing(
         data_thr = thresholding_functions.fillHoles(
             data_thr)
 
-    data_thr[seeds==2] = 0
+    # use a wall for label 2
+    if type(seeds) is np.ndarray:
+        data_thr[seeds==2] = 0
     # Zjisteni nejvetsich objektu.
     if get_priority_objects:
         if seeds is not None:

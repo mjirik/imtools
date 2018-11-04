@@ -107,7 +107,8 @@ class SelectLabelWidget(QtGui.QWidget):
         return labels
 
     def run(self):
-        self.app.exec()
+
+        self.app.exec_()
         return self.get_selected_labels()
 
 
