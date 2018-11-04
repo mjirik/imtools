@@ -1,6 +1,9 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
 
+import imma.image_manipulation
+from imma.image_manipulation import *
+
 #
 # import os.path
 # import sys
