@@ -39,7 +39,7 @@ requirements:
     - mock
     - nose
     - vtk
-    - skelet3d >=1.5.3
+#    - skelet3d >=1.5.3
     - checksumdir
     - vtkviewer >=0.0.7
     - dicom2fem
@@ -58,7 +58,7 @@ requirements:
     - scikit-image
     - matplotlib
     - vtk
-    - skelet3d >=1.5.3
+#    - skelet3d >=1.5.3
     - checksumdir
     - vtkviewer >=0.0.7
     - dicom2fem # because of seg2fem
