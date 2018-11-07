@@ -1,6 +1,6 @@
 __all__ = []
 
-__version__ = "1.4.3"
+__version__ = "1.4.4"
 
 # from . import qmisc
 # from . import misc
