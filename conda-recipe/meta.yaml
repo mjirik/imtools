@@ -43,9 +43,11 @@ requirements:
     - checksumdir
     - vtkviewer >=0.0.7
     - dicom2fem
-    - io3d >=1.3.30
     - fibrous
-    - sed3
+    - {{ pin_compatible('io3d', max_pin='x') }}
+    - {{ pin_compatible('sed3', max_pin='x') }}
+#    - io3d >=1.3.30
+#    - sed3
     - ruamel.yaml
     - python-dateutil # added trying to solve build problems
 #removed
@@ -62,9 +64,11 @@ requirements:
     - checksumdir
     - vtkviewer >=0.0.7
     - dicom2fem # because of seg2fem
-    - io3d >=1.3.30
     - fibrous
-    - sed3
+    - {{ pin_compatible('io3d', max_pin='x') }}
+    - {{ pin_compatible('sed3', max_pin='x') }}
+#    - io3d >=1.3.30
+#    - sed3
     - ruamel.yaml
     - python-dateutil # added trying to solve build problems
 # removed
