@@ -70,11 +70,11 @@ class SeedEditorQtTest(unittest.TestCase):
 
         """
         app = QApplication(sys.argv)
-        data = (np.random.rand(30,31,32) * 100).astype(np.int)
-        data[15:40, 13:20, 10:18] += 50
+        data = (np.random.rand(30,31,32) * 250).astype(np.int)
+        data[15:40, 13:20, 10:18] += 150
         se = seededitorqt.QTSeedEditor(data)
         import imtools.threshold_qsed_plugin
-        wg0 = imtools.threshold_qsed_plugin.QtSEdThresholdPlugin()
+        wg0 = imtools.threshold_qsed_plugin.QtSEdThresholdPlugin(debug=True)
         se.addPlugin(wg0)
         se.exec_()
         # self.assertTrue(False)

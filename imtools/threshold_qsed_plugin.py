@@ -1,6 +1,5 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import print_function
 
 import logging
@@ -9,7 +8,6 @@ import os.path
 import sys
 
 import numpy as np
-
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +18,6 @@ sys.path.append(os.path.join(path_to_script, "../src/"))
 from PyQt4 import QtGui, QtCore
 
 import seededitorqt.plugin
-
 
 class QtSEdThresholdPlugin(seededitorqt.plugin.QtSEdPlugin):
     def __init__(
@@ -35,6 +32,7 @@ class QtSEdThresholdPlugin(seededitorqt.plugin.QtSEdPlugin):
         fillHoles=True,
         threshold_auto_method="",
         threshold_upper=None,
+        debug=False,
     ):
         """
 
@@ -91,6 +89,7 @@ class QtSEdThresholdPlugin(seededitorqt.plugin.QtSEdPlugin):
             self.get_priority_objects = True
         else:
             self.get_priority_objects = True
+        self.debug = debug
 
         self.initUI()
         self.updateUI()
@@ -142,6 +141,7 @@ class QtSEdThresholdPlugin(seededitorqt.plugin.QtSEdPlugin):
             # logger.debug("threshold after first evaluation {}".format(threshold))
             self.slider_lo_thr.setRange(np.min(self.data3d), np.max(self.data3d))
             self.slider_hi_thr.setRange(np.min(self.data3d), np.max(self.data3d))
+            self.slider_hi_thr.setValue(np.max(self.data3d))
             self.slider_open.setRange(0, 10)
             self.slider_close.setRange(0, 10)
             self.slider_sigma.setRange(0, 100)
@@ -164,6 +164,7 @@ class QtSEdThresholdPlugin(seededitorqt.plugin.QtSEdPlugin):
             fill_holes=self.fillHoles,
             get_priority_objects=self.get_priority_objects,
             nObj=self.nObj,
+            debug=self.debug
         )
         self.segmentation = self.imgFiltering
         self.runFinish()
