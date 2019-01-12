@@ -743,6 +743,11 @@ def make_image_processing(
             data_copy, sigmaNew)
 
         del(sigmaNew)
+    if debug:
+        import sed3
+        # ed = sed3.sed3qt(data_copy)
+        sed3.show_slices(data_copy, shape=[6, 9])
+        # ed.show()
 
     if min_threshold is None:
         min_threshold = prepare_threshold_from_seeds(data=data_copy, seeds=seeds,

@@ -382,7 +382,15 @@ def prettify(elem):
     reparsed = minidom.parseString(rough_string)
     return reparsed.toprettyxml(indent="  ")
 
+
 def create_pvsm_file(vtk_files, pvsm_filename, relative_paths=True):
+    """
+    Create paraview status file (.pvsm) based on input vtk files.
+    :param vtk_files:
+    :param pvsm_filename:
+    :param relative_paths:
+    :return:
+    """
     from xml.etree.ElementTree import Element, SubElement, Comment
     import os.path as op
 
