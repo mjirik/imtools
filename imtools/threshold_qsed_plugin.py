@@ -10,6 +10,7 @@ import sys
 
 import numpy as np
 
+
 logger = logging.getLogger(__name__)
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
@@ -20,16 +21,21 @@ from PyQt4 import QtGui, QtCore
 
 import seededitorqt.plugin
 
+
 class QtSEdThresholdPlugin(seededitorqt.plugin.QtSEdPlugin):
-
-
-    def __init__(self, threshold=None,
-                 filter_sigma=0.2, nObj=1, biggestObjects=True,
-                 useSeedsOfCompactObjects=True,
-                 binaryClosingIterations=2, binaryOpeningIterations=0,
-                 fillHoles=True,
-                 threshold_auto_method='', threshold_upper=None,
-                 ):
+    def __init__(
+        self,
+        threshold=None,
+        filter_sigma=0.2,
+        nObj=1,
+        biggestObjects=True,
+        useSeedsOfCompactObjects=True,
+        binaryClosingIterations=2,
+        binaryOpeningIterations=0,
+        fillHoles=True,
+        threshold_auto_method="",
+        threshold_upper=None,
+    ):
         """
 
         Inicialitacni metoda.
@@ -53,7 +59,7 @@ class QtSEdThresholdPlugin(seededitorqt.plugin.QtSEdPlugin):
         """
         super(QtSEdThresholdPlugin, self).__init__()
 
-        logger.debug('Spoustim prahovani dat...')
+        logger.debug("Spoustim prahovani dat...")
         self.on_close_fcn = None
 
         self.errorsOccured = False
@@ -73,18 +79,18 @@ class QtSEdThresholdPlugin(seededitorqt.plugin.QtSEdPlugin):
 
         self.threshold_upper = threshold_upper
 
-
         # Kalkulace objemove jednotky (voxel) (V = a*b*c)
         # voxel1 = self.voxel[0]
         # voxel2 = self.voxel[1]
         # voxel3 = self.voxel[2]
-        self.voxelV = np.prod(self.voxelsize_mm, axis=None) #voxel1 * voxel2 * voxel3
+        self.voxelV = np.prod(self.voxelsize_mm, axis=None)  # voxel1 * voxel2 * voxel3
 
-        if (self.biggestObjects == True or (self.seeds != None and self.useSeedsOfCompactObjects)):
+        if self.biggestObjects == True or (
+            self.seeds != None and self.useSeedsOfCompactObjects
+        ):
             self.get_priority_objects = True
         else:
             self.get_priority_objects = True
-
 
         self.initUI()
         self.updateUI()
@@ -95,7 +101,9 @@ class QtSEdThresholdPlugin(seededitorqt.plugin.QtSEdPlugin):
         self.slider_hi_thr = self._create_slider("High Threshold")
         self.slider_open = self._create_slider("Binary Open")
         self.slider_close = self._create_slider("Binary Close")
-        self.slider_sigma = self._create_slider("Filter Sigma", connect=self._sigma_changed)
+        self.slider_sigma = self._create_slider(
+            "Filter Sigma", connect=self._sigma_changed
+        )
         self.slider_sigma_value = 0.2
 
         self.runbutton = QtGui.QPushButton("Run")
@@ -117,7 +125,6 @@ class QtSEdThresholdPlugin(seededitorqt.plugin.QtSEdPlugin):
     def _sigma_changed(self, slider_value):
         self.slider_sigma_value = slider_value * 0.05
         self._slider_value_updated(self.slider_sigma_value)
-
 
     def _slider_value_updated(self, slider_value):
         # slider.value()
@@ -141,33 +148,22 @@ class QtSEdThresholdPlugin(seededitorqt.plugin.QtSEdPlugin):
 
     def run(self):
         self.runInit()
-        # self.segmentation = self.data3d > self.slider_lo_thr.value()
-        # self.auto_method = ""
-        # self.fillHoles = True
-        # self.nObj = 1
-        # self.get_priority_objects = True
-
-        # if (sys.version_info[0] < 3):
-        #     import copy
-        #     self.data = copy.copy(data)
-        #     self.voxelsize_mm = copy.copy(voxel)
-        #
-        # else:
-        #     self.data = data.copy()
-        #     self.voxelsize_mm = voxel.copy()
-        #
 
         from imtools.uiThreshold import make_image_processing
-        self.imgFiltering, self.threshold = make_image_processing(data=self.data3d, voxelsize_mm=self.voxelsize_mm,
-                                                                  seeds=self.seeds,
-                                                                  sigma_mm=self.slider_sigma_value,
-                                                                  min_threshold=self.slider_lo_thr.value(),
-                                                                  max_threshold=self.slider_hi_thr.value(),
-                                                                  closeNum=self.slider_close.value(),
-                                                                  openNum=self.slider_open.value(),
-                                                                  min_threshold_auto_method=self.threshold_auto_method,
-                                                                  fill_holes=self.fillHoles,
-                                                                  get_priority_objects=self.get_priority_objects,
-                                                                  nObj=self.nObj)
+
+        self.imgFiltering, self.threshold = make_image_processing(
+            data=self.data3d,
+            voxelsize_mm=self.voxelsize_mm,
+            seeds=self.seeds,
+            sigma_mm=self.slider_sigma_value,
+            min_threshold=self.slider_lo_thr.value(),
+            max_threshold=self.slider_hi_thr.value(),
+            closeNum=self.slider_close.value(),
+            openNum=self.slider_open.value(),
+            min_threshold_auto_method=self.threshold_auto_method,
+            fill_holes=self.fillHoles,
+            get_priority_objects=self.get_priority_objects,
+            nObj=self.nObj,
+        )
         self.segmentation = self.imgFiltering
         self.runFinish()
