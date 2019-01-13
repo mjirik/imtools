@@ -32,7 +32,7 @@ def vesselSegmentation(
         useSeedsOfCompactObjects=False, seeds=None, interactivity=True, binaryClosingIterations=2,
         binaryOpeningIterations=0, smartInitBinaryOperations=False, returnThreshold=False,
         binaryOutput=True, returnUsedData=False, qapp=None, auto_method='', aoi_label=1,
-        forbidden_label=None, slab=None, old_gui=False):
+        forbidden_label=None, slab=None, old_gui=False, debug=False):
     """
 
     Vessel segmentation z jater.
@@ -237,7 +237,7 @@ ok)')
 
             se = seededitorqt.QTSeedEditor(preparedData, voxelSize=voxel)
             import imtools.threshold_qsed_plugin
-            wg0 = imtools.threshold_qsed_plugin.QtSEdThresholdPlugin(nObj=nObj)
+            wg0 = imtools.threshold_qsed_plugin.QtSEdThresholdPlugin(nObj=nObj, debug=debug)
             se.addPlugin(wg0)
             se.exec_()
             output = se.getContours()
