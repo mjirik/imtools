@@ -729,7 +729,7 @@ def prepare_threshold_from_seeds(data, seeds, min_threshold_auto_method):
 def make_image_processing(
         data, voxelsize_mm, seeds=None, sigma_mm=1, min_threshold=None, max_threshold=None,
         closeNum=0, openNum=0, min_threshold_auto_method="", fill_holes=True,
-        get_priority_objects=True, nObj=1, debug=True):
+        get_priority_objects=True, nObj=1, debug=False):
     if (sys.version_info[0] < 3):
         import copy
         data_copy = copy.copy(data)
