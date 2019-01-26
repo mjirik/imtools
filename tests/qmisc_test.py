@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 # import funkcí z jiného adresáře
-import sys
 import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
@@ -16,7 +15,6 @@ import os
 
 from imtools import qmisc
 from imtools import misc
-import imtools.sample_data
 
 
 #
@@ -34,19 +32,24 @@ class QmiscTest(unittest.TestCase):
         filename = "mujsoubor"
         # import ipdb; ipdb.set_trace() # BREAKPOINT
         new_filename = misc.suggest_filename(filename, exists=True)
-        self.assertTrue(new_filename == "mujsoubor2")
+        # self.assertTrue(new_filename == "mujsoubor2")
+        self.assertEqual(new_filename, "mujsoubor_2")
 
-        filename = "mujsoubor112"
+        filename = "mujsoubor_112"
         new_filename = misc.suggest_filename(filename, exists=True)
-        self.assertTrue(new_filename == "mujsoubor113")
+        self.assertTrue(new_filename == "mujsoubor_113")
 
-        filename = "mujsoubor-2.txt"
+        filename = "mujsoubor_2.txt"
         new_filename = misc.suggest_filename(filename, exists=True)
-        self.assertTrue(new_filename == "mujsoubor-3.txt")
+        self.assertTrue(new_filename == "mujsoubor_3.txt")
+
+        filename = "mujsoubor27.txt"
+        new_filename = misc.suggest_filename(filename, exists=True)
+        self.assertTrue(new_filename == "mujsoubor27_2.txt")
 
         filename = "mujsoubor-a24.txt"
         new_filename = misc.suggest_filename(filename, exists=False)
-        self.assertTrue(new_filename == "mujsoubor-a24.txt")
+        self.assertEqual(new_filename, "mujsoubor-a24.txt", "Rewrite")
 
     @unittest.skip("getVersionString is not used anymore")
     def test_getVersionString(self):
