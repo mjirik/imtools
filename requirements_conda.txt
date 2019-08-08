@@ -11,7 +11,7 @@ scikit-image
 opencv
 skelet3d
 checksumdir
-pyqt=4.11.4
+pyqt=5.*
 vtkviewer
 dicom2fem
 io3d
