@@ -10,7 +10,7 @@ python: 2.7
 
 os:
   - linux
-  - osx
+#  - osx
 #    - windows # on bash there does not work linux X server
 services:
   - xvfb
