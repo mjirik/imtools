@@ -62,9 +62,9 @@ class ImageManipulationTest(unittest.TestCase):
 
         crinfo_expected = [[0, 99], [20, 99], [45, 99]]
 
-        self.assertEquals(crinfo_auto1, crinfo_expected)
-        self.assertEquals(crinfo_auto1, crinfo_auto2)
-        self.assertEquals(crinfo_auto1, crinfo_auto3)
+        self.assertEqual(crinfo_auto1, crinfo_expected)
+        self.assertEqual(crinfo_auto1, crinfo_auto2)
+        self.assertEqual(crinfo_auto1, crinfo_auto3)
 
     def test_multiple_crop_and_uncrop(self):
         """
@@ -85,7 +85,7 @@ class ImageManipulationTest(unittest.TestCase):
         img_uncropped = imm.uncrop(img_cropped, crinfo_combined, shape)
 
         self.assertTrue(img_uncropped[4, 4, 3] == img_in[4, 4, 3])
-        self.assertEquals(img_in.shape, img_uncropped.shape)
+        self.assertEqual(img_in.shape, img_uncropped.shape)
 
     @unittest.skip("crinfo_combine should be tested in different way")
     def test_random_multiple_crop_and_uncrop(self):
@@ -120,7 +120,7 @@ class ImageManipulationTest(unittest.TestCase):
         logger.debug("img_uncropped.shape" + str(img_uncropped.shape))
 
 
-        self.assertEquals(img_in.shape, img_uncropped.shape)
+        self.assertEqual(img_in.shape, img_uncropped.shape)
         # sonda indexes inside cropped area
         # cr_com = np.asarray(crinfo_combined)
         # if np.all((cr_com[:, 1] - cr_com[:, 0]) > 1):
@@ -133,7 +133,7 @@ class ImageManipulationTest(unittest.TestCase):
                 ])
             sonda_intensity_uncropped = img_uncropped[sonda[0], sonda[1], sonda[2]]
             sonda_intensity_in = img_in[sonda[0], sonda[1], sonda[2]]
-            self.assertEquals(sonda_intensity_in, sonda_intensity_uncropped)
+            self.assertEqual(sonda_intensity_in, sonda_intensity_uncropped)
 
     def test_resize_to_shape(self):
 
@@ -321,7 +321,7 @@ class ImageManipulationTest(unittest.TestCase):
         # self.assertTrue(img_uncropped[crinfo1[0][1], 5 , 3] == img_uncropped[0, 5, 3], msg="pixels over crop")
         # self.assertTrue(img_uncropped[crinfo1[1][1], 5 , 3] == img_uncropped[1, 5, 3], msg="pixels over crop")
         # self.assertTrue(img_uncropped[crinfo1[2][1], 5 , 3] == img_uncropped[2, 5, 3], msg="pixels over crop")
-        self.assertEquals(img_in.shape, img_uncropped.shape)
+        self.assertEqual(img_in.shape, img_uncropped.shape)
 
     def test_uncrop_with_none_crinfo(self):
         shape = [10, 10, 5]

@@ -32,7 +32,7 @@ class QmiscTest(unittest.TestCase):
         self.assertEqual(imma.get_nlabels(slab, 1), 1)
         # after prev line can be number one added twice {"liver":1, "1":1}
         self.assertFalse("1" in slab.keys())
-        self.assertEquals(imma.get_nlabels(slab, ["porta", "liver"]), [2, 1])
+        self.assertEqual(imma.get_nlabels(slab, ["porta", "liver"]), [2, 1])
 
 if __name__ == "__main__":
     unittest.main()
