@@ -4,28 +4,33 @@
 
 # import funkcí z jiného adresáře
 import os.path
-
+
+
 import sys
-
+
+
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 pth = os.path.join(path_to_script, "../../seededitorqt/")
 sys.path.insert(0, pth)
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 import unittest
-
 
-from nose.plugins.attrib import attr
-
+import pytest
+
+
 import numpy as np
-
+
+
 
 from PyQt5.QtWidgets import QApplication
 import sed3
-
+
+
 
 from imtools import segmentation as imsegmentation
-
+
+
 
 
 class SegmentationTest(unittest.TestCase):
@@ -33,7 +38,7 @@ class SegmentationTest(unittest.TestCase):
 
     # @unittest.skip("demonstrating skipping")
     # @unittest.skipIf(not interactiveTest, "interactive test")
-    # @attr('interactive')
+    # @pytest.mark.interactive
 
     def synthetic_data(self):
         # data
@@ -139,7 +144,7 @@ class SegmentationTest(unittest.TestCase):
 
         self.assertLess(errorrate, 0.1)
 
-    @attr('interactive')
+    @pytest.mark.interactive
     def test_synthetic_data_segmentation_interactive_check(self):
         """
         Function uses organ_segmentation  for synthetic box object
@@ -153,7 +158,8 @@ class SegmentationTest(unittest.TestCase):
         slab = datap["slab"]
 # @TODO je tam bug, prohlížeč neumí korektně pracovat s doubly
         import sys
-
+
+
         app = QApplication(sys.argv)
 #        #pyed = QTSeedEditor(noise )
 #        pyed = QTSeedEditor(data3d)
@@ -202,7 +208,8 @@ class SegmentationTest(unittest.TestCase):
         UI threshold segmentation without binary close
         """
         from imtools import uiThreshold
-
+
+
 
         datap = self.synthetic_data()
         data3d = datap["data3d"]
@@ -241,7 +248,8 @@ class SegmentationTest(unittest.TestCase):
         """
         # TODO check the result better
         from imtools import uiThreshold
-
+
+
 
         datap = self.synthetic_data()
         data3d = datap["data3d"]
@@ -252,7 +260,8 @@ class SegmentationTest(unittest.TestCase):
         data3d[100:150, 58:70, 50:55] += 50
         # @TODO je tam bug, prohlížeč neumí korektně pracovat s doubly
         import sys
-
+
+
         app = QApplication(sys.argv)
         # pyed = sed3.sed3(data3d)
         # pyed.show()

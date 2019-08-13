@@ -6,7 +6,7 @@ import unittest
 import numpy as np
 import os
 import os.path
-from nose.plugins.attrib import attr
+import pytest
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 
 

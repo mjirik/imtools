@@ -2,30 +2,39 @@
 # -*- coding: utf-8 -*-
 
 import sys
-
+
+
 import unittest
-
+
+
 
 import matplotlib.pyplot as plt
-
+
+
 import numpy as np
-
+
+
 from PyQt5.QtWidgets import QApplication
-from nose.plugins.attrib import attr
-
+import pytest
+
+
 
 import imtools
-
+
+
 import imtools.sample_data
-
+
+
 import imtools.thresholding_functions
-
+
+
 import imtools.uiThreshold
-
+
+
 
 
 class MyTestCase(unittest.TestCase):
-    @attr('interactive')
+    @pytest.mark.interactive
     def test_something(self):
         self.assertEqual(True, False)
 
@@ -62,7 +71,7 @@ class MyTestCase(unittest.TestCase):
         err_percent = err / np.prod(datap["data3d"].shape)
         self.assertLess(err_percent, 0.1)
 
-    @attr('interactive')
+    @pytest.mark.interactive
     def test_ui_threshold(self):
         datap = imtools.sample_data.generate()
         uit = imtools.uiThreshold.uiThreshold(datap['data3d'], datap['voxelsize_mm'], interactivity=True, threshold=100)
@@ -74,7 +83,7 @@ class MyTestCase(unittest.TestCase):
     #     uit = imtools.uiThreshold.uiThreshold(datap['data3d'], datap['voxelsize_mm'], interactivity=True, threshold=100)
 
 
-    @attr('interactive')
+    @pytest.mark.interactive
     def test_ui_threshold_qt(self):
         app = QApplication(sys.argv)
         datap = imtools.sample_data.generate()
@@ -85,7 +94,8 @@ class MyTestCase(unittest.TestCase):
 
     def test_getPriorityObject(self):
         import skimage.morphology
-
+
+
         nobj = 2
         datap = imtools.sample_data.generate()
         thresholded = datap["data3d"] > 80
@@ -98,7 +108,8 @@ class MyTestCase(unittest.TestCase):
 
     def test_getPriorityObjectSeeds(self):
         import skimage.morphology
-
+
+
 
         nobj = 1
         datap = imtools.sample_data.generate()
@@ -115,7 +126,8 @@ class MyTestCase(unittest.TestCase):
     @unittest.skip("not completed")
     def test_thresholding(self):
         import skimage.morphology
-
+
+
         datap = imtools.sample_data.generate()
 
         max_threshold = None

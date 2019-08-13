@@ -2,19 +2,24 @@
 # -*- coding: utf-8 -*-
 
 import sys
-
+
+
 import unittest
-
+
+
 
 from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtWidgets import QApplication
-from nose.plugins.attrib import attr
-
+import pytest
+
+
 
 import imtools.sample_data
-
+
+
 import imtools.select_label_qt
-
+
+
 
 
 class MyTestCase(unittest.TestCase):
@@ -23,7 +28,7 @@ class MyTestCase(unittest.TestCase):
         # self.qapp = QApplication(sys.argv)
 
 
-    @attr('interactive')
+    @pytest.mark.interactive
     def test_select_labels(self):
         """
         creates VTK file from input data
@@ -52,7 +57,8 @@ class MyTestCase(unittest.TestCase):
         slab["label 5"] = 5
 
         import imtools.show_segmentation_qt as ssqt
-
+
+
         app = QApplication(sys.argv)
         # app.setGraphicsSystem("openvg")
         sw = ssqt.SelectLabelWidget(slab=slab, segmentation=segmentation, voxelsize_mm=voxelsize_mm)
@@ -61,14 +67,15 @@ class MyTestCase(unittest.TestCase):
         sw.show()
         app.exec_()
 
-    @attr('interactive')
+    @pytest.mark.interactive
     def test_pyqtgraph(self):
         """
         creates VTK file from input data
         :return:
         """
         import pyqtgraph.parametertree as pgpt
-
+
+
 
         params = [
             {'name': 'Liver', 'type': 'bool', 'value': False, "children": [{"name": "integer", "type": "int", "value": 5}]},

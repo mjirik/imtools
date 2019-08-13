@@ -6,7 +6,7 @@ import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 import unittest
-from nose.plugins.attrib import attr
+import pytest
 import numpy as np
 
 import logging

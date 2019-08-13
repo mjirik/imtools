@@ -6,7 +6,7 @@ import unittest
 import numpy as np
 import os
 import os.path
-from nose.plugins.attrib import attr
+import pytest
 import os.path as op
 import sys
 import matplotlib.pyplot as plt
@@ -29,7 +29,7 @@ class Train3DTest(unittest.TestCase):
     interactivetTest = False
     # interactivetTest = True
 
-    @attr("interactive")
+    @pytest.mark.interactive
     def test_intensity_training(self):
         # TODO use ircad
         sliver_reference_dir = op.expanduser("~/data/medical/orig/sliver07/training/")

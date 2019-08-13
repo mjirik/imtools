@@ -5,7 +5,7 @@ import os
 import os.path as op
 import unittest
 
-from nose.plugins.attrib import attr
+import pytest
 
 import imtools
 import imtools.sample_data
@@ -13,7 +13,7 @@ import imtools.show_segmentation as ss
 
 
 class ShowSegmemtationCase(unittest.TestCase):
-    # @attr('interactive')
+    # @pytest.mark.interactive
     def test_donut_in_one_function(self):
         datap = imtools.sample_data.donut()
 
@@ -111,8 +111,8 @@ class ShowSegmemtationCase(unittest.TestCase):
         os.remove(expected_output_fn3)
         os.remove(expected_output_fn4)
 
-    @attr('long')
-    # @attr('interactive')
+    @pytest.mark.slow
+    # @pytest.mark.interactive
     def test_from_file(self):
         input_file = "~/lisa_data/jatra_5mm_new.pklz"
         import io3d.datasets

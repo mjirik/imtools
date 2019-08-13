@@ -2,35 +2,44 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-
+
+
 
 import logging
-
+
+
 # import funkcí z jiného adresáře
 import unittest
-
+
+
 
 logger = logging.getLogger(__name__)
 
 import os.path
-
+
+
 import sys
-
+
+
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 pth = os.path.join(path_to_script, "../../seededitorqt/")
 sys.path.insert(0, pth)
 
-from nose.plugins.attrib import attr
-
+import pytest
+
+
 # from pysegbase import pycut
 
 import seededitorqt
-
+
+
 import seededitorqt.plugin
-
+
+
 import numpy as np
-
+
+
 from PyQt5.QtWidgets import QApplication
 
 
@@ -55,7 +64,7 @@ class SeedEditorQtTest(unittest.TestCase):
         # se.exec_()
         # self.assertTrue(False)
 
-    @attr('interactive')
+    @pytest.mark.interactive
     def test_addplugin_interactive(self):
         """
         just run editor to see what is new
@@ -71,7 +80,7 @@ class SeedEditorQtTest(unittest.TestCase):
         # se.exec_()
         # self.assertTrue(False)
 
-    @attr('interactive')
+    @pytest.mark.interactive
     def test_show_editor(self):
         """
         just run editor to see what is new
@@ -83,7 +92,8 @@ class SeedEditorQtTest(unittest.TestCase):
         data[15:40, 13:20, 10:18] += 150
         se = seededitorqt.QTSeedEditor(data)
         import imtools.threshold_qsed_plugin
-
+
+
         wg0 = imtools.threshold_qsed_plugin.QtSEdThresholdPlugin(debug=True)
         se.addPlugin(wg0)
         se.exec_()

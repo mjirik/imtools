@@ -14,7 +14,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout
 from PyQt5.QtTest import QTest
 
 
-from nose.plugins.attrib import attr
+import pytest
 
 import imtools.sample_data
 
@@ -24,11 +24,11 @@ class MyTestCase(unittest.TestCase):
         pass
         # self.qapp = QApplication(sys.argv)
 
-    @attr('interactive')
+    @pytest.mark.interactive
     def test_something(self):
         self.assertEqual(True, False)
 
-    @attr('interactive')
+    @pytest.mark.interactive
     def test_visualization(self):
 
         from PyQt5.QtWidgets import QApplication
@@ -44,7 +44,7 @@ class MyTestCase(unittest.TestCase):
         cw.show()
         app.exec_()
 
-    @attr('interactive')
+    @pytest.mark.interactive
     def test_showsegmentation_andclose(self):
 
         from PyQt5.QtWidgets import QApplication
@@ -62,7 +62,7 @@ class MyTestCase(unittest.TestCase):
         cw.close()
         # app.exec_()
 
-    @attr('interactive')
+    @pytest.mark.interactive
     def test_show_segmentation_qt_widget(self):
         # from teigen.dictwidgetqt import DictWidget
         # from teigen.generators.cylindersqt import CylindersWidget
@@ -83,7 +83,7 @@ class MyTestCase(unittest.TestCase):
         # sw.show()
         # app.exec_()
 
-    @attr('interactive')
+    @pytest.mark.interactive
     def test_show_qtwidget(self):
         # from teigen.dictwidgetqt import DictWidget
         # from teigen.generators.cylindersqt import CylindersWidget
@@ -96,7 +96,7 @@ class MyTestCase(unittest.TestCase):
         qw.show()
         app.exec_()
 
-    # @attr('interactive')
+    # @pytest.mark.interactive
     @unittest.skipIf(os.environ.get("TRAVIS", True), "Skip on Travis-CI")
     def test_show_segmentation_qt_widget_hidden_buttons(self):
         # = np.zeros([10, 10, 10])
@@ -125,7 +125,7 @@ class MyTestCase(unittest.TestCase):
         # app.quit()
         # app.exit()
 
-    @attr('interactive')
+    @pytest.mark.interactive
     def test_show_donut(self):
         """
         creates VTK file from input data
@@ -151,7 +151,7 @@ class MyTestCase(unittest.TestCase):
         # sw.close()
         # sw.deleteLater()
 
-    @attr('interactive')
+    @pytest.mark.interactive
     def test_show_donut_with_labels(self):
         """
         creates VTK file from input data
@@ -192,7 +192,7 @@ class MyTestCase(unittest.TestCase):
         sw.show()
         app.exec_()
 
-    @attr('interactive')
+    @pytest.mark.interactive
     def test_show_donut_with_zerosize_label(self):
         """
         creates VTK file from input data
@@ -219,7 +219,7 @@ class MyTestCase(unittest.TestCase):
         # sw.close()
         # sw.deleteLater()
 
-    # @attr('interactive')
+    # @pytest.mark.interactive
     @unittest.skipIf(os.environ.get("TRAVIS", False), "Skip on Travis-CI")
     def test_add_data_and_show(self):
         """
@@ -265,7 +265,7 @@ class MyTestCase(unittest.TestCase):
         filelist = glob.glob(output_vtk_file_star)
         self.assertGreater(len(filelist), 0)
 
-    @attr('interactive')
+    @pytest.mark.interactive
     def test_select_labels(self):
         """
         creates VTK file from input data
