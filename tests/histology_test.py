@@ -24,7 +24,6 @@ def join_sdp(datadir):
 class HistologyTest(unittest.TestCase):
     interactiveTests = False
 
-    # @attr("LAR")
     # def test_vessel_tree_lar(self):
     #     from fibrous.tb_lar import TBLar
     #     tvg = TBLar()
@@ -57,7 +56,6 @@ class HistologyTest(unittest.TestCase):
     #     yaml_output = os.path.join(path_to_script, "delme_esofspy.txt")
     #     vt.vt2esofspy(yaml_input, yaml_output)
 
-    @attr("actual")
     def test_surface_density_gensei_data(self):
         import io3d.datasets
         dr = io3d.datareader.DataReader()
