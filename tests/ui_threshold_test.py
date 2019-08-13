@@ -2,17 +2,26 @@
 # -*- coding: utf-8 -*-
 
 import sys
+
 import unittest
+
 
 import matplotlib.pyplot as plt
+
 import numpy as np
-from PyQt4.QtGui import QApplication
+
+from PyQt5.QtWidgets import QApplication
 from nose.plugins.attrib import attr
+
 
 import imtools
+
 import imtools.sample_data
+
 import imtools.thresholding_functions
+
 import imtools.uiThreshold
+
 
 
 class MyTestCase(unittest.TestCase):
@@ -76,6 +85,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_getPriorityObject(self):
         import skimage.morphology
+
         nobj = 2
         datap = imtools.sample_data.generate()
         thresholded = datap["data3d"] > 80
@@ -88,6 +98,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_getPriorityObjectSeeds(self):
         import skimage.morphology
+
 
         nobj = 1
         datap = imtools.sample_data.generate()
@@ -104,6 +115,7 @@ class MyTestCase(unittest.TestCase):
     @unittest.skip("not completed")
     def test_thresholding(self):
         import skimage.morphology
+
         datap = imtools.sample_data.generate()
 
         max_threshold = None

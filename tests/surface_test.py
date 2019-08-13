@@ -29,9 +29,10 @@ class SurfaceTest(unittest.TestCase):
         import imtools.surface_measurement as sm
         import io3d
         import imtools.sample_data
-        data_path = 'sample_data/gensei_slices/'
-        if not os.path.exists(data_path):
-            imtools.sample_data.get("gensei_slices", 'sample_data/')
+        data_path = io3d.datasets.join_path("medical/orig/gensei_slices", get_root=True)
+        # data_path = 'sample_data/gensei_slices/'
+        # if not os.path.exists(data_path):
+        #     imtools.sample_data.get("gensei_slices", 'sample_data/')
         dr = io3d.datareader.DataReader()
         datap = dr.Get3DData(datapath=data_path,
                              dataplus_format=True)

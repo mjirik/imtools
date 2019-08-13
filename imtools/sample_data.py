@@ -61,135 +61,135 @@ def remove(local_file_name):
         print(e)
 
 
-def downzip(url, destination='./sample_data/'):
-    """
-    Download, unzip and delete.
-    """
-
-    # url = "http://147.228.240.61/queetech/sample-data/jatra_06mm_jenjatra.zip"
-    logmsg = "downloading from '" + url + "'"
-    print(logmsg)
-    logger.debug(logmsg)
-    local_file_name = os.path.join(destination, 'tmp.zip')
-    urllibr.urlretrieve(url, local_file_name)
-    datafile = zipfile.ZipFile(local_file_name)
-    datafile.extractall(destination)
-    remove(local_file_name)
-
-
-# you can get hash from command line with:
-#  python imtools/sample_data.py -v sliver_training_001
-
-# vessels.pkl nejprve vytvoří prázný adresář s názvem vessels.pkl, pak jej při rozbalování zase smaže
-data_urls= {
-    "head": ["http://147.228.240.61/queetech/sample-data/head.zip", "89e9b60fd23257f01c4a1632ff7bb800", "matlab"] ,
-    "jatra_06mm_jenjatra": ["http://147.228.240.61/queetech/sample-data/jatra_06mm_jenjatra.zip", "jatra_06mm_jenjatra/*.dcm"],
-    "jatra_5mm": ["http://147.228.240.61/queetech/sample-data/jatra_5mm.zip", '1b9039ffe1ff9af9caa344341c8cec03', "jatra_06mm/*.dcm"],
-    "exp": ["http://147.228.240.61/queetech/sample-data/exp.zip", '74f2c10b17b6bd31bd03662df6cf884d'],
-    "sliver_training_001": ["http://147.228.240.61/queetech/sample-data/sliver_training_001.zip","d64235727c0adafe13d24bfb311d1ed0","liver*001.*"],
-    "volumetrie": ["http://147.228.240.61/queetech/sample-data/volumetrie.zip","6b2a2da67874ba526e2fe00a78dd19c9"],
-    "vessels.pkl": ["http://147.228.240.61/queetech/sample-data/vessels.pkl.zip","698ef2bc345bb616f8d4195048538ded"],
-    "biodur_sample": ["http://147.228.240.61/queetech/sample-data/biodur_sample.zip","d459dd5b308ca07d10414b3a3a9000ea"],
-    "gensei_slices": ["http://147.228.240.61/queetech/sample-data/gensei_slices.zip", "ef93b121add8e4a133bb086e9e6491c9"],
-    "exp_small": ["http://147.228.240.61/queetech/sample-data/exp_small.zip", "0526ba8ea363fe8b5227f5807b7aaca7"],
-    "vincentka": ["http://147.228.240.61/queetech/vincentka.zip", "a30fdabaa39c5ce032a3223ed30b88e3"],
-    "vincentka_sample": ["http://147.228.240.61/queetech/sample-data/vincentka_sample.zip"],
-    "donut": "http://147.228.240.61/queetech/sample-data/donut.zip",
-    # není nutné pole, stačí jen string
-    # "exp_small": "http://147.228.240.61/queetech/sample-data/exp_small.zip",
-}
-
-def get_sample_data(data_label=None, destination_dir="."):
-    """
-    Same as get() due to back compatibility
-    :param data_label:
-    :param destination_dir:
-    :return:
-    """
-    get(data_label=data_label, destination_dir=destination_dir)
-
-
-def get(data_label=None, destination_dir="."):
-    """
-    Download sample data by data label. Labels can be listed by sample_data.data_urls.keys()
-    :param data_label: label of data. If it is set to None, all data are downloaded
-    :param destination_dir: output dir for data
-    :return:
-    """
-    try:
-        os.mkdir(destination_dir)
-    except:
-        pass
-    if data_label is None:
-        data_label=data_urls.keys()
-
-    if type(data_label) == str:
-        data_label = [data_label]
-
-    for label in data_label:
-        # make all data:url have length 3
-        data_url = data_urls[label]
-        if type(data_url) == str:
-            # back compatibility
-            data_url = [data_url]
-        data_url.extend([None, None])
-        data_url = data_url[:3]
-        url, expected_hash, hash_path = data_url
-
-        if hash_path is None:
-            hash_path = label
-
-        try:
-            computed_hash = checksum(os.path.join(destination_dir, hash_path))
-        except:
-            # there is probably no checksumdir module
-            logger.warning("problem with sample_data.checksum()")
-            computed_hash = None
-
-        logger.info("dataset '" + label + "'")
-        logger.info("expected hash: '" + str(expected_hash) + "'")
-        logger.info("computed hash: '" + str(computed_hash) + "'")
-        if (computed_hash is not None) and (expected_hash == computed_hash):
-            logger.info("match ok - no download needed")
-        else:
-            logger.info("downloading")
-            downzip(url, destination=destination_dir)
-            logger.info("finished")
-            downloaded_hash = checksum(os.path.join(destination_dir, hash_path))
-            logger.info("downloaded hash: '" + str(downloaded_hash) + "'")
-            if downloaded_hash != expected_hash:
-                logger.warning("downloaded hash is different from expected hash\n" + \
-                    "expected hash: '" + str(expected_hash) + "'\n" + \
-                    "downloaded hash: '" + str(downloaded_hash) + "'\n")
-
-
-def checksum(path, hashfunc='md5'):
-    """
-    Return checksum given by path. Wildcards can be used in check sum. Function is strongly
-    dependent on checksumdir package by 'cakepietoast'.
-
-    :param path:
-    :param hashfunc:
-    :return:
-    """
-    import checksumdir
-    hash_func = checksumdir.HASH_FUNCS.get(hashfunc)
-    if not hash_func:
-        raise NotImplementedError('{} not implemented.'.format(hashfunc))
-
-    if os.path.isdir(path):
-        return checksumdir.dirhash(path, hashfunc=hashfunc)
-
-    hashvalues = []
-    path_list = glob.glob(path)
-    logger.debug("path_list " + str(path_list))
-    for path in path_list:
-        if os.path.isfile(path):
-            hashvalues.append(checksumdir._filehash(path, hashfunc=hash_func))
-    logger.debug(str(hashvalues))
-    hash = checksumdir._reduce_hash(hashvalues, hashfunc=hash_func)
-    return hash
-
+# def downzip(url, destination='./sample_data/'):
+#     """
+#     Download, unzip and delete.
+#     """
+#
+#     # url = "http://147.228.240.61/queetech/sample-data/jatra_06mm_jenjatra.zip"
+#     logmsg = "downloading from '" + url + "'"
+#     print(logmsg)
+#     logger.debug(logmsg)
+#     local_file_name = os.path.join(destination, 'tmp.zip')
+#     urllibr.urlretrieve(url, local_file_name)
+#     datafile = zipfile.ZipFile(local_file_name)
+#     datafile.extractall(destination)
+#     remove(local_file_name)
+#
+#
+# # you can get hash from command line with:
+# #  python imtools/sample_data.py -v sliver_training_001
+#
+# # vessels.pkl nejprve vytvoří prázný adresář s názvem vessels.pkl, pak jej při rozbalování zase smaže
+# data_urls= {
+#     "head": ["http://147.228.240.61/queetech/sample-data/head.zip", "89e9b60fd23257f01c4a1632ff7bb800", "matlab"] ,
+#     "jatra_06mm_jenjatra": ["http://147.228.240.61/queetech/sample-data/jatra_06mm_jenjatra.zip", "jatra_06mm_jenjatra/*.dcm"],
+#     "jatra_5mm": ["http://147.228.240.61/queetech/sample-data/jatra_5mm.zip", '1b9039ffe1ff9af9caa344341c8cec03', "jatra_06mm/*.dcm"],
+#     "exp": ["http://147.228.240.61/queetech/sample-data/exp.zip", '74f2c10b17b6bd31bd03662df6cf884d'],
+#     "sliver_training_001": ["http://147.228.240.61/queetech/sample-data/sliver_training_001.zip","d64235727c0adafe13d24bfb311d1ed0","liver*001.*"],
+#     "volumetrie": ["http://147.228.240.61/queetech/sample-data/volumetrie.zip","6b2a2da67874ba526e2fe00a78dd19c9"],
+#     "vessels.pkl": ["http://147.228.240.61/queetech/sample-data/vessels.pkl.zip","698ef2bc345bb616f8d4195048538ded"],
+#     "biodur_sample": ["http://147.228.240.61/queetech/sample-data/biodur_sample.zip","d459dd5b308ca07d10414b3a3a9000ea"],
+#     "gensei_slices": ["http://147.228.240.61/queetech/sample-data/gensei_slices.zip", "ef93b121add8e4a133bb086e9e6491c9"],
+#     "exp_small": ["http://147.228.240.61/queetech/sample-data/exp_small.zip", "0526ba8ea363fe8b5227f5807b7aaca7"],
+#     "vincentka": ["http://147.228.240.61/queetech/vincentka.zip", "a30fdabaa39c5ce032a3223ed30b88e3"],
+#     "vincentka_sample": ["http://147.228.240.61/queetech/sample-data/vincentka_sample.zip"],
+#     "donut": "http://147.228.240.61/queetech/sample-data/donut.zip",
+#     # není nutné pole, stačí jen string
+#     # "exp_small": "http://147.228.240.61/queetech/sample-data/exp_small.zip",
+# }
+#
+# def get_sample_data(data_label=None, destination_dir="."):
+#     """
+#     Same as get() due to back compatibility
+#     :param data_label:
+#     :param destination_dir:
+#     :return:
+#     """
+#     get(data_label=data_label, destination_dir=destination_dir)
+#
+#
+# def get(data_label=None, destination_dir="."):
+#     """
+#     Download sample data by data label. Labels can be listed by sample_data.data_urls.keys()
+#     :param data_label: label of data. If it is set to None, all data are downloaded
+#     :param destination_dir: output dir for data
+#     :return:
+#     """
+#     try:
+#         os.mkdir(destination_dir)
+#     except:
+#         pass
+#     if data_label is None:
+#         data_label=data_urls.keys()
+#
+#     if type(data_label) == str:
+#         data_label = [data_label]
+#
+#     for label in data_label:
+#         # make all data:url have length 3
+#         data_url = data_urls[label]
+#         if type(data_url) == str:
+#             # back compatibility
+#             data_url = [data_url]
+#         data_url.extend([None, None])
+#         data_url = data_url[:3]
+#         url, expected_hash, hash_path = data_url
+#
+#         if hash_path is None:
+#             hash_path = label
+#
+#         try:
+#             computed_hash = checksum(os.path.join(destination_dir, hash_path))
+#         except:
+#             # there is probably no checksumdir module
+#             logger.warning("problem with sample_data.checksum()")
+#             computed_hash = None
+#
+#         logger.info("dataset '" + label + "'")
+#         logger.info("expected hash: '" + str(expected_hash) + "'")
+#         logger.info("computed hash: '" + str(computed_hash) + "'")
+#         if (computed_hash is not None) and (expected_hash == computed_hash):
+#             logger.info("match ok - no download needed")
+#         else:
+#             logger.info("downloading")
+#             downzip(url, destination=destination_dir)
+#             logger.info("finished")
+#             downloaded_hash = checksum(os.path.join(destination_dir, hash_path))
+#             logger.info("downloaded hash: '" + str(downloaded_hash) + "'")
+#             if downloaded_hash != expected_hash:
+#                 logger.warning("downloaded hash is different from expected hash\n" + \
+#                     "expected hash: '" + str(expected_hash) + "'\n" + \
+#                     "downloaded hash: '" + str(downloaded_hash) + "'\n")
+#
+#
+# def checksum(path, hashfunc='md5'):
+#     """
+#     Return checksum given by path. Wildcards can be used in check sum. Function is strongly
+#     dependent on checksumdir package by 'cakepietoast'.
+#
+#     :param path:
+#     :param hashfunc:
+#     :return:
+#     """
+#     import checksumdir
+#     hash_func = checksumdir.HASH_FUNCS.get(hashfunc)
+#     if not hash_func:
+#         raise NotImplementedError('{} not implemented.'.format(hashfunc))
+#
+#     if os.path.isdir(path):
+#         return checksumdir.dirhash(path, hashfunc=hashfunc)
+#
+#     hashvalues = []
+#     path_list = glob.glob(path)
+#     logger.debug("path_list " + str(path_list))
+#     for path in path_list:
+#         if os.path.isfile(path):
+#             hashvalues.append(checksumdir._filehash(path, hashfunc=hash_func))
+#     logger.debug(str(hashvalues))
+#     hash = checksumdir._reduce_hash(hashvalues, hashfunc=hash_func)
+#     return hash
+#
 
 def donut():
     """
@@ -382,58 +382,3 @@ def __make_icon_linux():
         print("Couldnt find $HOME/.local/share/applications/.")
 
 
-def main():
-    logger = logging.getLogger()
-
-    logger.setLevel(logging.WARNING)
-    ch = logging.StreamHandler()
-    logger.addHandler(ch)
-
-    #logger.debug('input params')
-
-    # input parser
-    parser = argparse.ArgumentParser(
-        description=
-        "Download sample data")
-    parser.add_argument(
-        "labels", metavar="N", nargs="+",
-        default=None,
-        help='Get sample data')
-    parser.add_argument(
-        '-l', '--print_labels', action="store_true",
-        default=False,
-        help='print all available labels')
-    parser.add_argument(
-        '-v', '--verbatim', action="store_true",
-        default=False,
-        help='more messages')
-    parser.add_argument(
-        '-d', '--debug', # action="store_true",
-        default=None,
-        help='set debug level')
-    parser.add_argument(
-        '-o', '--destination_dir',
-        default=".",
-        help='set output directory')
-
-    args = parser.parse_args()
-
-
-#    if args.get_sample_data == False and args.install == False and args.build_gco == False:
-## default setup is install and get sample data
-#        args.get_sample_data = True
-#        args.install = True
-#        args.build_gco = False
-    if args.verbatim:
-        # logger.setLevel(logging.DEBUG)
-        logger.setLevel(logging.INFO)
-    if args.debug is not None:
-        logger.setLevel(int(args.debug))
-
-    get(args.labels, destination_dir=args.destination_dir)
-
-                #submodule_update()
-
-
-if __name__ == "__main__":
-    main()

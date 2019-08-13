@@ -7,9 +7,13 @@ import os.path as op
 import sys
 import unittest
 
-from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QApplication, QWidget, QPushButton, QVBoxLayout
-from PyQt4.QtTest import QTest
+from PyQt5.QtCore import Qt
+
+
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout
+from PyQt5.QtTest import QTest
+
+
 from nose.plugins.attrib import attr
 
 import imtools.sample_data
@@ -27,10 +31,12 @@ class MyTestCase(unittest.TestCase):
     @attr('interactive')
     def test_visualization(self):
 
-        from PyQt4.QtGui import QApplication
+        from PyQt5.QtWidgets import QApplication
         # from teigen.dictwidgetqt import DictWidget
         # from teigen.gui import TeigenWidget
         import imtools.show_segmentation_qt
+
+
         app = QApplication(sys.argv)
         cfg = {"bool": True, "int":5, 'str': 'strdrr', 'vs':[1.0, 2.5, 7]}
         captions = {"int": "toto je int"}
@@ -41,10 +47,12 @@ class MyTestCase(unittest.TestCase):
     @attr('interactive')
     def test_showsegmentation_andclose(self):
 
-        from PyQt4.QtGui import QApplication
+        from PyQt5.QtWidgets import QApplication
         # from teigen.dictwidgetqt import DictWidget
         # from teigen.gui import TeigenWidget
         import imtools.show_segmentation_qt
+
+
         app = QApplication(sys.argv)
         cfg = {"bool": True, "int":5, 'str': 'strdrr', 'vs':[1.0, 2.5, 7]}
         captions = {"int": "toto je int"}
@@ -59,6 +67,8 @@ class MyTestCase(unittest.TestCase):
         # from teigen.dictwidgetqt import DictWidget
         # from teigen.generators.cylindersqt import CylindersWidget
         import imtools.show_segmentation_qt as ssqt
+
+
         # app = QtGui.QApplication(sys.argv)
         app = QApplication(sys.argv)
         sw = ssqt.ShowSegmentationWidget(None, show_load_interface=True)
@@ -95,6 +105,8 @@ class MyTestCase(unittest.TestCase):
         # from teigen.dictwidgetqt import DictWidget
         # from teigen.generators.cylindersqt import CylindersWidget
         import imtools.show_segmentation_qt as ssqt
+
+
         app = QApplication(sys.argv)
         # app = QApplication([])
 
@@ -125,6 +137,8 @@ class MyTestCase(unittest.TestCase):
         voxelsize_mm = datap['voxelsize_mm']
 
         import imtools.show_segmentation_qt as ssqt
+
+
         app = QApplication(sys.argv)
         # app.setGraphicsSystem("openvg")
         sw = ssqt.ShowSegmentationWidget(None, show_load_button=True, show_load_interface=True)
@@ -166,6 +180,8 @@ class MyTestCase(unittest.TestCase):
         slab["label 5"] = 5
 
         import imtools.show_segmentation_qt as ssqt
+
+
         app = QApplication(sys.argv)
         # app.setGraphicsSystem("openvg")
         sw = ssqt.ShowSegmentationWidget(None, show_load_button=True, show_load_interface=True)
@@ -188,6 +204,8 @@ class MyTestCase(unittest.TestCase):
         voxelsize_mm = datap['voxelsize_mm']
 
         import imtools.show_segmentation_qt as ssqt
+
+
         app = QApplication(sys.argv)
         # app.setGraphicsSystem("openvg")
         sw = ssqt.ShowSegmentationWidget(None, show_load_button=True, show_load_interface=True)
@@ -214,6 +232,8 @@ class MyTestCase(unittest.TestCase):
         voxelsize_mm = datap['voxelsize_mm']
 
         import imtools.show_segmentation_qt as ssqt
+
+
         app = QApplication(sys.argv)
         # app.setGraphicsSystem("openvg")
         sw = ssqt.ShowSegmentationWidget(None, show_load_button=True)
@@ -274,6 +294,8 @@ class MyTestCase(unittest.TestCase):
         slab["label 5"] = 5
 
         import imtools.show_segmentation_qt as ssqt
+
+
         app = QApplication(sys.argv)
         # app.setGraphicsSystem("openvg")
         sw = ssqt.SelectLabelWidget(slab=slab, segmentation=segmentation, voxelsize_mm=voxelsize_mm, show_ok_button=True)

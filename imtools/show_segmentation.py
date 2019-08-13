@@ -5,16 +5,24 @@ Module is used for visualization of segmentation stored in pkl file.
 """
 
 import os.path
+
+
 import os.path as op
+
+
 import sys
+
+
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/dicom2fem/src"))
 import logging
+
+
 logger = logging.getLogger(__name__)
 
 # from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QApplication
+from PyQt5.QtWidgets import QApplication
 import argparse
 
 
@@ -174,6 +182,8 @@ class SegmentationToMesh():
                 logger.debug("resize begin")
                 new_voxelsize_mm = np.asarray([self.resize_mm_1d, self.resize_mm_1d, self.resize_mm_1d])
                 import imtools
+
+
                 prev_shape = segmentation.shape
                 segmentation = imtools.image_manipulation.resize_to_mm(segmentation, voxelsize_mm=voxelsize_mm,
                                                                        new_voxelsize_mm=new_voxelsize_mm, order=0)
@@ -353,6 +363,8 @@ def showSegmentation(
             logger.debug("qapp constructed")
 
         import vtkviewer
+
+
         vtkv = vtkviewer.VTKViewer()
         vtkv.AddFile(vtk_file)
         vtkv.Start()
@@ -375,7 +387,11 @@ def _stats(data):
 def prettify(elem):
     # from xml.etree.ElementTree import Element, SubElement, Comment, tostring
     from xml.etree import ElementTree
+
+
     from xml.dom import minidom
+
+
     """Return a pretty-printed XML string for the Element.
     """
     rough_string = ElementTree.tostring(elem, 'utf-8')
@@ -392,7 +408,11 @@ def create_pvsm_file(vtk_files, pvsm_filename, relative_paths=True):
     :return:
     """
     from xml.etree.ElementTree import Element, SubElement, Comment
+
+
     import os.path as op
+
+
 
     top = Element('ParaView')
 
@@ -491,6 +511,8 @@ def main():
     #     }
     # else:
     import io3d
+
+
     data = io3d.read(args.inputfile, dataplus_format=True)
     # args.label = np.array(eval(args.label))
     # print args.label

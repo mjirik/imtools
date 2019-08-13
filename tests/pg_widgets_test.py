@@ -2,14 +2,19 @@
 # -*- coding: utf-8 -*-
 
 import sys
+
 import unittest
+
 
-from PyQt4 import QtGui
-from PyQt4.QtGui import QApplication
+from PyQt5 import QtGui, QtWidgets
+from PyQt5.QtWidgets import QApplication
 from nose.plugins.attrib import attr
+
 
 import imtools.sample_data
+
 import imtools.select_label_qt
+
 
 
 class MyTestCase(unittest.TestCase):
@@ -47,6 +52,7 @@ class MyTestCase(unittest.TestCase):
         slab["label 5"] = 5
 
         import imtools.show_segmentation_qt as ssqt
+
         app = QApplication(sys.argv)
         # app.setGraphicsSystem("openvg")
         sw = ssqt.SelectLabelWidget(slab=slab, segmentation=segmentation, voxelsize_mm=voxelsize_mm)
@@ -62,6 +68,7 @@ class MyTestCase(unittest.TestCase):
         :return:
         """
         import pyqtgraph.parametertree as pgpt
+
 
         params = [
             {'name': 'Liver', 'type': 'bool', 'value': False, "children": [{"name": "integer", "type": "int", "value": 5}]},
@@ -145,11 +152,11 @@ class MyTestCase(unittest.TestCase):
         # QTest.mouseClick(sw.ui_buttons['Show volume'], Qt.LeftButton)
         # sw.add_vtk_file("~/projects/imtools/mesh.vtk")
         # sw.show()
-        win = QtGui.QWidget()
-        layout = QtGui.QGridLayout()
+        win = QtWidgets.QWidget()
+        layout = QtWidgets.QGridLayout()
         win.setLayout(layout)
         layout.addWidget(
-            QtGui.QLabel("These are two views of the same data. They should always display the same values."), 0, 0, 1,
+            QtWidgets.QLabel("These are two views of the same data. They should always display the same values."), 0, 0, 1,
             2)
         layout.addWidget(t, 1, 0, 1, 1)
         win.show()

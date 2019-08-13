@@ -13,14 +13,15 @@
 import logging
 
 logger = logging.getLogger(__name__)
-from PyQt4.QtGui import QGridLayout, QPushButton, QCheckBox, QWidget, QVBoxLayout
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5.QtWidgets import (QGridLayout, QPushButton, QCheckBox, QWidget,
+                         QVBoxLayout)
+# from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 import numpy as np
 # import pyqtgraph as pg
 
 
-class SelectLabelWidget(QtGui.QWidget):
+class SelectLabelWidget(QtWidgets.QWidget):
     def __init__(self, slab=None, segmentation=None, voxelsize_mm=None, show_ok_button=True, app=None):
         super(SelectLabelWidget, self).__init__()
         self.app = app
@@ -30,7 +31,7 @@ class SelectLabelWidget(QtGui.QWidget):
         widget = QWidget()
         widget.setLayout(self.mainLayout)
 
-        scroll = QtGui.QScrollArea()
+        scroll = QtWidgets.QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFixedHeight(400)
         scroll.setWidget(widget)
@@ -57,6 +58,7 @@ class SelectLabelWidget(QtGui.QWidget):
         self.voxelsize_mm = voxelsize_mm
 
         from . import show_segmentation
+
         self.slab = show_segmentation.create_slab_from_segmentation(
             self.segmentation, slab=slab)
 
@@ -112,7 +114,7 @@ class SelectLabelWidget(QtGui.QWidget):
         return self.get_selected_labels()
 
 
-class SelectLabelWidget2(QtGui.QWidget):
+class SelectLabelWidget2(QtWidgets.QWidget):
     def __init__(self, *args, **kwargs):
         super(SelectLabelWidget, self).__init__()
         pass

@@ -11,10 +11,14 @@ Copyright:   (c) Pavel Volkovinsky
 
 import sys
 
+
+
 sys.path.append("../src/")
 sys.path.append("../extern/")
 
 import logging as logger
+
+
 
 # import scipy.ndimage
 
@@ -26,7 +30,9 @@ from matplotlib.widgets import Slider, Button  # , RadioButtons
 
 import gc as garbage
 
-from PyQt4 import QtGui
+
+
+from PyQt5 import QtGui, QtWidgets
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 
@@ -35,13 +41,15 @@ import numpy as np
 from . import thresholding_functions
 
 
-class uiThresholdQt(QtGui.QDialog):
+
+
+class uiThresholdQt(QtWidgets.QDialog):
     def __init__(self, *pars, **params):
     # def __init__(self,parent=None):
         parent = None
 
 
-        QtGui.QDialog.__init__(self, parent)
+        QtWidgets.QDialog.__init__(self, parent)
         # super(Window, self).__init__(parent)
         # self.setupUi(self)
         self.figure = plt.figure()
@@ -49,7 +57,7 @@ class uiThresholdQt(QtGui.QDialog):
         self.toolbar = NavigationToolbar(self.canvas, self)
 
 # set the layout
-        layout = QtGui.QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.toolbar)
         layout.addWidget(self.canvas)
         # layout.addWidget(self.button)
@@ -158,6 +166,8 @@ class uiThreshold:
 
         if (sys.version_info[0] < 3):
             import copy
+
+
             self.data = copy.copy(data)
             self.voxelsize_mm = copy.copy(voxel)
 
@@ -732,6 +742,8 @@ def make_image_processing(
         get_priority_objects=True, nObj=1, debug=False):
     if (sys.version_info[0] < 3):
         import copy
+
+
         data_copy = copy.copy(data)
     else:
         data_copy = data.copy()
@@ -745,6 +757,8 @@ def make_image_processing(
         del(sigmaNew)
     if debug:
         import sed3
+
+
         # ed = sed3.sed3qt(data_copy)
         sed3.show_slices(data_copy, shape=[6, 9])
         # ed.show()
@@ -807,6 +821,8 @@ def make_image_processing(
 
 def main():
     import numpy as np
+
+
     data = np.random.randint(0, 30, [15, 16, 18])
     print(data.shape)
     data[5:11, 7:13, 2:10] += 20

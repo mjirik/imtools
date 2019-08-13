@@ -24,38 +24,38 @@ def join_sdp(datadir):
 class HistologyTest(unittest.TestCase):
     interactiveTests = False
 
-    @attr("LAR")
-    def test_vessel_tree_lar(self):
-        from fibrous.tb_lar import TBLar
-        tvg = TBLar()
-        yaml_path = os.path.join(path_to_script, "./hist_stats_test.yaml")
-        tvg.importFromYaml(yaml_path)
-        tvg.voxelsize_mm = [1, 1, 1]
-        tvg.shape = [100, 100, 100]
-        output = tvg.generateTree() # noqa
-        if self.interactiveTests:
-            tvg.show()
-
-    def test_import_new_vt_format(self):
-        # tvg = TreeBuilder()
-        tvg = TBVolume()
-
-        yaml_path = os.path.join(path_to_script, "vt_biodur_simple.yaml")
-        tvg.importFromYaml(yaml_path)
-        tvg.set_area_sampling(voxelsize_mm=[1,1,1], shape=[150, 150, 150])
-        # tvg.voxelsize_mm = [1, 1, 1]
-        # tvg.shape = [150, 150, 150]
-        data3d = tvg.buildTree()
-
-    def test_test_export_to_esofspy(self):
-        """
-        tests export function
-        """
-
-        import imtools.vesseltree_export as vt
-        yaml_input = os.path.join(path_to_script, "vt_biodur_simple.yaml")
-        yaml_output = os.path.join(path_to_script, "delme_esofspy.txt")
-        vt.vt2esofspy(yaml_input, yaml_output)
+    # @attr("LAR")
+    # def test_vessel_tree_lar(self):
+    #     from fibrous.tb_lar import TBLar
+    #     tvg = TBLar()
+    #     yaml_path = os.path.join(path_to_script, "./hist_stats_test.yaml")
+    #     tvg.importFromYaml(yaml_path)
+    #     tvg.voxelsize_mm = [1, 1, 1]
+    #     tvg.shape = [100, 100, 100]
+    #     output = tvg.generateTree() # noqa
+    #     if self.interactiveTests:
+    #         tvg.show()
+    #
+    # def test_import_new_vt_format(self):
+    #     # tvg = TreeBuilder()
+    #     tvg = TBVolume()
+    #
+    #     yaml_path = os.path.join(path_to_script, "vt_biodur_simple.yaml")
+    #     tvg.importFromYaml(yaml_path)
+    #     tvg.set_area_sampling(voxelsize_mm=[1,1,1], shape=[150, 150, 150])
+    #     # tvg.voxelsize_mm = [1, 1, 1]
+    #     # tvg.shape = [150, 150, 150]
+    #     data3d = tvg.buildTree()
+    #
+    # def test_test_export_to_esofspy(self):
+    #     """
+    #     tests export function
+    #     """
+    #
+    #     import imtools.vesseltree_export as vt
+    #     yaml_input = os.path.join(path_to_script, "vt_biodur_simple.yaml")
+    #     yaml_output = os.path.join(path_to_script, "delme_esofspy.txt")
+    #     vt.vt2esofspy(yaml_input, yaml_output)
 
     @attr("actual")
     def test_surface_density_gensei_data(self):
@@ -149,7 +149,8 @@ class HistologyTest(unittest.TestCase):
         self.assertLess(2*Sv1, Sv2*1.1)
 
     def test_surface_measurement_find_edge(self):
-        tvg = TBVolume()
+        import fibrous
+        tvg = fibrous.tb_volume.TBVolume()
         yaml_path = os.path.join(path_to_script, "./hist_stats_test.yaml")
         tvg.importFromYaml(yaml_path)
         tvg.voxelsize_mm = [1, 1, 1]

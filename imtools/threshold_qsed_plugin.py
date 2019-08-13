@@ -2,10 +2,18 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+
+
 import logging
+
+
 import os.path
+
+
 # import funkcí z jiného adresáře
 import sys
+
+
 
 import numpy as np
 
@@ -15,7 +23,7 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 
 # from pysegbase import pycut
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 import seededitorqt.plugin
 
@@ -95,7 +103,7 @@ class QtSEdThresholdPlugin(seededitorqt.plugin.QtSEdPlugin):
         self.updateUI()
 
     def initUI(self):
-        self.vbox.addWidget(QtGui.QLabel("Threshold segmentation"))
+        self.vbox.addWidget(QtWidgets.QLabel("Threshold segmentation"))
         self.slider_lo_thr = self._create_slider("Low Threshold")
         self.slider_hi_thr = self._create_slider("High Threshold")
         self.slider_open = self._create_slider("Binary Open")
@@ -105,14 +113,14 @@ class QtSEdThresholdPlugin(seededitorqt.plugin.QtSEdPlugin):
         )
         self.slider_sigma_value = 0.2
 
-        self.runbutton = QtGui.QPushButton("Run")
+        self.runbutton = QtWidgets.QPushButton("Run")
         self.runbutton.clicked.connect(self.run)
 
         # self.vbox.addWidget(self.slider_lo_thr)
         self.vbox.addWidget(self.runbutton)
 
     def _create_slider(self, tooltip=None, connect=None):
-        slider = QtGui.QSlider(QtCore.Qt.Horizontal, self)
+        slider = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
         if tooltip is not None:
             slider.setToolTip(tooltip)
         if connect is None:
@@ -150,6 +158,8 @@ class QtSEdThresholdPlugin(seededitorqt.plugin.QtSEdPlugin):
         self.runInit()
 
         from imtools.uiThreshold import make_image_processing
+
+
 
         self.imgFiltering, self.threshold = make_image_processing(
             data=self.data3d,

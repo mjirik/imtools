@@ -1,31 +1,81 @@
 __author__ = 'Ryba'
 
 import glob
+
+
 import itertools
+
+
 import os
+
+
 import sys
+
+
 from collections import namedtuple
 
+
+
 import matplotlib.pyplot as plt
+
+
 import numpy as np
+
+
 import scipy.ndimage.filters as scindifil
+
+
 import scipy.ndimage.interpolation as scindiint
+
+
 import scipy.ndimage.measurements as scindimea
+
+
 import scipy.ndimage.morphology as scindimor
+
+
 import scipy.signal as scisig
+
+
 import scipy.stats as scista
+
+
 import skimage.color as skicol
+
+
 import skimage.exposure as skiexp
+
+
 import skimage.feature as skifea
+
+
 import skimage.filters as skifil
+
+
 import skimage.io as skiio
+
+
 import skimage.measure as skimea
+
+
 import skimage.morphology as skimor
+
+
 import skimage.restoration as skires
+
+
 import skimage.segmentation as skiseg
+
+
 from matplotlib.patches import Ellipse
+
+
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+
 from skimage.segmentation import mark_boundaries
+
+
 from sklearn.cluster import MeanShift, estimate_bandwidth
 
 try:
@@ -34,8 +84,6 @@ except e:
     import pickle
 
 import gzip
-
-
 import warnings
 
 try:
@@ -201,6 +249,8 @@ def change_slice_index(data):
 def read_data(dcmdir, indices=None, wildcard='*.dcm', type=np.int16):
     import dicom
 
+
+
     dcmlist = []
     for infile in glob.glob(os.path.join(dcmdir, wildcard)):
         dcmlist.append(infile)
@@ -262,6 +312,8 @@ def windowing(data, level=50, width=350, sub1024=False, sliceId=2, out_range=(0,
 
 def smoothing(data, d=10, sigmaColor=10, sigmaSpace=10, sliceId=2):
     import cv2
+
+
     if data.ndim == 3:
         if sliceId == 2:
             for idx in range(data.shape[2]):
@@ -581,6 +633,8 @@ def morph_ND(data, method, selem=None, selem_rad=3, slicewise=True, sliceId=0):
 
 def resize3D(data, scale=None, shape=None, sliceId=2, method='cv2'):
     import cv2
+
+
     if data.ndim == 2:
         if shape is not None:
             new_data = cv2._resize_if_required(data.astype(np.uint8), shape, 0, 0, interpolation=cv2.INTER_NEAREST)
@@ -745,6 +799,8 @@ def crop_to_bbox(im, mask):
 
 def slics_3D(im, pseudo_3D=True, n_segments=100, get_slicewise=False):
     import cv2
+
+
     if im.ndim != 3:
         raise Exception('3D image is needed.')
 
@@ -968,6 +1024,8 @@ def load_pickle_data(fname, slice_idx=-1, return_datap=False):
 
         try:
             import gzip
+
+
             f = gzip.open(fname, 'rb')
             fcontent = f.read()
             f.close()
@@ -1127,8 +1185,10 @@ def view_segmentation(datap_1, datap_2=None):
         sys.path.append('../data_viewers/')
         from dataviewers.seg_viewer import SegViewer
 
-        from PyQt4 import QtGui
-        app = QtGui.QApplication(sys.argv)
+
+
+        from PyQt5 import QtGui, QtWidgets
+        app = QtWidgets.QApplication(sys.argv)
         le = SegViewer(datap1=datap_1, datap2=datap_2)
         le.show()
         sys.exit(app.exec_())
@@ -1140,6 +1200,8 @@ def show_3d(data, range=True):
     else:
         sys.path.append('/home/tomas/projects/data_viewers')
         from dataviewers.viewer_3D import Viewer_3D
+
+
         if isinstance(data, tuple):
             # n_data = len(data)
             n_slices = data[0].shape[0]
@@ -1162,8 +1224,8 @@ def show_3d(data, range=True):
         else:
             data_vis = data
 
-        from PyQt4 import QtGui
-        app = QtGui.QApplication(sys.argv)
+        from PyQt5 import QtGui, QtWidgets
+        app = QtWidgets.QApplication(sys.argv)
         viewer = Viewer_3D(data_vis, range=True)
         viewer.show()
         app.exec_()
@@ -1213,6 +1275,8 @@ def arange_figs(imgs, tits=None, max_r=3, max_c=5, same_range=False, colorbar=Fa
 
 def resize(image, width=None, height=None, inter=None):
     import cv2
+
+
     if inter is None:
         inter=cv2.INTER_AREA
     # initialize the dimensions of the image to be resized and
@@ -1256,6 +1320,8 @@ def pyramid(image, scale=2, min_size=(30, 30), inter=None):
     """
     yield image
     import cv2
+
+
     if inter is None:
         inter=cv2.INTER_AREA
     # yield the original image

@@ -11,24 +11,30 @@
 """
 
 import logging
-
 logger = logging.getLogger(__name__)
 import argparse
-from PyQt4.QtGui import QGridLayout, QLabel, QPushButton, QLineEdit, QCheckBox, QFileDialog
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+
+
+from PyQt5.QtWidgets import (QGridLayout, QLabel, QPushButton, QLineEdit, QCheckBox,
+                         QFileDialog)
+from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 import sys
 import numpy as np
 
 import vtk
-from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+
+# from vtk.qt5.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+# from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+
 import io3d.outputqt
 from . import image_manipulation as imma
 
 from .select_label_qt import SelectLabelWidget
 
 
-class ShowSegmentationWidget(QtGui.QWidget):
+class ShowSegmentationWidget(QtWidgets.QWidget):
     def __init__(self, segmentation=None, vtk_file="mesh_{}.vtk", *args, **kwargs):
         super(ShowSegmentationWidget, self).__init__()
         self.ui_buttons = {}
@@ -54,6 +60,7 @@ class ShowSegmentationWidget(QtGui.QWidget):
 
     def add_data_file(self, filename):
         import io3d
+
         datap = io3d.read(filename, dataplus_format=True)
         if not 'segmentation' in datap.keys():
             datap['segmentation'] = datap['data3d']
@@ -217,6 +224,8 @@ class ShowSegmentationWidget(QtGui.QWidget):
 
         # vtkviewer
         import vtkviewer
+
+
         self.vtkv = vtkviewer.VTKViewer()
         self.vtkv.renderer = self.renderer
         self.vtkv.iren = self.vtkWidget
@@ -233,10 +242,10 @@ class ShowSegmentationWidget(QtGui.QWidget):
 
 
     def action_select_vtk_file(self):
-        self.ui_buttons["vtk_file"].setText(QFileDialog.getSaveFileName())
+        self.ui_buttons["vtk_file"].setText(QFileDialog.getSaveFileName())[0]
 
     def _ui_callback_add_data_file(self):
-        self.add_data_file(str(QFileDialog.getOpenFileName()))
+        self.add_data_file(str(QFileDialog.getOpenFileName()))[0]
 
     def add_vtk_file(self, filename):
         self.vtkv.AddFile(filename)
@@ -247,11 +256,15 @@ class ShowSegmentationWidget(QtGui.QWidget):
         self.vtkv_start()
 
     def _ui_action_add_vtk_file(self):
-        fn = str(QFileDialog.getOpenFileName())
+        fn = str(QFileDialog.getOpenFileName())[0]
         import os.path as op
+
+
         ext = op.splitext(fn)[1]
         if ext == ".yaml":
             import gen_vtk_tree
+
+
             polydata = gen_vtk_tree.vt_file2polyData(fn)
             self.add_vtk_polydata(polydata)
         else:
@@ -337,6 +350,8 @@ class ShowSegmentationWidget(QtGui.QWidget):
 
     def show_labels(self, labels, vtk_file, together_vtk_file=True):
         from . import show_segmentation
+
+
         # ds = show_segmentation.select_labels(self.segmentation, labels, slab=self.slab_wg.slab)
         # if ds.max() == False:
         #     logger.info("Nothing found for labels " + str(labels))
@@ -389,6 +404,8 @@ class ShowSegmentationWidget(QtGui.QWidget):
 
 def main():
     import io3d
+
+
     logger = logging.getLogger()
 
     logger.setLevel(logging.DEBUG)
@@ -428,7 +445,7 @@ def main():
     if args.debug:
         ch.setLevel(logging.DEBUG)
 
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
 
     # w = QtGui.QWidget()
     # w = DictEdit(dictionary={'jatra':2, 'ledviny':7})
