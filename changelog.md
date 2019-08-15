@@ -2,6 +2,12 @@
 
 * [Changed] Smaller package size due to correct conda build in standalone dir
 
+
+# 2.0
+
+* [Changed] Update for io3d required version
+
+
 # 1.6
 
 * [Changed] Upgrade to PyQt5 
