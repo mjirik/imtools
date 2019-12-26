@@ -218,7 +218,7 @@ class SegmentationToMesh():
             self,
             labels=None,
             ):
-        """ Make one mesh (vtk or stl) file
+        """ Make one mesh (vtk, stl or obj) file. .obj file is produced by LarSurf in Julia
 
         :param label: labels from prev use of set_labels are used if None
 
