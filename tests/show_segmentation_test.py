@@ -35,6 +35,28 @@ class ShowSegmemtationCase(unittest.TestCase):
         )
 
         self.assertTrue(op.exists("donut.vtk"))
+
+    def test_donut_in_one_function_to_obj_with_larsurf(self):
+        datap = imtools.sample_data.donut()
+
+        segmentation = datap['segmentation']
+        voxelsize_mm = datap['voxelsize_mm']
+
+        # app.setGraphicsSystem("openvg")
+        sw = ss.showSegmentation(
+            segmentation,
+            degrad=1,
+            # degrad=self.degrad,
+            voxelsize_mm=voxelsize_mm,
+            vtk_file="donut.obj",
+            # resize_mm=self.resize_mm,
+            # resize_voxel_number=self.resize_voxel_number,
+            # smoothing=self.smoothing,
+            show=False
+            # show=True
+        )
+
+        self.assertTrue(op.exists("donut.obj"))
         # self.assertEqual(True, False)
 
     def test_donut(self):

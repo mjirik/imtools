@@ -260,27 +260,15 @@ class SegmentationToMesh():
         # _stats(self.segmentation)
         # _stats(self.binar_segmentation)
 
-        logger.debug("gen_mesh_from_voxels_mc() started")
-        mesh_data = gen_mesh_from_voxels_mc(self.resized_binar_segmentation, self.resized_voxelsize_mm)
-        if self.smoothing:
-            mesh_data.coors = smooth_mesh(mesh_data)
-            # mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
-
-        else:
-            pass
-            # mesh_data = gen_mesh_from_voxels_mc(segmentation, voxelsize_mm * 1.0e-2)
-            # mesh_data.coors +=
-        logger.debug("gen_mesh_from_voxels_mc() finished")
         pth, ext = op.splitext(mesh_filename)
-        if ext == ".stl":
-            vtk_filename = mesh_filename + ".vtk"
+        if ext == ".obj":
+            return get_surface_larsurf(self.resized_binar_segmentation, self.resized_voxelsize_mm, mesh_filename)
         else:
-            vtk_filename = mesh_filename
-        mesh_data.write(vtk_filename)
+            return get_surface_python_marching_cubes(
+                self.resized_binar_segmentation,
+                self.resized_voxelsize_mm, mesh_filename
+            )
 
-        if ext == ".stl":
-            vtk2stl.vtk2stl(vtk_filename, mesh_filename)
-        return mesh_filename
 
     def make_mesh_files(
             self,
@@ -466,6 +454,42 @@ def create_pvsm_file(vtk_files, pvsm_filename, relative_paths=True):
 
     # ElementTree(top).write()
 
+
+def get_surface_larsurf(segmentation, voxelsize_mm, filename_obj:str="triangulated.obj"):
+    import julia
+    from julia import Distributed
+    if Distributed.nprocs() < 3:
+        Distributed.addprocs(3)
+    from julia import LarSurf
+    LarSurf.lsp_setup([64,64,64])
+    V, FV = LarSurf.lsp_get_surface(segmentation, voxelsize=voxelsize_mm)
+    FVtri = LarSurf.triangulate_quads(FV)
+    objlines = LarSurf.Lar.lar2obj(V, FVtri, filename_obj)
+    return filename_obj
+
+
+def get_surface_python_marching_cubes(self, resized_binar_segmentation, resized_voxelsize_mm, mesh_filename):
+    logger.debug("gen_mesh_from_voxels_mc() started")
+    mesh_data = gen_mesh_from_voxels_mc(resized_binar_segmentation, resized_voxelsize_mm)
+    if self.smoothing:
+        mesh_data.coors = smooth_mesh(mesh_data)
+        # mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
+
+    else:
+        pass
+        # mesh_data = gen_mesh_from_voxels_mc(segmentation, voxelsize_mm * 1.0e-2)
+        # mesh_data.coors +=
+    logger.debug("gen_mesh_from_voxels_mc() finished")
+    pth, ext = op.splitext(mesh_filename)
+    if ext == ".stl":
+        vtk_filename = mesh_filename + ".vtk"
+    else:
+        vtk_filename = mesh_filename
+    mesh_data.write(vtk_filename)
+
+    if ext == ".stl":
+        vtk2stl.vtk2stl(vtk_filename, mesh_filename)
+    return mesh_filename
 
 
 def main():
