@@ -10,8 +10,9 @@
 
 """
 
-import logging
-logger = logging.getLogger(__name__)
+# import logging
+# logger = logging.getLogger(__name__)
+from loguru import logger
 import argparse
 
 
@@ -99,6 +100,13 @@ class ShowSegmentationWidget(QtWidgets.QWidget):
     def _init_ui(self):
 
         self.mainLayout = QGridLayout(self)
+        self.setLayout(self.mainLayout)
+        # self.mainLayout.setColumnStretch(0, 1)
+        self.mainLayout.setColumnStretch(1, 1)
+        self.mainLayout.setColumnStretch(2, 1)
+        self.mainLayout.setColumnStretch(3, 1)
+        self.mainLayout.setColumnStretch(4, 3)
+        self.mainLayout.setColumnMinimumWidth(4, 800)
 
         self._row = 0
 
@@ -230,7 +238,7 @@ class ShowSegmentationWidget(QtWidgets.QWidget):
         self.vtkv.renderer = self.renderer
         self.vtkv.iren = self.vtkWidget
         self.vtkv.renWin = self.renWin
-        self.vtkWidget.resize(300,300)
+        # self.vtkWidget.resize(300,300)
         self.updateGeometry()
         self.vtkv_started = False
 
@@ -293,9 +301,14 @@ class ShowSegmentationWidget(QtWidgets.QWidget):
         # self.vtkWidget.show()
 
     def _find_None(self, lineedit):
+        """
+        Detect none in string and set value to None
+        :param lineedit:
+        :return:
+        """
         text = str(lineedit.text())
 
-        print("find none ", text)
+        logger.debug(f"find none {text}")
         if text == "None":
             text = None
         else:

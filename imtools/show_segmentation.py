@@ -5,21 +5,14 @@ Module is used for visualization of segmentation stored in pkl file.
 """
 
 import os.path
-
-
 import os.path as op
-
-
 import sys
-
-
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/dicom2fem/src"))
-import logging
-
-
-logger = logging.getLogger(__name__)
+from loguru import logger
+# import logging
+# logger = logging.getLogger(__name__)
 
 # from PyQt4.QtCore import Qt
 from PyQt5.QtWidgets import QApplication
@@ -172,6 +165,7 @@ class SegmentationToMesh():
         # else:
         #     segmentation = self.binar_segmentation
         if self.resized_segmentation is None:
+            logger.debug("resize segmentation required")
             # segmentation = self.binar_segmentation
             segmentation = self.segmentation
 
@@ -179,16 +173,19 @@ class SegmentationToMesh():
             voxelsize_mm = self.voxelsize_mm * self.degrad
 
             if self.resize_mm_1d is not None:
-                logger.debug("resize begin")
+                logger.debug(f"resize begin with new voxelsize_mm: {self.resize_mm_1d}")
                 new_voxelsize_mm = np.asarray([self.resize_mm_1d, self.resize_mm_1d, self.resize_mm_1d])
                 import imtools
 
 
                 prev_shape = segmentation.shape
                 segmentation = imtools.image_manipulation.resize_to_mm(segmentation, voxelsize_mm=voxelsize_mm,
-                                                                       new_voxelsize_mm=new_voxelsize_mm, order=0)
+                                                                       new_voxelsize_mm=new_voxelsize_mm, order=0,
+
+                                                                       )
                 voxelsize_mm = new_voxelsize_mm
                 logger.debug("resize finished, old shape = {}, new shape = {}".format(str(prev_shape), str(segmentation.shape)))
+                # import pdb; pdb.set_trace()
                 # logger.debug("segmentation min={}, max={}".format(np.min(segmentation), np.max(segmentation)))
             self.resized_segmentation = segmentation
             self.resized_voxelsize_mm = voxelsize_mm
@@ -235,6 +232,7 @@ class SegmentationToMesh():
             labels=self.labels
 
         strlabel = imma.get_nlabels(slab=self.slab, labels=labels, return_mode="str")
+        numlabel = imma.get_nlabels(slab=self.slab, labels=labels, return_mode="num")
         if strlabel is list:
             # if one file with {} in pattern is created
             strlabel = "-".join(strlabel)
@@ -249,11 +247,19 @@ class SegmentationToMesh():
         # import sed3
         # sed3.show_slices(self.binar_segmentation)
 
+        _stats(self.segmentation)
+        _stats(self.resized_segmentation)
+        un = np.unique(self.resized_segmentation)
+        if type(numlabel) != list:
+            numlabel = [numlabel]
+        for nlab in numlabel:
+            if nlab not in un:
+                logger.error(f"Label {nlab} not found after resize. Use resolution with more details")
+                print(f"Label {nlab} not found after resize. Use resolution with more details")
+                return None
         # _stats(self.segmentation)
         # _stats(self.binar_segmentation)
-        _stats(self.resized_segmentation)
 
-        # import pdb; pdb.set_trace()
         logger.debug("gen_mesh_from_voxels_mc() started")
         mesh_data = gen_mesh_from_voxels_mc(self.resized_binar_segmentation, self.resized_voxelsize_mm)
         if self.smoothing:
