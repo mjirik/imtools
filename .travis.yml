@@ -95,7 +95,7 @@ install:
 # install julia LarSurf package (not necessary)
     - conda install -y -c conda-forge julia
     # not necessary
-    - julia -e "using Pkg; Pkg.install('LarSurf')"
+    - julia -e 'using Pkg; Pkg.add("LarSurf")'
 #    - julia -e 'using Pkg; Pkg.add("PyCall"); ENV["PYTHON"] = split(read(`which python`, String), "\n")[1]; Pkg.build("PyCall")'
     - pip install julia
     - julia --version
