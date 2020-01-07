@@ -266,7 +266,8 @@ class SegmentationToMesh():
         else:
             return get_surface_python_marching_cubes(
                 self.resized_binar_segmentation,
-                self.resized_voxelsize_mm, mesh_filename
+                self.resized_voxelsize_mm, mesh_filename,
+                self.smoothing
             )
 
 
@@ -468,10 +469,10 @@ def get_surface_larsurf(segmentation, voxelsize_mm, filename_obj:str="triangulat
     return filename_obj
 
 
-def get_surface_python_marching_cubes(resized_binar_segmentation, resized_voxelsize_mm, mesh_filename):
+def get_surface_python_marching_cubes(resized_binar_segmentation, resized_voxelsize_mm, mesh_filename, smoothing):
     logger.debug("gen_mesh_from_voxels_mc() started")
     mesh_data = gen_mesh_from_voxels_mc(resized_binar_segmentation, resized_voxelsize_mm)
-    if self.smoothing:
+    if smoothing:
         mesh_data.coors = smooth_mesh(mesh_data)
         # mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
 
