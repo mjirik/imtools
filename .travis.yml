@@ -97,6 +97,7 @@ install:
       # not necessary
       # - julia -e 'using Pkg; Pkg.add("PyCall"); ENV["PYTHON"] = split(read(`which python`, String), "\n")[1]; Pkg.build("PyCall")'
     - pip install julia
+    - julia --version
     - python -c "import julia; julia.install()"
 # command to run tests
 script: python -m pytest --cov=imtools/
