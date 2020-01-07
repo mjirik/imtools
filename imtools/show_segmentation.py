@@ -458,6 +458,12 @@ def create_pvsm_file(vtk_files, pvsm_filename, relative_paths=True):
 
 def get_surface_larsurf(segmentation, voxelsize_mm, filename_obj:str="triangulated.obj"):
     import julia
+    if sys.platform == "linux":
+        from julia.api import Julia
+        jl = Julia(compiled_modules=False)
+    elif sys.platform == "osx":
+        from julia.api import Julia
+        jl = Julia(compiled_modules=False)
     from julia import Distributed
     if Distributed.nprocs() < 3:
         Distributed.addprocs(3)
