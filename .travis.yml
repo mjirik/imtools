@@ -93,6 +93,7 @@ install:
 #    - ls ~/data/medical/orig/
 #    - python -m io3d.datasets -l biodur_sample
 # install julia LarSurf package (not necessary)
+    - julia --version
     - conda install -y -c conda-forge julia
     - julia --version
     # not necessary
