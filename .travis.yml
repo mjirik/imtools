@@ -99,6 +99,7 @@ install:
     - pip install julia
     - julia --version
     - python -c "import julia; julia.install()"
+    - python -c "from julia import Julia; jl = Julia(compiled_modules=False)"
     - python -c "from julia import Base; Base.sind(90)"
 # command to run tests
 script: python -m pytest --cov=imtools/
