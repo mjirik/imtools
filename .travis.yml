@@ -76,6 +76,10 @@ install:
     - python -m io3d.datasets -l gensei_slices  biodur_sample 3Dircadb1.1
     - ls ~/data/medical/orig/
 #    - python -m io3d.datasets -l biodur_sample
+# install julia LarSurf package (not necessary)
+    - conda install -y -c conda-forge julia
+    - pip install julia
+    - python -c "import julia; julia.install()"
 # command to run tests
 script: python -m pytest --cov=imtools/
 after_success: coveralls
