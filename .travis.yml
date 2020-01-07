@@ -15,7 +15,7 @@ os:
 services:
   - xvfb
 env:
-  - CONDA_PYTHON_VERSION=2.7
+#  - CONDA_PYTHON_VERSION=2.7
   - CONDA_PYTHON_VERSION=3.6
   - CONDA_PYTHON_VERSION=3.7
 
@@ -31,9 +31,17 @@ matrix:
       name: osx python37
       env:
         - CONDA_PYTHON_VERSION=3.7
+    - os: windows
+      language: minimal
+      name: windows python36
+      env:
+        - CONDA_PYTHON_VERSION=3.6
   allow_failures:
     - env: CONDA_PYTHON_VERSION=2.7
 #    - env: CONDA_PYTHON_VERSION=3.7
+    - name: "osx python36"
+    - name: "osx python37"
+    - name: "windows python36"
   fast_finish: true
 virtualenv:
   system_site_packages: true
@@ -55,7 +63,7 @@ before_install:
 #    - ./miniconda.sh -b
 #    - bash miniconda.sh -b -p $HOME/miniconda
 #    - export PATH="$HOME/miniconda/bin:$PATH"
-    - hash -r
+#    - hash -r
     - conda config --set always_yes yes --set changeps1 no
     - conda update -q conda
     # Useful for debugging any issues with conda
@@ -64,17 +72,25 @@ before_install:
 
 # command to install dependencies
 install:
-    - conda install --yes -c SimpleITK -c luispedro -c mjirik -c menpo -c conda-forge --file requirements_conda.txt python=$CONDA_PYTHON_VERSION
-    - conda install -y -c conda-forge python-coveralls pytest-cov
+    # Conda setup
+    - conda update --yes conda
+    - conda config --add channels conda-forge
+    - conda config --add channels SimpleITK
+    - conda config --add channels mjirik
+    - conda config --add channels luispedro
+    - conda config --add channels menpo
+    - conda list
+    - conda install --yes --file requirements_conda.txt python=$CONDA_PYTHON_VERSION pytest-cov pip
+#    - conda install -y -c conda-forge python-coveralls pytest-cov
 #    - pip install coveralls
     - pip install -r requirements_pip.txt
 #    - pip install .
     - conda list
 
 #    - python -m imtools.sample_data biodur_sample gensei_slices -o sample_data
-    - ls
+#    - ls
     - python -m io3d.datasets -l gensei_slices  biodur_sample 3Dircadb1.1
-    - ls ~/data/medical/orig/
+#    - ls ~/data/medical/orig/
 #    - python -m io3d.datasets -l biodur_sample
 # install julia LarSurf package (not necessary)
     - conda install -y -c conda-forge julia

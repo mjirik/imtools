@@ -5,21 +5,14 @@ Module is used for visualization of segmentation stored in pkl file.
 """
 
 import os.path
-
-
 import os.path as op
-
-
 import sys
-
-
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/dicom2fem/src"))
-import logging
-
-
-logger = logging.getLogger(__name__)
+from loguru import logger
+# import logging
+# logger = logging.getLogger(__name__)
 
 # from PyQt4.QtCore import Qt
 from PyQt5.QtWidgets import QApplication
@@ -172,6 +165,7 @@ class SegmentationToMesh():
         # else:
         #     segmentation = self.binar_segmentation
         if self.resized_segmentation is None:
+            logger.debug("resize segmentation required")
             # segmentation = self.binar_segmentation
             segmentation = self.segmentation
 
@@ -179,16 +173,19 @@ class SegmentationToMesh():
             voxelsize_mm = self.voxelsize_mm * self.degrad
 
             if self.resize_mm_1d is not None:
-                logger.debug("resize begin")
+                logger.debug(f"resize begin with new voxelsize_mm: {self.resize_mm_1d}")
                 new_voxelsize_mm = np.asarray([self.resize_mm_1d, self.resize_mm_1d, self.resize_mm_1d])
                 import imtools
 
 
                 prev_shape = segmentation.shape
                 segmentation = imtools.image_manipulation.resize_to_mm(segmentation, voxelsize_mm=voxelsize_mm,
-                                                                       new_voxelsize_mm=new_voxelsize_mm, order=0)
+                                                                       new_voxelsize_mm=new_voxelsize_mm, order=0,
+
+                                                                       )
                 voxelsize_mm = new_voxelsize_mm
                 logger.debug("resize finished, old shape = {}, new shape = {}".format(str(prev_shape), str(segmentation.shape)))
+                # import pdb; pdb.set_trace()
                 # logger.debug("segmentation min={}, max={}".format(np.min(segmentation), np.max(segmentation)))
             self.resized_segmentation = segmentation
             self.resized_voxelsize_mm = voxelsize_mm
@@ -221,7 +218,7 @@ class SegmentationToMesh():
             self,
             labels=None,
             ):
-        """ Make one mesh (vtk or stl) file
+        """ Make one mesh (vtk, stl or obj) file. .obj file is produced by LarSurf in Julia
 
         :param label: labels from prev use of set_labels are used if None
 
@@ -235,6 +232,7 @@ class SegmentationToMesh():
             labels=self.labels
 
         strlabel = imma.get_nlabels(slab=self.slab, labels=labels, return_mode="str")
+        numlabel = imma.get_nlabels(slab=self.slab, labels=labels, return_mode="num")
         if strlabel is list:
             # if one file with {} in pattern is created
             strlabel = "-".join(strlabel)
@@ -249,32 +247,28 @@ class SegmentationToMesh():
         # import sed3
         # sed3.show_slices(self.binar_segmentation)
 
+        _stats(self.segmentation)
+        _stats(self.resized_segmentation)
+        un = np.unique(self.resized_segmentation)
+        if type(numlabel) != list:
+            numlabel = [numlabel]
+        for nlab in numlabel:
+            if nlab not in un:
+                logger.error(f"Label {nlab} not found after resize. Use resolution with more details")
+                print(f"Label {nlab} not found after resize. Use resolution with more details")
+                return None
         # _stats(self.segmentation)
         # _stats(self.binar_segmentation)
-        _stats(self.resized_segmentation)
 
-        # import pdb; pdb.set_trace()
-        logger.debug("gen_mesh_from_voxels_mc() started")
-        mesh_data = gen_mesh_from_voxels_mc(self.resized_binar_segmentation, self.resized_voxelsize_mm)
-        if self.smoothing:
-            mesh_data.coors = smooth_mesh(mesh_data)
-            # mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
-
-        else:
-            pass
-            # mesh_data = gen_mesh_from_voxels_mc(segmentation, voxelsize_mm * 1.0e-2)
-            # mesh_data.coors +=
-        logger.debug("gen_mesh_from_voxels_mc() finished")
         pth, ext = op.splitext(mesh_filename)
-        if ext == ".stl":
-            vtk_filename = mesh_filename + ".vtk"
+        if ext == ".obj":
+            return get_surface_larsurf(self.resized_binar_segmentation, self.resized_voxelsize_mm, mesh_filename)
         else:
-            vtk_filename = mesh_filename
-        mesh_data.write(vtk_filename)
+            return get_surface_python_marching_cubes(
+                self.resized_binar_segmentation,
+                self.resized_voxelsize_mm, mesh_filename
+            )
 
-        if ext == ".stl":
-            vtk2stl.vtk2stl(vtk_filename, mesh_filename)
-        return mesh_filename
 
     def make_mesh_files(
             self,
@@ -460,6 +454,42 @@ def create_pvsm_file(vtk_files, pvsm_filename, relative_paths=True):
 
     # ElementTree(top).write()
 
+
+def get_surface_larsurf(segmentation, voxelsize_mm, filename_obj:str="triangulated.obj"):
+    import julia
+    from julia import Distributed
+    if Distributed.nprocs() < 3:
+        Distributed.addprocs(3)
+    from julia import LarSurf
+    LarSurf.lsp_setup([64,64,64])
+    V, FV = LarSurf.lsp_get_surface(segmentation, voxelsize=voxelsize_mm)
+    FVtri = LarSurf.triangulate_quads(FV)
+    objlines = LarSurf.Lar.lar2obj(V, FVtri, filename_obj)
+    return filename_obj
+
+
+def get_surface_python_marching_cubes(self, resized_binar_segmentation, resized_voxelsize_mm, mesh_filename):
+    logger.debug("gen_mesh_from_voxels_mc() started")
+    mesh_data = gen_mesh_from_voxels_mc(resized_binar_segmentation, resized_voxelsize_mm)
+    if self.smoothing:
+        mesh_data.coors = smooth_mesh(mesh_data)
+        # mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
+
+    else:
+        pass
+        # mesh_data = gen_mesh_from_voxels_mc(segmentation, voxelsize_mm * 1.0e-2)
+        # mesh_data.coors +=
+    logger.debug("gen_mesh_from_voxels_mc() finished")
+    pth, ext = op.splitext(mesh_filename)
+    if ext == ".stl":
+        vtk_filename = mesh_filename + ".vtk"
+    else:
+        vtk_filename = mesh_filename
+    mesh_data.write(vtk_filename)
+
+    if ext == ".stl":
+        vtk2stl.vtk2stl(vtk_filename, mesh_filename)
+    return mesh_filename
 
 
 def main():
