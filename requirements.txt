@@ -11,6 +11,6 @@ numpy==1.14.2
 pyparsing==2.2.0          # via matplotlib
 python-dateutil==2.7.2    # via matplotlib
 pytz==2018.4              # via matplotlib
-pyyaml==3.12
+# pyyaml==3.12 # removed because of security vulnerability
 scipy==1.0.1
 six==1.11.0               # via cycler, matplotlib, python-dateutil
