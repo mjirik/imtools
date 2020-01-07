@@ -94,7 +94,8 @@ install:
 #    - python -m io3d.datasets -l biodur_sample
 # install julia LarSurf package (not necessary)
     - conda install -y -c conda-forge julia
-    - julia -e 'using Pkg; Pkg.add("PyCall"); ENV["PYTHON"] = split(read(`which python`, String), "\n")[1]; Pkg.build("PyCall")'
+      # not necessary
+      # - julia -e 'using Pkg; Pkg.add("PyCall"); ENV["PYTHON"] = split(read(`which python`, String), "\n")[1]; Pkg.build("PyCall")'
     - pip install julia
     - python -c "import julia; julia.install()"
 # command to run tests
