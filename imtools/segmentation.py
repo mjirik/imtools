@@ -81,7 +81,7 @@ def fiber_segmentation(
     useSeedsOfCompactObjects=False, seeds=None, interactivity=True, binaryClosingIterations=2,
     binaryOpeningIterations=0, smartInitBinaryOperations=False, returnThreshold=False,
     binaryOutput=True, returnUsedData=False, qapp=None, auto_method='', aoi_label=1,
-    forbidden_label=None, slab=None, old_gui=False, debug=False):
+    forbidden_label=None, slab=None, old_gui=False, debug=False, do_sigma_check=True):
     """
 
     Vessel segmentation z jater.
@@ -158,9 +158,9 @@ vybrat prioritni objekty!')
     voxel3 = voxel[2]  # [0]
     voxelV = voxel1 * voxel2 * voxel3
 
-    # number je zaokrohleny 2x nasobek objemove jednotky na 2 desetinna mista.
-    # number stanovi doporucenou horni hranici parametru gauss. filtru.
-    number = (numpy.round((2 * voxelV ** (1.0 / 3.0)), 2))
+    # equivalent_voxel_cube_dimension_mul_2 je zaokrohleny 2x nasobek objemove jednotky na 2 desetinna mista.
+    # equivalent_voxel_cube_dimension_mul_2 stanovi doporucenou horni hranici parametru gauss. filtru.
+    equivalent_voxel_cube_dimension_mul_2 = (numpy.round((2 * voxelV ** (1.0 / 3.0)), 2))
 
     if aoi_label is None:
         target_organ_segmentation = np.ones(segmentation.shape)
@@ -209,10 +209,13 @@ ok)')
     # del(segmentation)
 
     # Nastaveni rozmazani a prahovani dat.
-    if(inputSigma == -1):
-        inputSigma = number
-    if(inputSigma > number):
-        inputSigma = number
+    if do_sigma_check:
+        if(inputSigma == -1):
+            inputSigma = equivalent_voxel_cube_dimension_mul_2
+            logger.debug(f"setting sigma to {inputSigma}")
+        if(inputSigma > equivalent_voxel_cube_dimension_mul_2):
+            inputSigma = equivalent_voxel_cube_dimension_mul_2
+            logger.debug(f"setting sigma to {inputSigma}")
 
     # seeds = None
     if biggestObjects == False and\
@@ -255,12 +258,9 @@ ok)')
     opening = binaryOpeningIterations
 
     if (smartInitBinaryOperations and interactivity):
-
         if (seeds == None):  # noqa
-
             closing = 5
             opening = 1
-
         else:
 
             closing = 2
@@ -271,7 +271,7 @@ ok)')
         if old_gui:
             uiT = uiThreshold.uiThresholdQt(
                 preparedData, voxel=voxel, threshold=threshold,
-                interactivity=interactivity, number=number, inputSigma=inputSigma,
+                interactivity=interactivity, number=equivalent_voxel_cube_dimension_mul_2, inputSigma=inputSigma,
                 nObj=nObj, biggestObjects=biggestObjects,
                 useSeedsOfCompactObjects=useSeedsOfCompactObjects,
                 binaryClosingIterations=closing, binaryOpeningIterations=opening,
@@ -291,12 +291,10 @@ ok)')
             se.exec_()
             output = se.getContours()
 
-
-
     else:
         uiT = uiThreshold.uiThreshold(
             preparedData, voxel=voxel, threshold=threshold,
-            interactivity=interactivity, number=number, inputSigma=inputSigma,
+            interactivity=interactivity, number=equivalent_voxel_cube_dimension_mul_2, inputSigma=inputSigma,
             nObj=nObj, biggestObjects=biggestObjects,
             useSeedsOfCompactObjects=useSeedsOfCompactObjects,
             binaryClosingIterations=closing, binaryOpeningIterations=opening,
@@ -307,30 +305,18 @@ ok)')
 
     # Vypocet binarni matice.
     if output is None:  # noqa
-
         logger.debug('Zadna data k vraceni! (output == None)')
-
     elif binaryOutput:
-
         output[output != 0] = 1
 
     # Vraceni matice.
     if returnThreshold:
-
         if returnUsedData:
-
             return preparedData, output, uiT.returnLastThreshold()
-
         else:
-
             return output, uiT.returnLastThreshold()
-
     else:
-
         if returnUsedData:
-
             return preparedData, output
-
         else:
-
             return output
