@@ -2,11 +2,8 @@
 """
     Purpose:     (CZE-ZCU-FAV-KKY) Liver medical project
 
-    Author:      Pavel Volkovinsky
+    Author:      Pavel Volkovinsky, Miroslav Jirik
     Email:       volkovinsky.pavel@gmail.com
-
-    Created:     2012/11/08
-    Copyright:   (c) Pavel Volkovinsky
 
 """
 
@@ -25,14 +22,66 @@ import scipy.ndimage
 
 from . import image_manipulation
 
+def vesselSegmentation(*args, **kwargs):
+    """
 
-def vesselSegmentation(
+    Vessel segmentation z jater.
+
+    Input:
+        :param data: - CT (nebo MRI) 3D data
+        :param segmentation: - zakladni oblast pro segmentaci, oznacena struktura se
+        :param stejnymi: rozmery jako "data",
+            kde je oznaceni (label) jako:
+                1 jatra,
+                -1 zajimava tkan (kosti, ...)
+                0 jinde
+        :param threshold: - prah
+        :param voxelsize_mm: - (vektor o hodnote 3) rozmery jednoho voxelu
+        :param inputSigma: - pocatecni hodnota pro prahovani
+        :param aoi_dilation_iterations: - pocet operaci dilation nad zakladni oblasti pro
+            segmentaci ("segmantation")
+        :param aoi_dilation_structure: - struktura pro operaci dilation
+        :param nObj: - oznacuje, kolik nejvetsich objektu se ma vyhledat - pokud je
+            rovno 0 (nule), vraci cela data
+        :param biggestObjects: - moznost, zda se maji vracet nejvetsi objekty nebo ne
+        :param seeds: - moznost zadat pocatecni body segmentace na vstupu. Je to matice
+            o rozmerech jako data. Vsude nuly, tam kde je oznaceni jsou jednicky
+               It can be same shape like data, or it can be
+               indexes e.g. from np.nonzero(seeds)
+        :param interactivity: - nastavi, zda ma nebo nema byt pouzit interaktivni mod
+            upravy dat
+        :param binaryClosingIterations: - vstupni binary closing operations
+        :param binaryOpeningIterations: - vstupni binary opening operations
+        :param smartInitBinaryOperations: - logicka hodnota pro smart volbu pocatecnich
+            hodnot binarnich operaci (bin. uzavreni a bin. otevreni)
+        :param returnThreshold: - jako druhy parametr funkce vrati posledni hodnotu
+            prahu
+        :param binaryOutput: - zda ma byt vystup vracen binarne nebo ne (binarnim
+            vystupem se rozumi: cokoliv jineho nez hodnota 0 je hodnota 1)
+        :param returnUsedData: - vrati pouzita data
+        :param aoi_label: label of organ where is the target vessel
+        :param forbidden_label: int or list of ints. Labels of areas which are not used for segmentation.
+
+    Output:
+        filtrovana data
+
+    """
+    # self.qapp = qapp
+    # data, segmentation=-1, threshold=None, voxelsize_mm=[1, 1, 1], inputSigma=-1,
+        # aoi_dilation_iterations=0, aoi_dilation_structure=None, nObj=10, biggestObjects=False,
+        # useSeedsOfCompactObjects=False, seeds=None, interactivity=True, binaryClosingIterations=2,
+        # binaryOpeningIterations=0, smartInitBinaryOperations=False, returnThreshold=False,
+        # binaryOutput=True, returnUsedData=False, qapp=None, auto_method='', aoi_label=1,
+        # forbidden_label=None, slab=None, old_gui=False, debug=False):
+    return fiber_segmentation(*args, **kwargs)
+
+def fiber_segmentation(
         data, segmentation=-1, threshold=None, voxelsize_mm=[1, 1, 1], inputSigma=-1,
-        aoi_dilation_iterations=0, aoi_dilation_structure=None, nObj=10, biggestObjects=False,
-        useSeedsOfCompactObjects=False, seeds=None, interactivity=True, binaryClosingIterations=2,
-        binaryOpeningIterations=0, smartInitBinaryOperations=False, returnThreshold=False,
-        binaryOutput=True, returnUsedData=False, qapp=None, auto_method='', aoi_label=1,
-        forbidden_label=None, slab=None, old_gui=False, debug=False):
+    aoi_dilation_iterations=0, aoi_dilation_structure=None, nObj=10, biggestObjects=False,
+    useSeedsOfCompactObjects=False, seeds=None, interactivity=True, binaryClosingIterations=2,
+    binaryOpeningIterations=0, smartInitBinaryOperations=False, returnThreshold=False,
+    binaryOutput=True, returnUsedData=False, qapp=None, auto_method='', aoi_label=1,
+    forbidden_label=None, slab=None, old_gui=False, debug=False):
     """
 
     Vessel segmentation z jater.
