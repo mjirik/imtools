@@ -36,7 +36,7 @@ class GMMCl():
 
     def __relabel(self, target, new_keys):
         out = np.zeros(target.shape, dtype=target.dtype)
-        for label, i in new_keys.iteritems():
+        for i, label in enumerate(new_keys):
             out[target==i] = label
 
         return out
