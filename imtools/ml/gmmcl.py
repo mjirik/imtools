@@ -16,7 +16,17 @@ import sklearn.mixture
 # sys.path.append(os.path.join(path_to_script, "./extern/sPickle"))
 
 class GMMCl():
+    """
+    Bayess classifier based on Gaussian Mixcure Model.
+    Parameters of this model are the same as https://scikit-learn.org/stable/modules/generated/sklearn.mixture.GaussianMixture.html
+    """
     def __init__(self, **pars):
+        """
+        Parameters are the same for all classes. See sklearn.mixture.GaussianMixture() for more details.
+
+        https://scikit-learn.org/stable/modules/generated/sklearn.mixture.GaussianMixture.html
+        :param pars:
+        """
         self.clspars = pars
         self.cls = {}
 
