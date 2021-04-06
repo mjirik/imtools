@@ -20,8 +20,9 @@ def externfv(data3d, voxelsize_mm):        # scale
     ], 1)
     return fv
 
+
 class Trainer3D():
-    def __init__(self, feature_function=None):
+    def __init__(self, feature_function=None, classifier=None):
         self.working_voxelsize_mm = [1.5, 1.5, 1.5]
         self.data=None
         self.target=None
@@ -31,7 +32,7 @@ class Trainer3D():
         if feature_function is None:
             feature_function = externfv
         self.feature_function = feature_function
-        self.cl = ml.gmmcl.GMMCl(n_components=6)
+        self.cl = classifier if classifier else ml.gmmcl.GMMCl(n_components=6)
 
     def save(self, filename='saved.ol.p'):
         """

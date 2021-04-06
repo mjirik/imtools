@@ -20,7 +20,7 @@ class GMMCl():
     Bayess classifier based on Gaussian Mixcure Model.
     Parameters of this model are the same as https://scikit-learn.org/stable/modules/generated/sklearn.mixture.GaussianMixture.html
     """
-    def __init__(self, **pars):
+    def __init__(self, classifier=None, **pars):
         """
         Parameters are the same for all classes. See sklearn.mixture.GaussianMixture() for more details.
 
@@ -29,16 +29,20 @@ class GMMCl():
         """
         self.clspars = pars
         self.cls = {}
+        self.dtype = np.int16
 
     def fit(self, data, target):
         data = np.asarray(data)
-        target = np.asarray(target).astype(np.int16)
+        target = np.asarray(target).astype(self.dtype)
 #         print "gmmcl fit sh ", data.shape
         un = np.unique(target)
         for label in un:
             # cli = sklearn.mixture.GMM(**self.clspars)
-            cli = sklearn.mixture.GaussianMixture(**self.clspars)
-            dtl = data[target.reshape(-1)==label]
+            if label in self.cls:
+                cli = self.cls[label]
+            else:
+                cli = sklearn.mixture.GaussianMixture(**self.clspars)
+            dtl = data[target.reshape(-1) == label]
             cli.fit(dtl)
             self.cls[label] = cli
 
@@ -47,7 +51,7 @@ class GMMCl():
     def __relabel(self, target, new_keys):
         out = np.zeros(target.shape, dtype=target.dtype)
         for i, label in enumerate(new_keys):
-            out[target==i] = label
+            out[target == i] = label
 
         return out
 
