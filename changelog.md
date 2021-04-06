@@ -1,5 +1,9 @@
 # Changelog
 
+# 2.1
+
+* [Added] Other classifiers can be used in `Trainer3d`
+* [Changed] `GMMCl` support different model for background and foreground
 * [Changed] Smaller package size due to correct conda build in standalone dir
 
 
