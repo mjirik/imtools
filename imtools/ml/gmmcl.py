@@ -83,3 +83,10 @@ class GMMCl():
             score.append(sc)
         target_tmp = np.argmax(score, 0)
         return self.__relabel(target_tmp, score_l)
+
+    def __str__(self):
+        desc = f"GMMCl({', '.join([str(key) + '=' + str(val) for (key, val) in self.clspars.items()])})"
+        for clkey in self.cls:
+            desc += f"\n  {self.cls[clkey].means_}"
+
+        return desc
