@@ -125,6 +125,30 @@ def test_intensity_training_artificial(cl, shape):
     # ol.cl = cl
     ol.add_train_data(d3d, seg, voxelsize_mm=voxelsize_mm, nth=None)  # We take all samples
 
+    #  https://elitedatascience.com/imbalanced-classes
+
+
+    un, counts = np.unique(ol.target, return_counts=True)
+    new_data_list = []
+    new_target_list = []
+    for label in un:
+        all_data_for_one_label = ol.data[ol.target.astype(np.uint8).flatten() == label]
+        # TODO mozna pouzit funkci sklearn.utils.resample
+        # https://scikit-learn.org/stable/modules/generated/sklearn.utils.resample.html
+        data_subset = all_data_for_one_label[:np.min(counts)]
+        new_data_list.append(data_subset)
+        new_target_list.append(np.ones([np.min(counts)]) * label)
+
+
+
+    original_data = ol.data
+    original_target = ol.target
+    new_data = np.concatenate(new_data_list, axis=0)
+    new_target = np.concatenate(new_target_list, axis=0)
+
+    ol.data = new_data
+    ol.target = new_target
+
     ol.fit()
 
     # test
