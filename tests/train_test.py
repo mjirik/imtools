@@ -129,15 +129,18 @@ def test_intensity_training_artificial(cl, shape):
 
 
     un, counts = np.unique(ol.target, return_counts=True)
+    n_samples = np.min(counts)
     new_data_list = []
     new_target_list = []
     for label in un:
         all_data_for_one_label = ol.data[ol.target.astype(np.uint8).flatten() == label]
         # TODO mozna pouzit funkci sklearn.utils.resample
         # https://scikit-learn.org/stable/modules/generated/sklearn.utils.resample.html
-        data_subset = all_data_for_one_label[:np.min(counts)]
-        new_data_list.append(data_subset)
-        new_target_list.append(np.ones([np.min(counts)]) * label)
+        resamples = sklearn.utils.resample(all_data_for_one_label, n_samples=n_samples, replace=True)
+        # data_subset = all_data_for_one_label[:n_samples]  # pick first n samples
+        # new_data_list.append(data_subset)
+        new_data_list.append(resamples)
+        new_target_list.append(np.ones([n_samples], dtype=type(label)) * label)
 
 
 
