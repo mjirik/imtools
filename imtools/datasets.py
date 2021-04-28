@@ -35,10 +35,10 @@ def sliver_reader(filename_end_mask="*[0-9].mhd", sliver_reference_dir="~/data/m
         ref_data= None
         orig_data = None
         if read_orig:
-            orig_data, metadata = io3d.datareader.read(oname)
+            orig_data, metadata = io3d.datareader.read(oname, dataplus_format=False)
             vs_mm = metadata['voxelsize_mm']
         if read_seg:
-            ref_data, metadata = io3d.datareader.read(rname)
+            ref_data, metadata = io3d.datareader.read(rname, dataplus_format=False)
             vs_mm = metadata['voxelsize_mm']
 
         import re
